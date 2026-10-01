@@ -124,12 +124,65 @@ export const AiChatBox = () => {
 ---
 
 ### 🔴 QUY TẮC 3: CLEAN CODE & GIAO DIỆN CHUẨN BRANDING
-1. **Tông màu chủ đạo:**
-   * Xanh ngọc bích chính: `emerald-600` (`#059669`) / `emerald-500` (`#10B981`).
-   * Cảnh báo ngập: `red-500` (`#EF4444`) / `amber-500` (`#F59E0B`).
-   * Nền thẻ & card: `bg-white` bo góc `rounded-2xl` hoặc `rounded-xl`, đổ bóng mềm `shadow-sm` / `shadow-md`.
-2. **Mobile-First Responsive:** Luôn đảm bảo hiển thị hoàn hảo trên màn hình hẹp (`max-w-md` hoặc `w-full md:max-w-4xl`).
-3. **Đặt tên rõ nghĩa:**
-   * Component: `PascalCase` (ví dụ: `FloodAlertCard.jsx`).
-   * Custom Hook: `camelCase` bắt đầu bằng `use` (ví dụ: `useFloodAlert.js`).
-   * Service API: `camelCase` (ví dụ: `getFloodAlertsApi.js`).
+
+#### 🎨 3.1 BẢNG MÃ MÀU TAILWIND DESIGN TOKENS (BẮT BUỘC SỬ DỤNG)
+
+Dự án MapMate sử dụng **Tailwind CSS v4** với hệ thống Design Token tùy chỉnh. Mọi component BẮT BUỘC dùng đúng token class dưới đây, **KHÔNG ĐƯỢC** dùng mã hex cứng hoặc class Tailwind mặc định (ví dụ: `bg-emerald-600`).
+
+File cấu hình: `src/index.css` → `@theme { ... }`
+
+| Semantic Token | Tailwind Class | Hex | Mục đích sử dụng |
+|---|---|---|---|
+| **Primary** (Emerald) | `bg-primary-600`, `text-primary-700`, `border-primary-500` | `#059669` | Nút chính, Header, Navigation bar, Link hoạt động, Brand color |
+| **Primary Light** | `bg-primary-100`, `text-primary-800` | `#d1fae5` | Badge tag, Chip trạng thái, Nền nhẹ |
+| **Secondary** (Teal) | `bg-secondary-500`, `text-secondary-700` | `#14b8a6` | Bản đồ POI marker, Polyline route, Layer |
+| **Accent** (Amber) | `bg-accent-500`, `text-accent-700` | `#f59e0b` | Nút CTA phụ, XP Reward, Star rating, Gamification highlight |
+| **Danger** (Red) | `bg-danger-500`, `text-danger-700` | `#ef4444` | Cảnh báo ngập nặng, Vùng nguy hiểm, Lỗi validation |
+| **Warning** (Orange) | `bg-warning-500`, `text-warning-700` | `#f97316` | Cảnh báo ngập trung bình, Lưu ý, Flash message |
+| **Success** (Green) | `bg-success-500`, `text-success-700` | `#22c55e` | Check-in thành công, Route an toàn, Toast thành công |
+| **Info** (Sky) | `bg-info-500`, `text-info-700` | `#0ea5e9` | AI Chat bubble bot, Tooltip, Thông báo hướng dẫn |
+| **Neutral** (Slate) | `bg-neutral-100`, `text-neutral-800` | `#f1f5f9` / `#1e293b` | Nền trang, Text body, Border, Placeholder |
+| **Surface** | `bg-surface`, `hover:bg-surface-hover` | `#ffffff` | Card, Modal, Drawer, Bottom Sheet |
+
+#### 🎨 3.2 QUY TẮC ÁP DỤNG MÀU THEO DOMAIN
+
+| Domain / Feature | Primary Color | Accent Color | Ghi chú |
+|---|---|---|---|
+| **Header / Navbar** | `bg-primary-600 text-white` | — | Luôn dùng primary emerald |
+| **AI Chatbot** | `bg-primary-500` (bot bubble) | `bg-info-100` (user bubble) | Bot = Primary, User = Info |
+| **Flood Alert** | `bg-danger-500` (ngập nặng) | `bg-warning-400` (ngập vừa) | Dựa theo `severity` field |
+| **Gamification XP** | `bg-accent-500` (XP badge) | `bg-success-500` (check-in) | Vàng cam cho phần thưởng |
+| **Map Route** | `text-secondary-600` (polyline) | `text-danger-500` (vùng ngập) | Teal cho route, Red cho flood zone |
+| **Card / Modal** | `bg-surface rounded-card shadow-card` | — | Luôn dùng Surface token |
+| **Button Primary** | `bg-primary-600 hover:bg-primary-700 text-white rounded-button` | — | Nút hành động chính |
+| **Button Secondary** | `bg-primary-100 text-primary-700 hover:bg-primary-200 rounded-button` | — | Nút phụ / Ghost |
+| **Input / Select** | `border-neutral-300 focus:border-primary-500 focus:ring-primary-500 rounded-input` | — | Viền mặc định neutral |
+
+#### 🎨 3.3 QUY TẮC BORDER RADIUS & SHADOW
+* **Card chính:** `rounded-card shadow-card` → `border-radius: 1rem`
+* **Button:** `rounded-button` → `border-radius: 0.75rem`
+* **Pill / Tag / Badge:** `rounded-pill` → `border-radius: 9999px`
+* **Input / Select:** `rounded-input` → `border-radius: 0.5rem`
+* **Hover card:** `hover:shadow-card-hover transition-shadow`
+* **Modal overlay:** `shadow-modal`
+
+#### 🎨 3.4 TYPOGRAPHY
+* **Font chính:** `font-sans` → Inter, system-ui
+* **Font code:** `font-mono` → JetBrains Mono, Consolas
+* **Heading:** `font-bold tracking-tight text-neutral-900`
+* **Body text:** `text-neutral-700` (light bg) hoặc `text-neutral-300` (dark bg)
+* **Caption / Muted:** `text-neutral-500 text-sm`
+
+---
+
+### 🔴 QUY TẮC 4: MOBILE-FIRST RESPONSIVE
+1. **Mobile-First:** Luôn đảm bảo hiển thị hoàn hảo trên màn hình hẹp trước (`w-full`), sau đó mở rộng cho desktop (`md:max-w-4xl`, `lg:max-w-7xl`).
+2. **Breakpoints chuẩn Tailwind:** `sm:640px`, `md:768px`, `lg:1024px`, `xl:1280px`.
+
+---
+
+### 🔴 QUY TẮC 5: QUY ƯỚC ĐẶT TÊN
+1. **Component:** `PascalCase` (ví dụ: `FloodAlertCard.jsx`).
+2. **Custom Hook:** `camelCase` bắt đầu bằng `use` (ví dụ: `useFloodAlert.js`).
+3. **Service API:** `camelCase` (ví dụ: `getFloodAlertsApi.js`).
+4. **Folder feature:** `kebab-case` (ví dụ: `flood-alert/`, `ai-planner/`).
