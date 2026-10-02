@@ -1,0 +1,9 @@
+// Public API của feature social
+export { FeedTab } from './components/FeedTab';
+export { FriendActionButton } from './components/FriendActionButton';
+export { FriendsTab } from './components/FriendsTab';
+export { PinButton } from './components/PinButton';
+export { PinsPanel } from './components/PinsPanel';
+export { PostComposerModal } from './components/PostComposerModal';
+export { UserPinsSection } from './components/UserPinsSection';
+export { useSocialStore } from './stores/socialStore';

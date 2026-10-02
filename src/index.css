@@ -164,3 +164,38 @@
   box-shadow: var(--shadow-card-hover) !important;
   overflow: hidden;
 }
+
+/* Thanh trượt 2 đầu (DualRangeSlider): 2 input chồng nhau, nền trong suốt, chỉ núm kéo nhận chuột/chạm */
+.dual-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.dual-range::-webkit-slider-runnable-track { background: transparent; }
+.dual-range::-moz-range-track { background: transparent; }
+.dual-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary-600);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+}
+.dual-range::-moz-range-thumb {
+  pointer-events: auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary-600);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+}

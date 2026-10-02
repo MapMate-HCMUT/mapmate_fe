@@ -1,7 +1,9 @@
 import { Icon } from './Icon';
 
 // Hộp thoại dùng chung. containerRef lấy từ useDisclosure() để bấm ra ngoài / Esc là đóng.
-export const Modal = ({ isOpen, title, onClose, containerRef, children }) => {
+const SIZES = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' };
+
+export const Modal = ({ isOpen, title, onClose, containerRef, children, size = 'md' }) => {
   if (!isOpen) return null;
 
   return (
@@ -11,7 +13,7 @@ export const Modal = ({ isOpen, title, onClose, containerRef, children }) => {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full sm:max-w-lg bg-surface rounded-t-card sm:rounded-card shadow-modal p-6 sm:p-7 max-h-[92dvh] overflow-y-auto animate-[sheet-up_200ms_ease-out]"
+        className={`w-full ${SIZES[size]} bg-surface rounded-t-card sm:rounded-card shadow-modal p-6 sm:p-7 max-h-[92dvh] overflow-y-auto animate-[sheet-up_200ms_ease-out]`}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-neutral-900">{title}</h2>

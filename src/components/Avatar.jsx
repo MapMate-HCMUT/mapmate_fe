@@ -6,6 +6,7 @@ const PALETTE = ['bg-primary-100 text-primary-700', 'bg-info-100 text-info-700',
 // w-/h- theo đơn vị Tailwind (1 = 4px): w-24 = 96px, w-32 = 128px, w-40 = 160px, w-48 = 192px.
 // text-* là cỡ chữ cái đầu khi người dùng chưa có ảnh.
 const AVATAR_SIZES = {
+  xs: 'w-5 h-5 text-[10px]', //   20px — chip chọn bạn bè
   sm: 'w-8 h-8 text-sm', //       32px — Navbar, bảng xếp hạng
   md: 'w-10 h-10 text-base', //   40px
   xl: 'w-24 h-24 text-4xl', //    96px
