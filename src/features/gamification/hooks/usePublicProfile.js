@@ -14,6 +14,7 @@ export const usePublicProfile = () => {
     profile: data?.profile,
     stats: data?.stats,
     achievements: data?.achievements ?? [],
+    relationship: data?.relationship ?? null, // null = khách chưa đăng nhập
     isMe: Boolean(myId) && myId === userId,
     error,
     isLoading,
