@@ -1,6 +1,6 @@
+import { PenSquare, Send, Users, FileText } from 'lucide-react';
 import { Avatar } from '../../../components/Avatar';
 import { LoginPrompt } from '../../../components/LoginPrompt';
-import { Icon } from '../../../components/Icon';
 import { useFeedTab } from '../hooks/useFeedTab';
 import { FEED_SCOPES } from '../utils/socialConfig';
 import { FeedSidebar } from './FeedSidebar';
@@ -26,22 +26,31 @@ export const FeedTab = () => {
         <button type="button" onClick={openComposer} className="w-full flex items-center gap-3 p-3 bg-surface rounded-card shadow-card text-left hover:shadow-card-hover transition-shadow">
           <Avatar name={user?.username ?? '?'} src={user?.avatar_url} size="md" />
           <span className="flex-1 px-4 py-2.5 rounded-pill bg-neutral-100 text-sm text-neutral-500">Chia sẻ địa điểm, lộ trình hoặc hỏi gợi ý…</span>
-          <Icon name="edit" className="w-5 h-5 text-primary-600" />
+          <PenSquare className="w-5 h-5 text-primary-600 shrink-0" />
         </button>
 
-        <div className="flex gap-1 p-1 bg-surface rounded-card shadow-card" role="tablist" aria-label="Phạm vi bảng tin">
-          {FEED_SCOPES.map((scope) => (
-            <button
-              key={scope.value}
-              type="button"
-              role="tab"
-              aria-selected={feed.scope === scope.value}
-              onClick={() => feed.changeScope(scope.value)}
-              className={`flex-1 py-2 rounded-button text-sm font-semibold transition ${feed.scope === scope.value ? 'bg-primary-600 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
-            >
-              {scope.emoji} {scope.label}
-            </button>
-          ))}
+        <div className="flex gap-1.5 p-1 bg-surface rounded-card shadow-card" role="tablist" aria-label="Phạm vi bảng tin">
+          {FEED_SCOPES.map((scope) => {
+            const IconComp = scope.icon;
+            const isActive = feed.scope === scope.value;
+            return (
+              <button
+                key={scope.value}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => feed.changeScope(scope.value)}
+                className={`flex-1 py-2 px-3 rounded-button text-sm font-semibold transition inline-flex items-center justify-center gap-2 ${
+                  isActive
+                    ? 'bg-primary-600 text-white shadow-xs'
+                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+                }`}
+              >
+                {IconComp && <IconComp className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-neutral-500'}`} />}
+                <span>{scope.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {feed.tag && (
@@ -54,7 +63,10 @@ export const FeedTab = () => {
         {feed.sharedPost && (
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-neutral-800">📨 Bài viết được chia sẻ với bạn</h2>
+              <h2 className="text-sm font-bold text-neutral-800 inline-flex items-center gap-1.5">
+                <Send className="w-4 h-4 text-primary-600 shrink-0" />
+                Bài viết được chia sẻ với bạn
+              </h2>
               <button type="button" onClick={feed.dismissSharedPost} className="text-xs font-semibold text-neutral-500 hover:text-neutral-800">Đóng</button>
             </div>
             {feed.sharedPost.post
@@ -64,14 +76,14 @@ export const FeedTab = () => {
         )}
 
         {feed.needsLogin ? (
-          <LoginPrompt emoji="👥" title="Bảng tin dành cho thành viên" description="Đăng nhập để xem bài viết của bạn bè và của chính bạn." />
+          <LoginPrompt icon={<Users className="w-10 h-10 text-primary-600" />} title="Bảng tin dành cho thành viên" description="Đăng nhập để xem bài viết của bạn bè và của chính bạn." />
         ) : (
           <>
             {feed.error && <p className="bg-surface rounded-card shadow-card p-6 text-center text-sm text-danger-600">{feed.error.message}</p>}
             {feed.isLoading && feed.items.length === 0 && Array.from({ length: SKELETON_ROWS }, (_, index) => <div key={index} className="h-40 bg-surface rounded-card shadow-card animate-pulse" />)}
             {!feed.isLoading && !feed.error && feed.items.length === 0 && (
               <div className="bg-surface rounded-card shadow-card p-10 text-center">
-                <p className="text-4xl mb-2" aria-hidden="true">📝</p>
+                <FileText className="w-10 h-10 mx-auto mb-2 text-neutral-300" strokeWidth={1.5} />
                 <p className="font-semibold text-neutral-800">Chưa có bài viết nào</p>
                 <p className="mt-1 text-sm text-neutral-500">{feed.scope === 'friends' ? 'Kết thêm bạn hoặc xem tab Cộng đồng nhé.' : 'Hãy là người đầu tiên chia sẻ một địa điểm!'}</p>
               </div>

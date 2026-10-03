@@ -11,7 +11,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
     <article className="bg-surface rounded-t-card lg:rounded-card shadow-modal p-4 animate-[sheet-up_220ms_ease-out]">
       <div className="w-10 h-1 bg-neutral-300 rounded-pill mx-auto mb-3 lg:hidden" aria-hidden="true" />
       <div className="flex gap-3">
-        <PlaceThumb category={place.category} size="md" />
+        <PlaceThumb place={place} size="md" />
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-start gap-2">
             <h3 className="flex-1 font-bold text-base leading-snug text-neutral-900">{place.name}</h3>

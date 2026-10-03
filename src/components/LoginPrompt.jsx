@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router';
 
 // Khối nhắc đăng nhập cho những phần chỉ dành cho thành viên (bạn bè, ghim, lộ trình đã lưu...).
-export const LoginPrompt = ({ emoji = '🔐', title, description }) => {
+export const LoginPrompt = ({ icon, emoji = '🔐', title, description }) => {
   const location = useLocation();
   const redirect = encodeURIComponent(location.pathname + location.search);
 
   return (
     <div className="max-w-md mx-auto bg-surface rounded-card shadow-card p-8 text-center">
-      <p className="text-4xl mb-2" aria-hidden="true">{emoji}</p>
+      <div className="flex justify-center mb-3 text-primary-600" aria-hidden="true">
+        {icon ? icon : <span className="text-4xl">{emoji}</span>}
+      </div>
       <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
       <p className="mt-1 text-sm text-neutral-500">{description}</p>
       <div className="mt-5 flex justify-center gap-2">

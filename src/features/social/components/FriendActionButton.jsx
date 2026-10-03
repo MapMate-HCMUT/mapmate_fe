@@ -1,3 +1,4 @@
+import { Check, UserPlus } from 'lucide-react';
 import { useFriendAction } from '../hooks/useFriendAction';
 
 const base = 'px-3 py-1.5 rounded-button text-xs font-semibold transition disabled:opacity-60';
@@ -15,7 +16,10 @@ export const FriendActionButton = ({ userId, relationship: initialRelationship }
     case 'friends':
       return (
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-xs font-semibold text-success-700">✓ Bạn bè</span>
+          <span className="text-xs font-semibold text-success-700 inline-flex items-center gap-1">
+            <Check className="w-3.5 h-3.5 text-success-600" />
+            <span>Bạn bè</span>
+          </span>
           <button type="button" disabled={isBusy} onClick={unfriend} className={danger}>Huỷ kết bạn</button>
         </span>
       );
@@ -29,6 +33,11 @@ export const FriendActionButton = ({ userId, relationship: initialRelationship }
         </span>
       );
     default:
-      return <button type="button" disabled={isBusy} onClick={sendRequest} className={primary}>＋ Kết bạn</button>;
+      return (
+        <button type="button" disabled={isBusy} onClick={sendRequest} className={`${primary} inline-flex items-center gap-1`}>
+          <UserPlus className="w-3.5 h-3.5" />
+          <span>Kết bạn</span>
+        </button>
+      );
   }
 };

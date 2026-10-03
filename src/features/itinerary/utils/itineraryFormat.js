@@ -1,18 +1,20 @@
+import { Footprints, Bike, Bus, Car, Train, Settings, Lock, Users, Globe } from 'lucide-react';
+
 export const VEHICLE_LABELS = {
-  walk: { label: 'Đi bộ', emoji: '🚶' },
-  bike: { label: 'Xe máy', emoji: '🛵' },
-  bus: { label: 'Xe buýt', emoji: '🚌' },
-  car: { label: 'Ô tô', emoji: '🚗' },
-  public: { label: 'Phương tiện công cộng', emoji: '🚍' },
-  metro_grab: { label: 'Metro + Grab', emoji: '🚇' },
-  custom: { label: 'Kết hợp tuỳ chỉnh', emoji: '⚙️' },
+  walk: { label: 'Đi bộ', emoji: '🚶', icon: Footprints },
+  bike: { label: 'Xe máy', emoji: '🛵', icon: Bike },
+  bus: { label: 'Xe buýt', emoji: '🚌', icon: Bus },
+  car: { label: 'Ô tô', emoji: '🚗', icon: Car },
+  public: { label: 'Phương tiện công cộng', emoji: '🚍', icon: Bus },
+  metro_grab: { label: 'Metro + Grab', emoji: '🚇', icon: Train },
+  custom: { label: 'Kết hợp tuỳ chỉnh', emoji: '⚙️', icon: Settings },
 };
 export const getVehicleLabel = (vehicle) => VEHICLE_LABELS[vehicle] ?? VEHICLE_LABELS.bike;
 
 export const VISIBILITY_LABELS = {
-  private: { label: 'Chỉ mình tôi', emoji: '🔒' },
-  friends: { label: 'Bạn bè', emoji: '👥' },
-  public: { label: 'Công khai', emoji: '🌐' },
+  private: { label: 'Chỉ mình tôi', emoji: '🔒', icon: Lock },
+  friends: { label: 'Bạn bè', emoji: '👥', icon: Users },
+  public: { label: 'Công khai', emoji: '🌐', icon: Globe },
 };
 
 // Trạm của lộ trình GỢI Ý có dạng { place: {...} }, trạm ĐÃ LƯU có dạng phẳng { place_name } => đưa về 1 dạng để hiển thị.

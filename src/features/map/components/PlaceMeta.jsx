@@ -1,10 +1,11 @@
+import { Star } from 'lucide-react';
 import { formatDistance } from '../../../utils/calculateDistance';
 import { formatPriceRange } from '../../../utils/formatCurrencyVND';
 
 // Dòng thông tin ngắn: ⭐ rating · giá · khoảng cách · thời gian di chuyển
 export const PlaceRating = ({ rating, reviewCount }) => (
   <span className="inline-flex items-center gap-1 text-xs">
-    <span className="text-accent-500" aria-hidden="true">★</span>
+    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" aria-hidden="true" />
     <span className="font-semibold text-neutral-800">{rating.toFixed(1)}</span>
     {reviewCount !== undefined && (
       <span className="text-neutral-400">({reviewCount.toLocaleString('vi-VN')})</span>

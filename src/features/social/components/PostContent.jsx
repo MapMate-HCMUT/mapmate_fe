@@ -1,11 +1,10 @@
 import { Link } from 'react-router';
+import { Globe, Users, CheckCircle2 } from 'lucide-react';
 import { Avatar } from '../../../components/Avatar';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 import { ItineraryActionButton, ItineraryCard } from '../../itinerary';
 import { PlaceEmbed } from './PlaceEmbed';
 import { StarRating } from './StarRating';
-
-const VISIBILITY_ICON = { public: '🌐', friends: '👥' };
 
 // Nội dung 1 bài viết gốc: tác giả, lời viết, địa điểm / lộ trình đính kèm, hashtag, người được gắn thẻ.
 export const PostContent = ({ post, onTagClick, onCloneItinerary, cloningId }) => (
@@ -15,16 +14,24 @@ export const PostContent = ({ post, onTagClick, onCloneItinerary, cloningId }) =
         <Avatar name={post.author.username} src={post.author.avatar_url} size="md" />
       </Link>
       <div className="flex-1 min-w-0">
-        <p className="text-sm leading-tight">
+        <p className="text-sm leading-tight flex items-center flex-wrap gap-1">
           <Link to={post.is_mine ? '/profile' : `/users/${post.author.id}`} className="font-bold text-neutral-900 hover:underline">{post.author.username}</Link>
-          <span className="ml-1.5 text-[11px] font-medium text-accent-600">Lv.{post.author.level}</span>
-          {post.visited && <span className="ml-1.5 text-xs text-success-700">· đã đến đây ✅</span>}
+          <span className="text-[11px] font-medium text-accent-600">Lv.{post.author.level}</span>
+          {post.visited && (
+            <span className="text-xs text-success-700 inline-flex items-center gap-1 font-medium">
+              · đã đến đây <CheckCircle2 className="w-3.5 h-3.5 text-success-600 inline shrink-0" />
+            </span>
+          )}
         </p>
-        <p className="text-xs text-neutral-400">
-          {formatRelativeTime(post.created_at)} · <span title={post.visibility === 'public' ? 'Công khai' : 'Bạn bè'}>{VISIBILITY_ICON[post.visibility]}</span>
+        <p className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+          <span>{formatRelativeTime(post.created_at)}</span>
+          <span>·</span>
+          <span title={post.visibility === 'public' ? 'Công khai' : 'Bạn bè'} className="inline-flex items-center">
+            {post.visibility === 'public' ? <Globe className="w-3.5 h-3.5 text-neutral-400" /> : <Users className="w-3.5 h-3.5 text-neutral-400" />}
+          </span>
         </p>
       </div>
-      {post.rating && <StarRating value={post.rating} size="text-sm" />}
+      {post.rating && <StarRating value={post.rating} size="w-3.5 h-3.5" />}
     </div>
 
     {post.content && <p className="text-sm text-neutral-800 whitespace-pre-line break-words">{post.content}</p>}

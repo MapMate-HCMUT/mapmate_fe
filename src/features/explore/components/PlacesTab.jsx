@@ -1,6 +1,7 @@
 import { Modal } from '../../../components/Modal';
 import { RouteSuggestionsModal } from '../../itinerary';
 import { usePlacesTab } from '../hooks/usePlacesTab';
+import { DataAttribution } from './DataAttribution';
 import { FilterPanel } from './FilterPanel';
 import { PlaceResultList } from './PlaceResultList';
 import { ResultToolbar } from './ResultToolbar';
@@ -30,7 +31,7 @@ export const PlacesTab = () => {
 
       <div className="min-w-0">
         <ResultToolbar
-          total={places.total}
+          total={places.totalLabel}
           isLoading={places.isLoading}
           keyword={places.keyword}
           sort={filters.sort}
@@ -55,6 +56,7 @@ export const PlacesTab = () => {
           onToggleDraft={tab.toggleDraft}
           onShare={tab.sharePlace}
         />
+        <DataAttribution items={options.attribution} />
       </div>
 
       <aside className="hidden xl:block xl:sticky xl:top-0">
@@ -64,7 +66,7 @@ export const PlacesTab = () => {
       <Modal isOpen={tab.filterSheet.isOpen} title="Bộ lọc" onClose={tab.filterSheet.close} containerRef={filterSheetRef}>
         {filterPanel}
         <button type="button" onClick={tab.filterSheet.close} className="mt-6 w-full py-3 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold">
-          Xem {places.total} địa điểm
+          Xem {places.totalLabel} địa điểm
         </button>
       </Modal>
       <RouteSuggestionsModal routes={routes} onShare={tab.shareItinerary} />

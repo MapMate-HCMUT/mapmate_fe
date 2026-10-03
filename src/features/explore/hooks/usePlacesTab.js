@@ -29,7 +29,7 @@ export const usePlacesTab = () => {
   const criteria = useMemo(() => buildTripCriteria(filters, origin.origin), [filters, origin.origin]);
   const placeIds = useMemo(() => draft.places.map((place) => place.id), [draft.places]);
   const preview = useTripPreview(criteria, placeIds);
-  const tagLabels = useMemo(() => Object.fromEntries(options.tags.map((tag) => [tag.value, `${tag.emoji} ${tag.label}`])), [options.tags]);
+  const tagLabels = useMemo(() => Object.fromEntries(options.tags.map((tag) => [tag.value, tag.label])), [options.tags]);
   const vehicleEmoji = options.vehicles.find((vehicle) => vehicle.value === filters.vehicle)?.emoji ?? '🛵';
 
   const toggleDraft = (place) => {

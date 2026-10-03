@@ -8,7 +8,10 @@ const WARNINGS = [
   { when: (summary) => !summary.within_budget, text: 'Vượt tổng ngân sách bạn đặt (đã gồm chi phí di chuyển)' },
   { when: (summary) => !summary.within_duration, text: 'Dài hơn thời lượng bạn chọn' },
   { when: (summary) => !summary.all_open, text: 'Có điểm chưa mở cửa lúc bạn đến' },
+  { when: (summary) => summary.unknown_hours_stops > 0, text: (summary) => `${summary.unknown_hours_stops} điểm chưa rõ giờ mở cửa — nên gọi hỏi trước khi đi` },
+  { when: (summary) => summary.estimated_price_stops > 0, text: (summary) => `Giá của ${summary.estimated_price_stops} điểm là ước tính theo loại hình` },
 ];
+const warningText = (warning, summary) => (typeof warning.text === 'function' ? warning.text(summary) : warning.text);
 
 // Hộp thoại so sánh các lộ trình được gợi ý, đặt tên và lưu. `onShare(itinerary)` mở khung đăng bài.
 export const RouteSuggestionsModal = ({ routes, onShare }) => {
@@ -41,7 +44,7 @@ export const RouteSuggestionsModal = ({ routes, onShare }) => {
 
         {warnings.length > 0 && (
           <ul className="p-3 rounded-input bg-warning-50 border border-warning-200 text-xs text-warning-800 space-y-0.5">
-            {warnings.map((warning) => <li key={warning.text}>⚠️ {warning.text}</li>)}
+            {warnings.map((warning) => <li key={warningText(warning, summary)}>⚠️ {warningText(warning, summary)}</li>)}
           </ul>
         )}
 

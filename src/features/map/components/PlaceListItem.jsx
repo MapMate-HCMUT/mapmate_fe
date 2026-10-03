@@ -1,3 +1,4 @@
+import { Flame } from 'lucide-react';
 import { getCategory } from '../utils/placeCategory';
 import { PlaceRating, PlaceTravelInfo } from './PlaceMeta';
 import { PlaceThumb } from './PlaceThumb';
@@ -15,11 +16,11 @@ export const PlaceListItem = ({ place, isSelected, vehicleEmoji, onSelect }) => 
           isSelected ? 'bg-primary-50 ring-1 ring-primary-200' : 'hover:bg-neutral-50'
         }`}
       >
-        <PlaceThumb category={place.category} />
+        <PlaceThumb place={place} />
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-2">
             <p className="font-semibold text-sm text-neutral-900 truncate">{place.name}</p>
-            {place.is_trending && <span className="shrink-0 text-xs" title="Đang hot">🔥</span>}
+            {place.is_trending && <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500 shrink-0" title="Đang hot" />}
           </div>
           <div className="flex items-center gap-2">
             <PlaceRating rating={place.rating} />

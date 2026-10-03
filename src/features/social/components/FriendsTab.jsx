@@ -1,5 +1,5 @@
+import { UserSearch, Inbox, Send, Sparkles, Users, Search } from 'lucide-react';
 import { LoginPrompt } from '../../../components/LoginPrompt';
-import { Icon } from '../../../components/Icon';
 import { useAuth } from '../../../hooks/useAuth';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 import { useFriends } from '../hooks/useFriends';
@@ -8,9 +8,13 @@ import { UserRow } from './UserRow';
 
 const FRIENDS = { status: 'friends', request_id: null };
 
-const Section = ({ title, count, children, emptyText }) => (
+const Section = ({ icon: IconComp, title, count, children, emptyText }) => (
   <section className="bg-surface rounded-card shadow-card p-5">
-    <h2 className="text-base font-bold text-neutral-900">{title} {count !== undefined && <span className="text-sm font-semibold text-neutral-400">{count}</span>}</h2>
+    <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+      {IconComp && <span className="shrink-0">{IconComp}</span>}
+      <span>{title}</span>
+      {count !== undefined && <span className="text-sm font-semibold text-neutral-400">{count}</span>}
+    </h2>
     {count === 0 ? <p className="mt-2 text-sm text-neutral-500">{emptyText}</p> : <ul className="mt-1 divide-y divide-neutral-100">{children}</ul>}
   </section>
 );
@@ -26,9 +30,12 @@ const FriendsContent = () => {
     <div className="grid lg:grid-cols-2 gap-5 items-start">
       <div className="space-y-5">
         <section className="bg-surface rounded-card shadow-card p-5">
-          <h2 className="text-base font-bold text-neutral-900 mb-3">🔎 Tìm bạn bè</h2>
+          <h2 className="text-base font-bold text-neutral-900 mb-3 flex items-center gap-2">
+            <UserSearch className="w-5 h-5 text-primary-600 shrink-0" />
+            <span>Tìm bạn bè</span>
+          </h2>
           <div className="relative">
-            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="search"
               value={search.query}
@@ -46,25 +53,25 @@ const FriendsContent = () => {
         </section>
 
         {incoming.length > 0 && (
-          <Section title="📬 Lời mời kết bạn" count={incoming.length}>
+          <Section icon={<Inbox className="w-5 h-5 text-primary-600" />} title="Lời mời kết bạn" count={incoming.length}>
             {incoming.map((request) => (
               <UserRow key={request.request_id} user={request.user} relationship={{ status: 'pending_received', request_id: request.request_id }} note={formatRelativeTime(request.created_at)} />
             ))}
           </Section>
         )}
         {outgoing.length > 0 && (
-          <Section title="📤 Lời mời đã gửi" count={outgoing.length}>
+          <Section icon={<Send className="w-5 h-5 text-primary-600" />} title="Lời mời đã gửi" count={outgoing.length}>
             {outgoing.map((request) => (
               <UserRow key={request.request_id} user={request.user} relationship={{ status: 'pending_sent', request_id: request.request_id }} note="đang chờ" />
             ))}
           </Section>
         )}
-        <Section title="💡 Gợi ý kết bạn" count={suggestions.length} emptyText="Hiện chưa có gợi ý mới.">
+        <Section icon={<Sparkles className="w-5 h-5 text-amber-500" />} title="Gợi ý kết bạn" count={suggestions.length} emptyText="Hiện chưa có gợi ý mới.">
           {suggestions.map((user) => <UserRow key={user.id} user={user} relationship={user.relationship} />)}
         </Section>
       </div>
 
-      <Section title="👥 Bạn bè của tôi" count={friends.length} emptyText="Bạn chưa có người bạn nào. Tìm theo tên hoặc xem gợi ý bên cạnh nhé.">
+      <Section icon={<Users className="w-5 h-5 text-primary-600" />} title="Bạn bè của tôi" count={friends.length} emptyText="Bạn chưa có người bạn nào. Tìm theo tên hoặc xem gợi ý bên cạnh nhé.">
         {friends.map((friend) => <UserRow key={friend.id} user={friend} relationship={FRIENDS} />)}
       </Section>
     </div>
@@ -73,6 +80,6 @@ const FriendsContent = () => {
 
 export const FriendsTab = () => {
   const { isAuthenticated } = useAuth();
-  if (!isAuthenticated) return <LoginPrompt emoji="👥" title="Kết nối với bạn bè" description="Đăng nhập để kết bạn, xem địa điểm bạn bè đã đi và chia sẻ lộ trình cho nhau." />;
+  if (!isAuthenticated) return <LoginPrompt icon={<Users className="w-10 h-10 text-primary-600" />} title="Kết nối với bạn bè" description="Đăng nhập để kết bạn, xem địa điểm bạn bè đã đi và chia sẻ lộ trình cho nhau." />;
   return <FriendsContent />;
 };
