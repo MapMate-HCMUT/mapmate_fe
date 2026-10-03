@@ -30,7 +30,6 @@ export const usePlacesTab = () => {
   const placeIds = useMemo(() => draft.places.map((place) => place.id), [draft.places]);
   const preview = useTripPreview(criteria, placeIds);
   const tagLabels = useMemo(() => Object.fromEntries(options.tags.map((tag) => [tag.value, tag.label])), [options.tags]);
-  const vehicleEmoji = options.vehicles.find((vehicle) => vehicle.value === filters.vehicle)?.emoji ?? '🛵';
 
   const toggleDraft = (place) => {
     if (draftIds.has(place.id)) return draft.removePlace(place.id);
@@ -41,7 +40,7 @@ export const usePlacesTab = () => {
   return {
     filters, options, setFilter, resetFilters,
     activeFilterCount: countActiveFilters(filters),
-    origin, places, draft, draftIds, tagLabels, vehicleEmoji, toggleDraft, preview,
+    origin, places, draft, draftIds, tagLabels, toggleDraft, preview,
     filterSheet, filterSheetRef,
     routes,
     // Bộ lọc hiện tại + các điểm đã chọn => tối đa 3 lộ trình

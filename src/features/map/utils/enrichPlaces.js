@@ -3,7 +3,8 @@ import { ALL_CATEGORIES } from './placeCategory';
 import { getVehicle } from './quickFilters';
 
 const MINUTES_PER_HOUR = 60;
-const normalize = (text) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase();
+// Bỏ dấu + ký tự ẩn mà một số bộ gõ chèn vào => gõ có dấu hay không dấu đều tìm được.
+const normalize = (text) => text.normalize('NFKD').replace(/\p{M}/gu, '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').replace(/đ/gi, 'd').toLowerCase();
 
 // Gắn khoảng cách + thời gian di chuyển ước tính, sau đó lọc theo bộ lọc hiện tại.
 export const enrichAndFilterPlaces = (places, { origin, vehicle, category, query, budgetMax, radiusKm }) => {

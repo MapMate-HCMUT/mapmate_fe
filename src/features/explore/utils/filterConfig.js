@@ -54,6 +54,7 @@ export const FALLBACK_OPTIONS = {
     { value: 'cafe', label: 'Cà phê', emoji: '☕' },
     { value: 'attraction', label: 'Tham quan', emoji: '🏛️' },
     { value: 'entertainment', label: 'Giải trí', emoji: '🎭' },
+    { value: 'park', label: 'Công viên', emoji: '🎡' },
     { value: 'shopping', label: 'Mua sắm', emoji: '🛍️' },
   ],
   tags: [],

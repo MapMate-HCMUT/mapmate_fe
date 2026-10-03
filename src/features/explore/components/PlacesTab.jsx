@@ -34,6 +34,7 @@ export const PlacesTab = () => {
           total={places.totalLabel}
           isLoading={places.isLoading}
           keyword={places.keyword}
+          searchRadiusKm={places.radiusKm}
           sort={filters.sort}
           sortOptions={options.sorts}
           onSortChange={(sort) => tab.setFilter('sort', sort)}
@@ -52,7 +53,6 @@ export const PlacesTab = () => {
           onReset={tab.resetFilters}
           draftIds={tab.draftIds}
           tagLabels={tab.tagLabels}
-          vehicleEmoji={tab.vehicleEmoji}
           onToggleDraft={tab.toggleDraft}
           onShare={tab.sharePlace}
         />

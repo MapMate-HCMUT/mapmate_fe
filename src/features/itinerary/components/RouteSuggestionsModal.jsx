@@ -8,6 +8,7 @@ const WARNINGS = [
   { when: (summary) => !summary.within_budget, text: 'Vượt tổng ngân sách bạn đặt (đã gồm chi phí di chuyển)' },
   { when: (summary) => !summary.within_duration, text: 'Dài hơn thời lượng bạn chọn' },
   { when: (summary) => !summary.all_open, text: 'Có điểm chưa mở cửa lúc bạn đến' },
+  { when: (summary) => summary.maybe_closed_stops > 0, text: (summary) => `${summary.maybe_closed_stops} điểm có người báo đã đóng cửa — nên gọi hỏi trước` },
   { when: (summary) => summary.unknown_hours_stops > 0, text: (summary) => `${summary.unknown_hours_stops} điểm chưa rõ giờ mở cửa — nên gọi hỏi trước khi đi` },
   { when: (summary) => summary.estimated_price_stops > 0, text: (summary) => `Giá của ${summary.estimated_price_stops} điểm là ước tính theo loại hình` },
 ];
@@ -48,7 +49,7 @@ export const RouteSuggestionsModal = ({ routes, onShare }) => {
           </ul>
         )}
 
-        <ItineraryTimeline stops={selected.stops} vehicleEmoji={vehicle.emoji} />
+        <ItineraryTimeline stops={selected.stops} />
 
         <div className="pt-4 border-t border-neutral-100 space-y-3">
           {savedItinerary ? (

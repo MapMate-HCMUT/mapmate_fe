@@ -4,7 +4,7 @@ import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
 import { toTimelineStops } from '../utils/itineraryFormat';
 
 // Dòng thời gian dọc: giờ đến → tên trạm → thời gian ở lại, chi phí.
-export const ItineraryTimeline = ({ stops, vehicleIcon: VehicleIcon, vehicleEmoji = '🛵', compact = false }) => {
+export const ItineraryTimeline = ({ stops, vehicleIcon: VehicleIcon, compact = false }) => {
   const FallbackVehicle = VehicleIcon || Bike;
 
   return (

@@ -4,7 +4,7 @@ import { getNearbyPlacesApi } from '../api/placesApi';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { buildNearbyParams, SEARCH_DEBOUNCE_MS } from '../utils/filterConfig';
 
-const EMPTY = { items: [], total: 0, totalCapped: false, page: 1, hasMore: false, isLoading: true, error: null };
+const EMPTY = { items: [], total: 0, totalCapped: false, radiusKm: null, page: 1, hasMore: false, isLoading: true, error: null };
 
 // Tải danh sách địa điểm theo bộ lọc: đổi bộ lọc => chờ 350ms rồi tải lại từ trang 1; "Xem thêm" nối trang kế.
 export const useExplorePlaces = () => {
@@ -20,7 +20,7 @@ export const useExplorePlaces = () => {
     const timer = setTimeout(() => {
       setState((prev) => ({ ...prev, isLoading: true }));
       getNearbyPlacesApi(firstPageParams)
-        .then((data) => isActive && setState({ items: data.items, total: data.total, totalCapped: Boolean(data.total_capped), page: 1, hasMore: data.has_more, isLoading: false, error: null }))
+        .then((data) => isActive && setState({ items: data.items, total: data.total, totalCapped: Boolean(data.total_capped), radiusKm: data.radius_km ?? null, page: 1, hasMore: data.has_more, isLoading: false, error: null }))
         .catch((error) => isActive && setState({ ...EMPTY, isLoading: false, error }));
     }, SEARCH_DEBOUNCE_MS);
     return () => {
