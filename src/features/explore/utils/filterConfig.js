@@ -22,7 +22,7 @@ export const createDefaultFilters = () => ({
   radiusKm: 5,
   minRating: null,
   district: '',
-  sort: 'distance',
+  sort: 'recommended',
   // Thiết lập chuyến đi
   people: 2,
   vehicle: 'bike',
@@ -71,7 +71,12 @@ export const FALLBACK_OPTIONS = {
     { value: 'grab_car', label: 'Grab ô tô', emoji: '🚕' },
   ],
   fares: null,
-  sorts: [{ value: 'distance', label: 'Gần nhất' }],
+  sorts: [{ value: 'recommended', label: 'Đề xuất' }, { value: 'distance', label: 'Gần nhất' }],
+  // Ghi nguồn dữ liệu mở (bắt buộc theo giấy phép ODbL / CDLA)
+  attribution: [
+    { label: 'Overture Maps Foundation', license: 'CDLA-Permissive-2.0', url: 'https://overturemaps.org' },
+    { label: '© OpenStreetMap contributors', license: 'ODbL', url: 'https://www.openstreetmap.org/copyright' },
+  ],
   trip_budget: { min: 50000, max: 2000000, step: 50000, default: 500000 },
   radius: { min: 1, max: 20, default: 5 },
   people: { min: 1, max: 20, default: 2 },

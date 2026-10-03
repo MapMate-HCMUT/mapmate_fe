@@ -15,6 +15,7 @@ const PreviewNotes = ({ summary }) => (
     )}
     {summary.time_left_minutes != null && summary.time_left_minutes < 0 && <li className="text-danger-600">⚠ Dài hơn thời lượng dự định {-summary.time_left_minutes} phút</li>}
     {!summary.all_open && <li className="text-warning-700">⚠ Có điểm chưa mở cửa lúc bạn đến</li>}
+    {summary.unknown_hours_stops > 0 && <li className="text-warning-700">⚠ {summary.unknown_hours_stops} điểm chưa rõ giờ mở cửa</li>}
     <li className="text-neutral-400">Gồm {formatK(summary.transport_cost_per_person)} di chuyển · bấm Gợi ý lộ trình để xem chi tiết</li>
   </ul>
 );

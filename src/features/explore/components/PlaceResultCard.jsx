@@ -1,10 +1,27 @@
 import { Icon } from '../../../components/Icon';
 import { formatDistance } from '../../../utils/calculateDistance';
-import { formatPriceRange, formatShortVND } from '../../../utils/formatCurrencyVND';
+import { formatShortVND } from '../../../utils/formatCurrencyVND';
+import { formatPlaceAddress, formatPlaceHours, formatPlacePrice, getPlaceRating, isVerifiedPlace, PLACE_SOURCE_LABELS } from '../../../utils/formatPlace';
+import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
 import { PinButton } from '../../social';
-import { formatOpeningHours, getCategoryStyle } from '../../../utils/placeCategoryStyle';
 
 const MAX_TAGS_SHOWN = 3;
+const linkClass = 'font-semibold text-primary-700 hover:underline';
+
+const RatingText = ({ place }) => {
+  const rating = getPlaceRating(place);
+  if (!rating) return <span className="text-neutral-400">Chưa có đánh giá</span>;
+  return <span><span className="text-accent-500">★</span> <b className="text-neutral-800">{rating}</b> ({place.review_count.toLocaleString('vi-VN')})</span>;
+};
+
+// Dữ liệu mở chưa ai xác minh: ghi nguồn + liên hệ để người dùng tự hỏi giờ / giá.
+const SourceLine = ({ place }) => (
+  <p className="mt-1.5 flex flex-wrap gap-x-2 text-[11px] text-neutral-400" title="Thông tin từ dữ liệu mở, MapMate chưa xác minh">
+    <span>Nguồn: {PLACE_SOURCE_LABELS[place.source] ?? place.source} · chưa xác minh</span>
+    {place.contact?.phone && <a href={`tel:${place.contact.phone}`} className={linkClass}>📞 {place.contact.phone}</a>}
+    {place.contact?.facebook && <a href={place.contact.facebook} target="_blank" rel="noreferrer" className={linkClass}>Facebook</a>}
+  </p>
+);
 
 export const PlaceResultCard = ({ place, tagLabels, vehicleEmoji, inDraft, onToggleDraft, onShare }) => {
   const style = getCategoryStyle(place.category);
@@ -21,25 +38,32 @@ export const PlaceResultCard = ({ place, tagLabels, vehicleEmoji, inDraft, onTog
           </h3>
           <span className={`${style.badge} shrink-0 px-2 py-0.5 rounded-pill text-[11px] font-semibold`}>{style.label}</span>
         </div>
-        <p className="mt-0.5 text-xs text-neutral-500 truncate">{place.address}, {place.district}</p>
+        <p className="mt-0.5 text-xs text-neutral-500 truncate">{formatPlaceAddress(place)}</p>
 
         <p className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-neutral-600">
-          <span><span className="text-accent-500">★</span> <b className="text-neutral-800">{place.rating.toFixed(1)}</b> ({place.review_count.toLocaleString('vi-VN')})</span>
-          <span className="font-semibold text-neutral-800">{formatPriceRange(place.price_range)}</span>
+          <RatingText place={place} />
+          <span className="font-semibold text-neutral-800" title={place.price_estimated ? 'Giá ước tính theo loại hình, chưa ai xác nhận' : undefined}>
+            {formatPlacePrice(place)}
+          </span>
           <span>{formatDistance(place.distance_km)}</span>
           <span className="font-semibold text-primary-700" title={place.travel?.label}>
             {place.travel?.emoji ?? vehicleEmoji} {place.travel_minutes} phút{place.travel?.cost_per_person > 0 && <> · {formatShortVND(place.travel.cost_per_person)}</>}
           </span>
-          <span>🕒 {formatOpeningHours(place.opening_hours)}</span>
+          <span className={place.hours_known === false ? 'text-neutral-400' : undefined}>🕒 {formatPlaceHours(place)}</span>
         </p>
 
-        {place.tags.length > 0 && (
+        {(place.tags.length > 0 || place.cuisines?.length > 0) && (
           <p className="mt-2 flex flex-wrap gap-1">
+            {place.cuisines?.slice(0, 1).map((cuisine) => (
+              <span key={cuisine} className="px-2 py-0.5 rounded-pill bg-warning-50 text-[11px] text-warning-700">{cuisine}</span>
+            ))}
             {place.tags.slice(0, MAX_TAGS_SHOWN).map((tag) => (
               <span key={tag} className="px-2 py-0.5 rounded-pill bg-neutral-100 text-[11px] text-neutral-600">{tagLabels[tag] ?? tag}</span>
             ))}
           </p>
         )}
+
+        {!isVerifiedPlace(place) && <SourceLine place={place} />}
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button

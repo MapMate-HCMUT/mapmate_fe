@@ -9,6 +9,3 @@ const CATEGORY_STYLES = {
 const FALLBACK_STYLE = { label: 'Địa điểm', emoji: '📍', tile: 'bg-neutral-100', badge: 'bg-neutral-100 text-neutral-700', dot: 'bg-neutral-400' };
 
 export const getCategoryStyle = (category) => CATEGORY_STYLES[category] ?? FALLBACK_STYLE;
-
-// "08:00 – 21:00" hoặc "Mở cả ngày"
-export const formatOpeningHours = (hours) => (hours?.open ? `${hours.open} – ${hours.close}` : 'Mở cả ngày');
