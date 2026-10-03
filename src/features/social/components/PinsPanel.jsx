@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Bookmark } from 'lucide-react';
 import { ChipGroup } from '../../../components/form/ChipGroup';
 import { useMyPins } from '../hooks/useSocialLists';
 import { PIN_OPTIONS } from '../utils/socialConfig';
@@ -19,7 +20,7 @@ export const PinList = ({ pins, emptyText, showPin = true }) => {
             showPin={showPin}
             footer={(pin.rating || pin.note || pin.visited_on) && (
               <p className="mt-1 text-xs text-neutral-600">
-                {pin.rating && <StarRating value={pin.rating} size="text-xs" />} {pin.visited_on && <span className="text-neutral-400">· {formatDate(pin.visited_on)}</span>}
+                {pin.rating && <StarRating value={pin.rating} size="w-3.5 h-3.5" />} {pin.visited_on && <span className="text-neutral-400">· {formatDate(pin.visited_on)}</span>}
                 {pin.note && <span className="block italic">“{pin.note}”</span>}
               </p>
             )}
@@ -37,12 +38,15 @@ export const PinsPanel = () => {
   return (
     <section className="bg-surface rounded-card shadow-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <h2 className="text-base font-bold text-neutral-900">📌 Địa điểm đã ghim</h2>
+        <h2 className="text-base font-bold text-neutral-900 flex items-center gap-1.5">
+          <Bookmark className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+          <span>Địa điểm đã ghim</span>
+        </h2>
         <ChipGroup size="sm" options={PIN_OPTIONS} value={status} onChange={setStatus} ariaLabel="Loại ghim" />
       </div>
       {error && <p className="text-sm text-danger-600">{error.message}</p>}
       {isLoading ? <div className="h-24 rounded-card bg-neutral-100 animate-pulse" /> : (
-        <PinList pins={pins} emptyText={status === 'visited' ? 'Chưa ghim nơi nào đã đi. Bấm 📌 Ghim trên thẻ địa điểm để lưu lại.' : 'Chưa có nơi nào trong danh sách muốn đi.'} />
+        <PinList pins={pins} emptyText={status === 'visited' ? 'Chưa ghim nơi nào đã đi. Bấm Ghim trên thẻ địa điểm để lưu lại.' : 'Chưa có nơi nào trong danh sách muốn đi.'} />
       )}
     </section>
   );

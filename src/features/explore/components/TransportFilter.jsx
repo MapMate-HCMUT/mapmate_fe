@@ -1,5 +1,6 @@
 import { ChipGroup } from '../../../components/form/ChipGroup';
 import { CUSTOM_VEHICLE } from '../utils/filterConfig';
+import { VEHICLE_ICONS } from '../utils/exploreIcons';
 import { FilterSection } from './FilterSection';
 
 const formatDate = (isoDate) => new Date(isoDate).toLocaleDateString('vi-VN');
@@ -11,13 +12,34 @@ export const TransportFilter = ({ filters, options, onChange }) => {
 
   return (
     <FilterSection title="Phương tiện">
-      <ChipGroup size="sm" options={options.vehicles} value={filters.vehicle} onChange={(value) => onChange('vehicle', value)} ariaLabel="Phương tiện" />
+      <ChipGroup
+        size="sm"
+        options={options.vehicles}
+        value={filters.vehicle}
+        onChange={(value) => onChange('vehicle', value)}
+        ariaLabel="Phương tiện"
+        getIcon={(opt) => {
+          const IconComp = VEHICLE_ICONS[opt.value];
+          return IconComp ? <IconComp className="w-3.5 h-3.5" /> : null;
+        }}
+      />
       {selected?.description && <p className="text-xs text-neutral-500">{selected.description}</p>}
 
       {isCustom && (
         <div className="p-3 rounded-input bg-neutral-50 border border-neutral-200 space-y-2">
           <p className="text-xs font-semibold text-neutral-600">Kết hợp các phương tiện:</p>
-          <ChipGroup multiple size="sm" options={options.custom_modes} value={filters.customModes} onChange={(value) => onChange('customModes', value)} ariaLabel="Phương tiện kết hợp" />
+          <ChipGroup
+            multiple
+            size="sm"
+            options={options.custom_modes}
+            value={filters.customModes}
+            onChange={(value) => onChange('customModes', value)}
+            ariaLabel="Phương tiện kết hợp"
+            getIcon={(opt) => {
+              const IconComp = VEHICLE_ICONS[opt.value];
+              return IconComp ? <IconComp className="w-3.5 h-3.5" /> : null;
+            }}
+          />
           <p className="text-[11px] text-neutral-400">
             {filters.customModes.length === 0 ? 'Chưa chọn gì — sẽ chỉ đi bộ.' : 'Đi bộ luôn được dùng cho đoạn ngắn. Mỗi chặng tự chọn cách nhanh và rẻ nhất.'}
           </p>

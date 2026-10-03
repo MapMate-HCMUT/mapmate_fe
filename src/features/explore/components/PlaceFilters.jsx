@@ -4,6 +4,7 @@ import { RangeSlider } from '../../../components/form/RangeSlider';
 import { Icon } from '../../../components/Icon';
 import { formatShortVND } from '../../../utils/formatCurrencyVND';
 import { PRICE_MAX, PRICE_MIN, PRICE_STEP } from '../utils/filterConfig';
+import { CATEGORY_ICONS, TAG_ICONS } from '../utils/exploreIcons';
 import { FilterSection } from './FilterSection';
 
 const ANY_RATING = { value: null, label: 'Tất cả' };
@@ -13,12 +14,33 @@ const formatPriceRange = ([low, high]) => `${formatShortVND(low)} – ${high >= 
 export const PlaceFilters = ({ filters, options, onChange, origin, isLocating, onLocate }) => (
   <div className="space-y-5">
     <FilterSection title="Loại hình">
-      <ChipGroup multiple options={options.categories} value={filters.categories} onChange={(value) => onChange('categories', value)} ariaLabel="Loại hình" />
+      <ChipGroup
+        multiple
+        options={options.categories}
+        value={filters.categories}
+        onChange={(value) => onChange('categories', value)}
+        ariaLabel="Loại hình"
+        getIcon={(opt) => {
+          const IconComp = CATEGORY_ICONS[opt.value];
+          return IconComp ? <IconComp className="w-3.5 h-3.5" /> : null;
+        }}
+      />
     </FilterSection>
 
     {options.tags.length > 0 && (
       <FilterSection title="Phong cách / dịp">
-        <ChipGroup multiple size="sm" options={options.tags} value={filters.tags} onChange={(value) => onChange('tags', value)} ariaLabel="Phong cách" />
+        <ChipGroup
+          multiple
+          size="sm"
+          options={options.tags}
+          value={filters.tags}
+          onChange={(value) => onChange('tags', value)}
+          ariaLabel="Phong cách"
+          getIcon={(opt) => {
+            const IconComp = TAG_ICONS[opt.value];
+            return IconComp ? <IconComp className="w-3.5 h-3.5" /> : null;
+          }}
+        />
       </FilterSection>
     )}
 

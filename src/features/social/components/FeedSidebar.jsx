@@ -1,3 +1,4 @@
+import { Flame, Sparkles, UserCheck } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useFriends } from '../hooks/useFriends';
 import { useTrendingTags } from '../hooks/useSocialLists';
@@ -7,19 +8,27 @@ const FriendSuggestions = () => {
   const { suggestions, incoming } = useFriends();
   if (suggestions.length === 0 && incoming.length === 0) return null;
   return (
-    <section className="bg-surface rounded-card shadow-card p-4">
+    <section className="bg-surface rounded-card shadow-card p-4 space-y-4">
       {incoming.length > 0 && (
-        <>
-          <h2 className="text-sm font-bold text-neutral-900">📬 Lời mời kết bạn</h2>
-          <ul className="divide-y divide-neutral-100 mb-3">
+        <div>
+          <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5 mb-2">
+            <UserCheck className="w-4 h-4 text-primary-600 shrink-0" />
+            <span>Lời mời kết bạn</span>
+          </h2>
+          <ul className="divide-y divide-neutral-100">
             {incoming.map((request) => <UserRow key={request.request_id} user={request.user} relationship={{ status: 'pending_received', request_id: request.request_id }} />)}
           </ul>
-        </>
+        </div>
       )}
-      <h2 className="text-sm font-bold text-neutral-900">💡 Gợi ý kết bạn</h2>
-      <ul className="divide-y divide-neutral-100">
-        {suggestions.slice(0, 4).map((user) => <UserRow key={user.id} user={user} relationship={user.relationship} />)}
-      </ul>
+      <div>
+        <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5 mb-2">
+          <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+          <span>Gợi ý kết bạn</span>
+        </h2>
+        <ul className="divide-y divide-neutral-100">
+          {suggestions.slice(0, 4).map((user) => <UserRow key={user.id} user={user} relationship={user.relationship} />)}
+        </ul>
+      </div>
     </section>
   );
 };
@@ -32,7 +41,10 @@ export const FeedSidebar = ({ activeTag, onTagClick }) => {
   return (
     <aside className="space-y-5">
       <section className="bg-surface rounded-card shadow-card p-4">
-        <h2 className="text-sm font-bold text-neutral-900 mb-2">🔥 Hashtag nổi bật</h2>
+        <h2 className="text-sm font-bold text-neutral-900 mb-2 flex items-center gap-1.5">
+          <Flame className="w-4 h-4 text-orange-500 fill-orange-500 shrink-0" />
+          <span>Hashtag nổi bật</span>
+        </h2>
         {trending.length === 0 ? (
           <p className="text-xs text-neutral-500">Chưa có hashtag nào. Hãy là người đầu tiên gắn thẻ!</p>
         ) : (

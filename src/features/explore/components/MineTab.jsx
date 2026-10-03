@@ -1,3 +1,4 @@
+import { Bookmark } from 'lucide-react';
 import { LoginPrompt } from '../../../components/LoginPrompt';
 import { useAuth } from '../../../hooks/useAuth';
 import { MyItinerariesPanel } from '../../itinerary';
@@ -8,7 +9,7 @@ export const MineTab = () => {
   const { isAuthenticated } = useAuth();
   const openComposer = useSocialStore((state) => state.openComposer);
   if (!isAuthenticated) {
-    return <LoginPrompt emoji="📌" title="Sổ tay của bạn" description="Đăng nhập để ghim những nơi đã đi, muốn đi và lưu lại các lộ trình." />;
+    return <LoginPrompt icon={<Bookmark className="w-10 h-10 text-primary-600" />} title="Sổ tay của bạn" description="Đăng nhập để ghim những nơi đã đi, muốn đi và lưu lại các lộ trình." />;
   }
   return (
     <div className="grid lg:grid-cols-2 gap-5 items-start">

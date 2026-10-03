@@ -1,3 +1,4 @@
+import { Compass } from 'lucide-react';
 import { useMyItineraries } from '../hooks/useMyItineraries';
 import { ItineraryActionButton, ItineraryCard } from './ItineraryCard';
 
@@ -7,7 +8,11 @@ export const MyItinerariesPanel = ({ onShare }) => {
 
   return (
     <section className="bg-surface rounded-card shadow-card p-5">
-      <h2 className="text-base font-bold text-neutral-900 mb-3">🧭 Lộ trình đã lưu <span className="text-sm font-semibold text-neutral-400">{itineraries.length}</span></h2>
+      <h2 className="text-base font-bold text-neutral-900 mb-3 flex items-center gap-1.5">
+        <Compass className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+        <span>Lộ trình đã lưu</span>
+        <span className="text-sm font-semibold text-neutral-400">{itineraries.length}</span>
+      </h2>
       {error && <p className="text-sm text-danger-600">{error.message}</p>}
       {isLoading && itineraries.length === 0 && <div className="h-40 rounded-card bg-neutral-100 animate-pulse" />}
       {!isLoading && !error && itineraries.length === 0 && (
