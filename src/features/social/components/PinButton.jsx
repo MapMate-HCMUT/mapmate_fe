@@ -1,4 +1,4 @@
-import { Bookmark, Pin } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import { usePinToggle } from '../hooks/usePinToggle';
 import { getPinOption, PIN_OPTIONS } from '../utils/socialConfig';
 

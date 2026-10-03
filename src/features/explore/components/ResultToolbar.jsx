@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import { Icon } from '../../../components/Icon';
 
-export const ResultToolbar = ({ total, isLoading, keyword, sort, sortOptions, onSortChange, activeCount, onOpenFilters }) => {
+export const ResultToolbar = ({ total, isLoading, keyword, searchRadiusKm, sort, sortOptions, onSortChange, activeCount, onOpenFilters }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -23,6 +23,7 @@ export const ResultToolbar = ({ total, isLoading, keyword, sort, sortOptions, on
       <p className="flex-1 min-w-40 text-sm text-neutral-600">
         {isLoading ? 'Đang tìm…' : <><b className="text-neutral-900">{total}</b> địa điểm phù hợp</>}
         {keyword && <> cho “<b className="text-neutral-900">{keyword}</b>”</>}
+        {keyword && searchRadiusKm && <span className="text-neutral-400"> · tìm trong {searchRadiusKm} km</span>}
       </p>
 
       <div className="flex items-center gap-2">

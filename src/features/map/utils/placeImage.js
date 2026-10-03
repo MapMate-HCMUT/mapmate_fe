@@ -215,7 +215,7 @@ export const getPlaceImageUrl = (place) => {
   if (text.includes('rạp') || text.includes('cgv') || text.includes('cinema') || text.includes('lotte')) {
     return pickFromList(STOCK_PHOTOS.cinema, seed);
   }
-  if (text.includes('công viên') || text.includes('thảo cầm viên') || text.includes('zoo')) {
+  if (place.category === 'park' || text.includes('công viên') || text.includes('thảo cầm viên') || text.includes('zoo')) {
     return pickFromList(STOCK_PHOTOS.park, seed);
   }
   if (place.category === 'sightseeing' || text.includes('bảo tàng') || text.includes('dinh') || text.includes('nhà thờ') || text.includes('chùa') || text.includes('đền')) {
