@@ -3,6 +3,7 @@ import {
   Coffee,
   Landmark,
   Ticket,
+  FerrisWheel,
   ShoppingBag,
   Heart,
   Home,
@@ -39,6 +40,7 @@ export {
   Coffee,
   Landmark,
   Ticket,
+  FerrisWheel,
   ShoppingBag,
   Heart,
   Home,
@@ -75,6 +77,7 @@ export const CATEGORY_ICONS = {
   cafe: Coffee,
   attraction: Landmark,
   entertainment: Ticket,
+  park: FerrisWheel,
   shopping: ShoppingBag,
 };
 

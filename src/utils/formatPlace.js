@@ -13,7 +13,15 @@ export const isVerifiedPlace = (place) => !place.source || place.source === 'map
 // null = chưa có đánh giá (không hiện "★ 0.0" gây hiểu nhầm là quán dở)
 export const getPlaceRating = (place) => (place.review_count > 0 || place.rating > 0 ? place.rating.toFixed(1) : null);
 
-export const formatPlacePrice = (place) => `${place.price_estimated ? '~' : ''}${formatPriceRange(place.price_range)}`;
+// "~60k – 200k" = ước tính; công viên / tượng đài miễn phí thì không cần dấu ~
+export const formatPlacePrice = (place) => `${place.price_estimated && place.price_range.max > 0 ? '~' : ''}${formatPriceRange(place.price_range)}`;
+
+// Lần cuối lấy dữ liệu từ nguồn mở: "10/2026"
+export const formatDataMonth = (date) => {
+  if (!date) return null;
+  const value = new Date(date);
+  return `${String(value.getMonth() + 1).padStart(2, '0')}/${value.getFullYear()}`;
+};
 
 export const formatPlaceAddress = (place) => [place.address, place.district].filter(Boolean).join(', ');
 

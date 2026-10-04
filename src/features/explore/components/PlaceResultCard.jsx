@@ -1,11 +1,12 @@
 import { Star, Flame, Clock, Phone, Plus, Check, Share2, Bike } from 'lucide-react';
 import { formatDistance } from '../../../utils/calculateDistance';
 import { formatShortVND } from '../../../utils/formatCurrencyVND';
-import { formatPlaceAddress, formatPlaceHours, formatPlacePrice, getPlaceRating, isVerifiedPlace, PLACE_SOURCE_LABELS } from '../../../utils/formatPlace';
+import { formatDataMonth, formatPlaceAddress, formatPlaceHours, formatPlacePrice, getPlaceRating, isVerifiedPlace, PLACE_SOURCE_LABELS } from '../../../utils/formatPlace';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
 import { PinButton } from '../../social';
 import { PlaceThumb } from '../../map/components/PlaceThumb';
 import { TAG_ICONS, VEHICLE_ICONS } from '../utils/exploreIcons';
+import { PlaceStatusReport } from './PlaceStatusReport';
 
 const MAX_TAGS_SHOWN = 3;
 const linkClass = 'font-semibold text-primary-700 hover:underline';
@@ -25,7 +26,10 @@ const RatingText = ({ place }) => {
 // Dữ liệu mở chưa ai xác minh: ghi nguồn + liên hệ để người dùng tự hỏi giờ / giá.
 const SourceLine = ({ place }) => (
   <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[11px] text-neutral-400" title="Thông tin từ dữ liệu mở, MapMate chưa xác minh">
-    <span>Nguồn: {PLACE_SOURCE_LABELS[place.source] ?? place.source} · chưa xác minh</span>
+    <span>
+      Nguồn: {PLACE_SOURCE_LABELS[place.source] ?? place.source} · chưa xác minh
+      {place.data_updated_at && <> · cập nhật {formatDataMonth(place.data_updated_at)}</>}
+    </span>
     {place.contact?.phone && (
       <a href={`tel:${place.contact.phone}`} className={`${linkClass} inline-flex items-center gap-1`}>
         <Phone className="w-3 h-3 text-neutral-400" /> {place.contact.phone}
@@ -35,7 +39,7 @@ const SourceLine = ({ place }) => (
   </p>
 );
 
-export const PlaceResultCard = ({ place, tagLabels, vehicleEmoji, inDraft, onToggleDraft, onShare }) => {
+export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onShare }) => {
   const style = getCategoryStyle(place.category);
   const VehicleIcon = VEHICLE_ICONS[place.travel?.mode] || Bike;
 
@@ -109,6 +113,7 @@ export const PlaceResultCard = ({ place, tagLabels, vehicleEmoji, inDraft, onTog
             Chia sẻ
           </button>
         </div>
+        <PlaceStatusReport place={place} />
       </div>
     </li>
   );

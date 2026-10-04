@@ -2,7 +2,7 @@ import { PlaceResultCard } from './PlaceResultCard';
 
 const SKELETON_ROWS = 4;
 
-export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onReset, draftIds, tagLabels, vehicleEmoji, onToggleDraft, onShare }) => {
+export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onReset, draftIds, tagLabels, onToggleDraft, onShare }) => {
   if (error) {
     return <p className="bg-surface rounded-card shadow-card p-8 text-center text-sm text-danger-600">{error.message}</p>;
   }
@@ -35,7 +35,6 @@ export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore,
             key={place.id}
             place={place}
             tagLabels={tagLabels}
-            vehicleEmoji={vehicleEmoji}
             inDraft={draftIds.has(place.id)}
             onToggleDraft={onToggleDraft}
             onShare={onShare}
