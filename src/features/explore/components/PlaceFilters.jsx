@@ -44,7 +44,7 @@ export const PlaceFilters = ({ filters, options, onChange, origin, isLocating, o
       </FilterSection>
     )}
 
-    <FilterSection title="Mức giá mỗi điểm (đ/người)" hint={formatPriceRange(filters.priceRange)}>
+    <FilterSection title="Mức giá mỗi địa điểm" hint={formatPriceRange(filters.priceRange)}>
       <DualRangeSlider min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} value={filters.priceRange} onChange={(value) => onChange('priceRange', value)} ariaLabel="Mức giá" />
     </FilterSection>
 

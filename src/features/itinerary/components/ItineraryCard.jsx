@@ -1,4 +1,4 @@
-import { Compass, Bookmark, Share2, Trash2 } from 'lucide-react';
+import { Compass, Bookmark, Share2, Trash2, Pencil } from 'lucide-react';
 import { Icon } from '../../../components/Icon';
 import { getTripSummary, getVehicleLabel, VISIBILITY_LABELS } from '../utils/itineraryFormat';
 import { ItineraryTimeline } from './ItineraryTimeline';
@@ -52,6 +52,8 @@ export const ItineraryActionButton = ({ icon, children, onClick, tone = 'neutral
         <Share2 className="w-3.5 h-3.5 shrink-0" />
       ) : icon === 'close' || icon === 'trash' ? (
         <Trash2 className="w-3.5 h-3.5 shrink-0" />
+      ) : icon === 'edit' ? (
+        <Pencil className="w-3.5 h-3.5 shrink-0" />
       ) : typeof icon === 'function' || (typeof icon === 'object' && icon !== null && icon.$$typeof) ? (
         (() => { const IconC = icon; return <IconC className="w-3.5 h-3.5 shrink-0" />; })()
       ) : icon ? (

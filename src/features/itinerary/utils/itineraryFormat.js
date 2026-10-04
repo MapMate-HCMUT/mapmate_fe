@@ -17,6 +17,17 @@ export const VISIBILITY_LABELS = {
   public: { label: 'Công khai', emoji: '🌐', icon: Globe },
 };
 
+// Vai trò điểm dừng (server tính từ loại quán + giờ đến): bữa chính / ăn vặt / đồ uống / vui chơi
+export const STOP_ROLE_LABELS = { meal: 'Bữa chính', snack: 'Ăn vặt', drink: 'Đồ uống', activity: 'Vui chơi' };
+export const MEAL_LABELS = { breakfast: 'Bữa sáng', lunch: 'Bữa trưa', dinner: 'Bữa tối', late_night: 'Ăn khuya' };
+export const getStopRoleLabel = (stop) => (stop.meal ? MEAL_LABELS[stop.meal] : STOP_ROLE_LABELS[stop.role]) ?? null;
+
+// Chỉnh thời gian ở lại từng điểm (khớp giới hạn của server: constants/tripRules.js — STAY_RANGE)
+export const STAY_STEP_MINUTES = 15;
+export const STAY_LIMITS = { min: 10, max: 300 };
+// Thời gian ở lại đang hiển thị => gửi kèm khi lưu / xem trước để server giữ đúng như vậy
+export const stayOverridesOf = (stops) => Object.fromEntries(stops.map((stop) => [stop.place.id, stop.stay_minutes]));
+
 // Trạm của lộ trình GỢI Ý có dạng { place: {...} }, trạm ĐÃ LƯU có dạng phẳng { place_name } => đưa về 1 dạng để hiển thị.
 export const toTimelineStops = (stops) =>
   stops.map((stop, index) => ({
@@ -30,6 +41,12 @@ export const toTimelineStops = (stops) =>
     est_cost: stop.est_cost,
     travel: stop.travel ?? null, // { label, cost_per_person, segments[] } — null với lộ trình lưu từ bản cũ
     closed_on_arrival: stop.open_on_arrival === false,
+    role_label: getStopRoleLabel(stop), // null với lộ trình lưu từ bản cũ
+    // Nằm trong mall nào (null nếu không có, hoặc điểm này chính là mall)
+    venue: stop.venue && String(stop.venue.id) !== String(stop.place?.id) ? stop.venue : null,
+    venue_name: stop.venue?.name ?? null, // có cả khi điểm này chính là mall => chờ giờ ăn = dạo mall
+    stay_range: stop.stay_range ?? null, // khoảng hợp lý — chỉ có ở lộ trình gợi ý / xem trước
+    free_minutes_before: stop.free_minutes_before ?? 0, // chờ tới giờ ăn hợp lý => dạo quanh trước khi vào
   }));
 
 const sumOf = (stops, key) => stops.reduce((sum, stop) => sum + (stop[key] ?? 0), 0);

@@ -4,6 +4,7 @@ import { usePlacesTab } from '../hooks/usePlacesTab';
 import { DataAttribution } from './DataAttribution';
 import { FilterPanel } from './FilterPanel';
 import { PlaceResultList } from './PlaceResultList';
+import { RelaxedNotice } from './RelaxedNotice';
 import { ResultToolbar } from './ResultToolbar';
 import { TripDraftPanel } from './TripDraftPanel';
 
@@ -41,8 +42,22 @@ export const PlacesTab = () => {
           activeCount={tab.activeFilterCount}
           onOpenFilters={tab.filterSheet.open}
         />
+        {places.relaxed && !places.isLoading && <RelaxedNotice relaxed={places.relaxed} onApply={tab.applyRelaxed} />}
         <div className="xl:hidden mb-3">
-          <TripDraftPanel places={draft.places} preview={tab.preview} onRemove={draft.removePlace} onClear={draft.clearPlaces} onSuggest={tab.suggestRoutes} isSuggesting={routes.isSuggesting} />
+          <TripDraftPanel
+            places={draft.places}
+            preview={tab.preview}
+            tripName={draft.tripName}
+            onNameChange={draft.setTripName}
+            onSave={tab.saveDraft}
+            isSaving={tab.isSaving}
+            isEditing={tab.isEditing}
+            onCancelEdit={tab.cancelEditing}
+            onRemove={draft.removePlace}
+            onClear={draft.clearPlaces}
+            onSuggest={tab.suggestRoutes}
+            isSuggesting={routes.isSuggesting}
+          />
         </div>
         <PlaceResultList
           places={places.items}
@@ -60,7 +75,20 @@ export const PlacesTab = () => {
       </div>
 
       <aside className="hidden xl:block xl:sticky xl:top-0">
-        <TripDraftPanel places={draft.places} preview={tab.preview} onRemove={draft.removePlace} onClear={draft.clearPlaces} onSuggest={tab.suggestRoutes} isSuggesting={routes.isSuggesting} />
+        <TripDraftPanel
+          places={draft.places}
+          preview={tab.preview}
+          tripName={draft.tripName}
+          onNameChange={draft.setTripName}
+          onSave={tab.saveDraft}
+          isSaving={tab.isSaving}
+          isEditing={tab.isEditing}
+          onCancelEdit={tab.cancelEditing}
+          onRemove={draft.removePlace}
+          onClear={draft.clearPlaces}
+          onSuggest={tab.suggestRoutes}
+          isSuggesting={routes.isSuggesting}
+        />
       </aside>
 
       <Modal isOpen={tab.filterSheet.isOpen} title="Bộ lọc" onClose={tab.filterSheet.close} containerRef={filterSheetRef}>
@@ -69,7 +97,7 @@ export const PlacesTab = () => {
           Xem {places.totalLabel} địa điểm
         </button>
       </Modal>
-      <RouteSuggestionsModal routes={routes} onShare={tab.shareItinerary} />
+      <RouteSuggestionsModal routes={routes} onSelect={tab.selectSuggestion} />
     </div>
   );
 };
