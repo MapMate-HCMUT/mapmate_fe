@@ -1,8 +1,8 @@
-import { Route, Routes } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
 import { MainLayout } from '../app/MainLayout';
 import { ComingSoonPage } from '../components/ComingSoonPage';
 import { AiPlannerPage } from '../features/ai-planner';
-import { LoginPage, RegisterPage } from '../features/auth';
+import { LoginPage } from '../features/auth';
 import { ExplorePage } from '../features/explore';
 import { ProfilePage, PublicProfilePage } from '../features/gamification';
 import { MapHomePage } from '../features/map';
@@ -15,7 +15,7 @@ const PLACEHOLDER_PAGES = [
 export const AppRoutes = () => (
   <Routes>
     <Route path="login" element={<GuestOnlyRoute><LoginPage /></GuestOnlyRoute>} />
-    <Route path="register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
+    <Route path="register" element={<Navigate to="/login" replace />} />
 
     <Route element={<MainLayout />}>
       <Route index element={<MapHomePage />} />

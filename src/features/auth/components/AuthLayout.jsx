@@ -1,13 +1,14 @@
+import { Sparkles, Trophy, Waves } from 'lucide-react';
 import { Logo } from '../../../components/Logo';
 import { BRAND } from '../../../config/app';
 
 const HIGHLIGHTS = [
-  { emoji: '🤖', text: 'AI gợi ý lịch trình theo túi tiền' },
-  { emoji: '🌊', text: 'Cảnh báo ngập & né đường ngập thời gian thực' },
-  { emoji: '🏆', text: 'Check-in nhận XP, mở khóa huy hiệu' },
+  { icon: Sparkles, text: 'AI gợi ý lịch trình theo túi tiền', bg: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30' },
+  { icon: Waves, text: 'Cảnh báo ngập & né đường ngập thời gian thực', bg: 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30' },
+  { icon: Trophy, text: 'Check-in nhận XP, mở khóa huy hiệu', bg: 'bg-amber-500/20 text-amber-200 border-amber-400/30' },
 ];
 
-// Khung chung cho trang Đăng nhập / Đăng ký: panel thương hiệu (desktop) + form.
+// Khung chung cho trang Đăng nhập: panel thương hiệu (desktop) + form.
 export const AuthLayout = ({ title, subtitle, children, footer }) => (
   <div className="min-h-dvh flex bg-neutral-50">
     <aside className="hidden lg:flex w-[44%] flex-col justify-between p-12 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-800 text-white">
@@ -16,13 +17,18 @@ export const AuthLayout = ({ title, subtitle, children, footer }) => (
       </div>
       <div className="space-y-6">
         <h2 className="text-4xl font-extrabold tracking-tight leading-tight">{BRAND.tagline}</h2>
-        <ul className="space-y-3">
-          {HIGHLIGHTS.map((item) => (
-            <li key={item.text} className="flex items-center gap-3 text-primary-50">
-              <span className="w-9 h-9 rounded-pill bg-white/15 flex items-center justify-center" aria-hidden="true">{item.emoji}</span>
-              {item.text}
-            </li>
-          ))}
+        <ul className="space-y-4">
+          {HIGHLIGHTS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.text} className="flex items-center gap-3.5 text-primary-50 text-sm font-medium">
+                <span className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${item.bg}`} aria-hidden="true">
+                  <Icon className="w-5 h-5" />
+                </span>
+                <span>{item.text}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
       <p className="text-sm text-primary-100">© {new Date().getFullYear()} {BRAND.name} · MLAI Hackathon 2026</p>
