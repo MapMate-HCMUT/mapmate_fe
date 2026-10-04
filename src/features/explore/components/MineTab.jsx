@@ -1,21 +1,29 @@
 import { Bookmark } from 'lucide-react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { LoginPrompt } from '../../../components/LoginPrompt';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
-import { MyItinerariesPanel } from '../../itinerary';
+import { MyItinerariesPanel, useActiveRouteStore } from '../../itinerary';
 import { PinsPanel, useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { useTripDraftStore } from '../stores/tripDraftStore';
 
 // Tab "Của tôi": địa điểm đã ghim + lộ trình đã lưu.
 export const MineTab = () => {
+  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const startEditing = useTripDraftStore((state) => state.startEditing);
   const applyCriteria = useExploreFilterStore((state) => state.applyCriteria);
+  const startTrip = useActiveRouteStore((state) => state.startTrip);
   const openComposer = useSocialStore((state) => state.openComposer);
+
+  const handleStartItinerary = (itinerary) => {
+    startTrip(itinerary);
+    showToast(`Bắt đầu chuyến đi “${itinerary.name}”`);
+    navigate('/'); // Chuyển sang tab Bản đồ
+  };
 
   const handleEditItinerary = (itinerary) => {
     const places = (itinerary.stops || []).map((stop) => {
@@ -59,6 +67,7 @@ export const MineTab = () => {
       <MyItinerariesPanel
         onShare={(itinerary) => openComposer({ type: 'itinerary', itinerary })}
         onEdit={handleEditItinerary}
+        onStart={handleStartItinerary}
       />
     </div>
   );

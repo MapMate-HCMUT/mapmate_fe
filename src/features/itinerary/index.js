@@ -11,3 +11,4 @@ export { useStayAdjust } from './hooks/useStayAdjust';
 export { useCloneItinerary } from './hooks/useCloneItinerary';
 export { useRouteSuggestions } from './hooks/useRouteSuggestions';
 export { useTripPreview } from './hooks/useTripPreview';
+export { useActiveRouteStore } from './stores/activeRouteStore';

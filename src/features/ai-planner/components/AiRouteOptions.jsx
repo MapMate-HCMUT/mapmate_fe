@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { AlertTriangle, Bookmark, Check, Pencil, Sparkles } from 'lucide-react';
+import { AlertTriangle, Bookmark, Check, Navigation, Pencil, Sparkles } from 'lucide-react';
 import { useExploreFilterStore, useTripDraftStore } from '../../explore';
-import { ItineraryTimeline, TripSummary, useStayAdjust } from '../../itinerary';
+import { ItineraryTimeline, TripSummary, useActiveRouteStore, useStayAdjust } from '../../itinerary';
 import { useSaveAiItinerary } from '../hooks/useSaveAiItinerary';
 
 // Các phương án lộ trình (dữ liệu thật từ DB) + ghi chú của AI cho từng phương án; lưu được vào "Của tôi" hoặc sửa ở Khám phá.
@@ -11,11 +11,24 @@ export const AiRouteOptions = ({ options, criteria }) => {
   const setDraftPlaces = useTripDraftStore((state) => state.setPlaces);
   const startEditing = useTripDraftStore((state) => state.startEditing);
   const applyCriteria = useExploreFilterStore((state) => state.applyCriteria);
+  const startTrip = useActiveRouteStore((state) => state.startTrip);
   const [selectedKey, setSelectedKey] = useState(options[0].key);
   const { save, saved, savingKey } = useSaveAiItinerary(criteria);
   const stays = useStayAdjust(criteria);
   // Phương án đang xem — đã áp thời gian ở lại người dùng tự chỉnh ±15′ (nếu có)
   const selected = stays.view(options.find((option) => option.key === selectedKey) ?? options[0]);
+
+  const handleStartTrip = (option) => {
+    const tripToStart = saved[option.key] || {
+      name: option.suggested_name || option.label,
+      vehicle: criteria?.vehicle || 'bike',
+      stops: option.stops,
+      total_distance_km: option.summary?.total_distance_km,
+      total_duration: option.summary?.total_duration_minutes,
+    };
+    startTrip(tripToStart);
+    navigate('/');
+  };
 
   const handleEditInExplore = (option) => {
     const places = (option.stops || []).map((stop) => {
@@ -91,6 +104,14 @@ export const AiRouteOptions = ({ options, criteria }) => {
         <button type="button" onClick={() => stays.reset(selected.key)} className="text-xs font-semibold text-primary-700 hover:underline">Về thời gian gợi ý ban đầu</button>
       )}
       <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={() => handleStartTrip(selected)}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-button bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition"
+        >
+          <Navigation className="w-4 h-4" />
+          <span>Bắt đầu</span>
+        </button>
         <button
           type="button"
           onClick={() => save(selected)}

@@ -1,9 +1,9 @@
-import { Compass } from 'lucide-react';
+import { Compass, Navigation } from 'lucide-react';
 import { useMyItineraries } from '../hooks/useMyItineraries';
 import { ItineraryActionButton, ItineraryCard } from './ItineraryCard';
 
-// Danh sách lộ trình đã lưu của tôi. `onShare(itinerary)` mở khung đăng bài chia sẻ, `onEdit(itinerary)` chuyển sang tab Khám phá để sửa.
-export const MyItinerariesPanel = ({ onShare, onEdit }) => {
+// Danh sách lộ trình đã lưu của tôi. `onStart(itinerary)` chuyển sang tab Bản đồ để bắt đầu, `onShare(itinerary)` mở khung đăng bài chia sẻ, `onEdit(itinerary)` chuyển sang tab Khám phá để sửa.
+export const MyItinerariesPanel = ({ onShare, onEdit, onStart }) => {
   const { itineraries, isLoading, error, remove } = useMyItineraries();
 
   return (
@@ -27,12 +27,17 @@ export const MyItinerariesPanel = ({ onShare, onEdit }) => {
             itinerary={itinerary}
             actions={
               <>
+                {onStart && (
+                  <ItineraryActionButton icon={Navigation} tone="primary" onClick={() => onStart(itinerary)}>
+                    Bắt đầu
+                  </ItineraryActionButton>
+                )}
                 {onEdit && (
                   <ItineraryActionButton icon="edit" tone="neutral" onClick={() => onEdit(itinerary)}>
                     Sửa lộ trình
                   </ItineraryActionButton>
                 )}
-                <ItineraryActionButton icon="share" tone="primary" onClick={() => onShare(itinerary)}>
+                <ItineraryActionButton icon="share" tone="neutral" onClick={() => onShare(itinerary)}>
                   Chia sẻ lên bảng tin
                 </ItineraryActionButton>
                 <ItineraryActionButton icon="close" tone="danger" onClick={() => remove(itinerary)}>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../../../hooks/useToast';
+import { setStoredUserLocation } from '../../map/hooks/useUserLocation';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { DEFAULT_ORIGIN } from '../utils/filterConfig';
 
@@ -17,6 +18,7 @@ export const useExploreOrigin = () => {
     setIsLocating(true);
     return navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        setStoredUserLocation([coords.longitude, coords.latitude]);
         setOrigin({ lat: coords.latitude, lng: coords.longitude, label: 'Vị trí hiện tại của bạn', isDefault: false });
         setIsLocating(false);
         showToast('Đã lấy vị trí của bạn làm điểm xuất phát');
