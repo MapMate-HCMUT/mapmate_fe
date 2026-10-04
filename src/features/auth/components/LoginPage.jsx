@@ -36,7 +36,6 @@ export const LoginPage = () => {
   const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
-  const googleBtnContainerRef = useRef(null);
   const tokenClientRef = useRef(null);
 
   const handleLoginSuccess = useCallback(
@@ -72,7 +71,7 @@ export const LoginPage = () => {
     const initGoogle = () => {
       if (!window.google?.accounts) return;
 
-      // 1. Khởi tạo Google ID Token (One Tap / Sign In with Google)
+      // 1. Khởi tạo Google ID Token (One Tap)
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -83,17 +82,6 @@ export const LoginPage = () => {
           },
           auto_select: false,
         });
-
-        if (googleBtnContainerRef.current) {
-          window.google.accounts.id.renderButton(googleBtnContainerRef.current, {
-            theme: 'outline',
-            size: 'large',
-            width: 340,
-            text: 'continue_with',
-            shape: 'rectangular',
-            logo_alignment: 'left',
-          });
-        }
       } catch (err) {
         console.warn('Lỗi khởi tạo Google ID:', err);
       }
@@ -192,9 +180,6 @@ export const LoginPage = () => {
             <GoogleIcon />
             <span>{isLoading ? 'Đang kết nối Google…' : 'Tiếp tục với Google'}</span>
           </button>
-
-          {/* Vùng render nút Google iframe mặc định (dự phòng) */}
-          <div ref={googleBtnContainerRef} className="flex justify-center empty:hidden" />
 
           <label className="flex items-center gap-2.5 text-xs font-medium text-neutral-700 cursor-pointer select-none pt-1">
             <input
