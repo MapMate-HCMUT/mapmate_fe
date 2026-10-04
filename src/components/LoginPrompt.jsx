@@ -12,12 +12,9 @@ export const LoginPrompt = ({ icon, emoji = '🔐', title, description }) => {
       </div>
       <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
       <p className="mt-1 text-sm text-neutral-500">{description}</p>
-      <div className="mt-5 flex justify-center gap-2">
-        <Link to={`/login?redirect=${redirect}`} className="px-5 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold">
-          Đăng nhập
-        </Link>
-        <Link to={`/register?redirect=${redirect}`} className="px-5 py-2.5 rounded-button bg-primary-100 hover:bg-primary-200 text-primary-700 text-sm font-semibold">
-          Tạo tài khoản
+      <div className="mt-5 flex justify-center">
+        <Link to={`/login?redirect=${redirect}`} className="px-6 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold shadow-xs">
+          Đăng nhập ngay
         </Link>
       </div>
     </div>
