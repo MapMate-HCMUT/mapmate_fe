@@ -3,8 +3,11 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 // Màn hình đầu: giới thiệu + câu mẫu (bấm là gửi). Người dùng gõ gì cũng được, không cần theo mẫu.
 export const AiWelcome = ({ examples, llmEnabled, onPick }) => (
   <div className="mx-auto max-w-xl py-4 sm:py-8 px-2 sm:px-4 text-center">
-    <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-pill bg-primary-100 text-primary-700">
-      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+    <div className="relative mx-auto mb-3 sm:mb-4 w-fit">
+      <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-3xl blur-md opacity-35 animate-pulse" />
+      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 p-0.5 shadow-lg shadow-emerald-500/25 flex items-center justify-center ring-1 ring-white/40">
+        <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-sm" />
+      </div>
     </div>
     <h1 className="mt-2.5 sm:mt-3 text-lg sm:text-xl font-bold text-neutral-900">Hôm nay bạn muốn đi đâu?</h1>
     <p className="mt-1 text-xs sm:text-sm text-neutral-500 max-w-md mx-auto">
