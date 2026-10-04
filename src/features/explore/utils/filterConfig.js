@@ -154,22 +154,32 @@ export const buildTripCriteria = (filters, origin) => ({
 const EXPLORE_VEHICLES = ['bike', 'car', 'walk', 'public', CUSTOM_VEHICLE];
 
 // Ngược của buildTripCriteria: "tiêu chí chuyến đi" (VD do AI Planner hiểu từ câu chat) -> bộ lọc trên giao diện Khám phá.
-export const criteriaToFilters = (criteria, current) => ({
-  ...current,
-  categories: criteria.categories ?? [],
-  tags: criteria.tags ?? [],
-  priceRange: [criteria.price_min ?? PRICE_MIN, criteria.price_max ?? PRICE_MAX],
-  radiusKm: criteria.radius_km ?? current.radiusKm,
-  minRating: criteria.min_rating ?? null,
-  district: criteria.district ?? '',
-  people: criteria.people ?? current.people,
-  vehicle: EXPLORE_VEHICLES.includes(criteria.vehicle) ? criteria.vehicle : current.vehicle,
-  customModes: criteria.transport_modes?.length ? criteria.transport_modes : current.customModes,
-  startTime: criteria.start_time ?? current.startTime,
-  durationHours: criteria.duration_hours ?? current.durationHours,
-  tripBudget: criteria.trip_budget ?? null,
-  openOnly: Boolean(criteria.open_only),
-});
+export const criteriaToFilters = (criteria, current = {}) => {
+  if (!criteria) return current;
+  let district = criteria.district || '';
+  if (!district && criteria.origin?.label?.startsWith('Trung tâm ')) {
+    district = criteria.origin.label.replace(/^Trung tâm\s+/, '').trim();
+  }
+  return {
+    ...current,
+    categories: Array.isArray(criteria.categories) ? criteria.categories : (current.categories ?? []),
+    tags: Array.isArray(criteria.tags) ? criteria.tags : (current.tags ?? []),
+    priceRange: [
+      criteria.price_min != null ? criteria.price_min : PRICE_MIN,
+      criteria.price_max != null ? criteria.price_max : PRICE_MAX,
+    ],
+    radiusKm: criteria.radius_km ?? current.radiusKm ?? 5,
+    minRating: criteria.min_rating ?? null,
+    district,
+    people: criteria.people ?? current.people ?? 2,
+    vehicle: EXPLORE_VEHICLES.includes(criteria.vehicle) ? criteria.vehicle : (current.vehicle ?? 'bike'),
+    customModes: criteria.transport_modes?.length ? criteria.transport_modes : (current.customModes ?? ['bus', 'metro', 'grab_bike']),
+    startTime: criteria.start_time ?? current.startTime ?? getDefaultStartTime(),
+    durationHours: criteria.duration_hours ?? current.durationHours ?? 4,
+    tripBudget: criteria.trip_budget ?? null,
+    openOnly: Boolean(criteria.open_only),
+  };
+};
 
 // Số bộ lọc địa điểm đang bật (hiện trên nút "Bộ lọc" ở mobile)
 export const countActiveFilters = (filters) =>

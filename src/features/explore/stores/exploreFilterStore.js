@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createDefaultFilters, DEFAULT_ORIGIN, migrateSavedFilters } from '../utils/filterConfig';
+import { createDefaultFilters, criteriaToFilters, DEFAULT_ORIGIN, migrateSavedFilters } from '../utils/filterConfig';
 
 const STORAGE_KEY = 'mapmate.exploreFilters.v2'; // v2: thêm phương tiện kết hợp, khoảng giá tới 2.000k
 
@@ -39,4 +39,20 @@ export const useExploreFilterStore = create((set, get) => ({
     set({ filters });
   },
   setOrigin: (origin) => set({ origin }),
+  applyCriteria: (criteria) => {
+    if (!criteria) return;
+    const current = get().filters;
+    const nextFilters = criteriaToFilters(criteria, current);
+    persist(nextFilters);
+    const updates = { filters: nextFilters };
+    if (criteria.origin) {
+      const label = criteria.origin.label ?? (nextFilters.district ? `Trung tâm ${nextFilters.district}` : 'Điểm xuất phát');
+      updates.origin = {
+        ...criteria.origin,
+        label,
+        isDefault: false,
+      };
+    }
+    set(updates);
+  },
 }));

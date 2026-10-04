@@ -5,6 +5,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
 import { MyItinerariesPanel } from '../../itinerary';
 import { PinsPanel, useSocialStore } from '../../social';
+import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { useTripDraftStore } from '../stores/tripDraftStore';
 
 // Tab "Của tôi": địa điểm đã ghim + lộ trình đã lưu.
@@ -13,6 +14,7 @@ export const MineTab = () => {
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const startEditing = useTripDraftStore((state) => state.startEditing);
+  const applyCriteria = useExploreFilterStore((state) => state.applyCriteria);
   const openComposer = useSocialStore((state) => state.openComposer);
 
   const handleEditItinerary = (itinerary) => {
@@ -34,6 +36,16 @@ export const MineTab = () => {
       };
     });
     startEditing(itinerary.id, places, itinerary.name);
+    const criteria = itinerary.criteria || {
+      origin: itinerary.origin,
+      people: itinerary.people,
+      vehicle: itinerary.vehicle,
+      transport_modes: itinerary.transport_modes,
+      start_time: itinerary.start_time,
+    };
+    if (criteria) {
+      applyCriteria(criteria);
+    }
     setSearchParams({}); // Chuyển về tab mặc định: Địa điểm ('places')
     showToast(`Đang chỉnh sửa “${itinerary.name}”`);
   };
