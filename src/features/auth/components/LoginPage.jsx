@@ -3,7 +3,7 @@ import { ShieldCheck } from 'lucide-react';
 import { FormAlert } from '../../../components/form/FormAlert';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../stores/authStore';
-import { googleLoginApi, loginApi, registerApi } from '../api/authApi';
+import { googleLoginApi } from '../api/authApi';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { AuthLayout } from './AuthLayout';
 
@@ -52,60 +52,8 @@ export const LoginPage = () => {
       setIsLoading(true);
       setFormError('');
       try {
-        try {
-          const session = await googleLoginApi(payload);
-          handleLoginSuccess(session);
-          return;
-        } catch (apiErr) {
-          // Nếu server backend chưa deploy endpoint /auth/google (404), tự động chuyển qua đăng ký/đăng nhập tương thích
-          const errText = String(apiErr.message || '');
-          if (payload?.email && (errText.includes('404') || errText.includes('/auth/google') || apiErr.status === 404)) {
-            const fallbackPassword = `Ggl#${payload.email.slice(0, 4)}!2026`;
-            const fallbackUsername = (payload.name || payload.email.split('@')[0])
-              .replace(/[^a-zA-Z0-9_]/g, '')
-              .slice(0, 15) || 'user';
-            try {
-              const regSession = await registerApi({
-                email: payload.email.toLowerCase(),
-                username: fallbackUsername,
-                password: fallbackPassword,
-              });
-              if (regSession?.user && payload.picture) {
-                regSession.user.avatar_url = payload.picture;
-              }
-              handleLoginSuccess(regSession);
-              return;
-            } catch {
-              try {
-                const loginSession = await loginApi({
-                  email: payload.email.toLowerCase(),
-                  password: fallbackPassword,
-                });
-                if (loginSession?.user && payload.picture) {
-                  loginSession.user.avatar_url = payload.picture;
-                }
-                handleLoginSuccess(loginSession);
-                return;
-              } catch {
-                const localSession = {
-                  token: 'mock-google-token-' + Date.now(),
-                  user: {
-                    _id: 'usr_' + Date.now(),
-                    email: payload.email,
-                    username: fallbackUsername,
-                    avatar_url: payload.picture || null,
-                    level: 1,
-                    xp: 25,
-                    stars: 1,
-                  },
-                };
-                handleLoginSuccess(localSession);
-                return;
-              }
-            }
-          }
-          throw apiErr;
-        }
+        const session = await googleLoginApi(payload);
+        handleLoginSuccess(session);
       } catch (err) {
         setFormError(err.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
       } finally {
