@@ -3,8 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
 import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
+import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../../explore';
 import { useActiveRouteStore } from '../../itinerary';
-import { fetchTripRoute, getStopCoordinates } from '../api/goongDirections';
+import { fetchTripRoute, getStopCoordinates, normalizeTripVehicle } from '../api/goongDirections';
 import { useMapStore } from '../stores/mapStore';
 import { enrichAndFilterPlaces } from '../utils/enrichPlaces';
 import { pickMostSevere } from '../utils/floodSeverity';
@@ -17,10 +18,9 @@ import { getStoredUserLocation, useUserLocation } from './useUserLocation';
 // Hook điều phối toàn bộ trang chủ bản đồ: dữ liệu, bộ lọc, lựa chọn, marker, hành động & dẫn đường Goong.
 export const useHomeMap = () => {
   const { containerRef, map, error: mapError } = useMapInstance();
-  const { places, floodAlerts, isLoading } = useMapData();
   const query = useSearchStore((state) => state.query);
   const { category, budgetMax, radiusKm, vehicle, selectedPlaceId, activeFloodId } = useMapStore();
-  const { setCategory, setSelectedPlaceId, setActiveFloodId } = useMapStore();
+  const { setCategory, setSelectedPlaceId, setActiveFloodId, setVehicle: setMapVehicle } = useMapStore();
   const { showToast } = useToast();
   const [isFloodBannerVisible, setIsFloodBannerVisible] = useState(true);
 
@@ -44,10 +44,13 @@ export const useHomeMap = () => {
     [map],
   );
   const { coordinates: userCoordinates, isLocating, locate } = useUserLocation(flyTo);
+  // Địa điểm thật quanh vị trí người dùng (chưa có thì quanh trung tâm), tìm theo từ khoá trên Navbar ở server
+  const { places, floodAlerts, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query);
 
   const visiblePlaces = useMemo(
-    () => enrichAndFilterPlaces(places, { origin: userCoordinates, vehicle, category, query, budgetMax, radiusKm }),
-    [places, userCoordinates, vehicle, category, query, budgetMax, radiusKm],
+    // Từ khoá đã được server lọc (khớp cả món / địa chỉ) => không lọc lại theo tên ở đây
+    () => enrichAndFilterPlaces(places, { origin: userCoordinates, vehicle, category, query: '', budgetMax, radiusKm }),
+    [places, userCoordinates, vehicle, category, budgetMax, radiusKm],
   );
   const selectedPlace = visiblePlaces.find((place) => place.id === selectedPlaceId) ?? null;
   const floodAlert = floodAlerts.find((alert) => alert.id === activeFloodId) ?? pickMostSevere(floodAlerts);
@@ -86,6 +89,26 @@ export const useHomeMap = () => {
       navigatedTripIdRef.current = null;
     }
   }, [isNavigating, activeItinerary, locate]);
+
+  // Đồng bộ phương tiện: đổi ở nút lọc bản đồ (Xe máy / Đi bộ...) khi đang dẫn đường => tính lại đường theo phương tiện mới
+  const tripVehicle = activeItinerary ? normalizeTripVehicle(activeItinerary.vehicle || vehicle) : null;
+  const lastMapVehicleRef = useRef(vehicle);
+  useEffect(() => {
+    if (lastMapVehicleRef.current === vehicle) return;
+    lastMapVehicleRef.current = vehicle;
+    if (isNavigating && normalizeTripVehicle(vehicle) !== tripVehicle) setVehicle(normalizeTripVehicle(vehicle));
+  }, [vehicle, isNavigating, tripVehicle, setVehicle]);
+
+  // Đổi ở cột chỉ đường => cập nhật luôn nút lọc bản đồ (thời gian tới các địa điểm khác cũng theo phương tiện đó)
+  const setTripVehicle = useCallback(
+    (next) => {
+      setVehicle(next);
+      const mapValue = { bike: 'motorbike', taxi: 'car' }[next] ?? next;
+      lastMapVehicleRef.current = mapValue;
+      setMapVehicle(mapValue);
+    },
+    [setVehicle, setMapVehicle],
+  );
 
   const fetchRequestIdRef = useRef(0);
 
@@ -184,9 +207,16 @@ export const useHomeMap = () => {
     return () => map.off('click', clearSelection);
   }, [map, clearSelection]);
 
+  // "Thêm vào lộ trình" => thêm thật vào giỏ chuyến đi DÙNG CHUNG với trang Khám phá
+  const draftPlaces = useTripDraftStore((state) => state.places);
+  const addDraftPlace = useTripDraftStore((state) => state.addPlace);
   const addToItinerary = useCallback(
-    (place) => showToast(`Đã thêm "${place.name}" vào hành trình`),
-    [showToast],
+    (place) => {
+      if (draftPlaces.some((item) => item.id === place.id)) return showToast(`"${place.name}" đã có trong chuyến đi`, 'info');
+      if (!addDraftPlace(place)) return showToast(`Mỗi chuyến đi tối đa ${TRIP_DRAFT_MAX_PLACES} điểm`, 'warning');
+      return showToast(`Đã thêm "${place.name}" vào chuyến đi (${draftPlaces.length + 1}/${TRIP_DRAFT_MAX_PLACES})`);
+    },
+    [draftPlaces, addDraftPlace, showToast],
   );
 
   // Chỉ đường nhanh tới 1 điểm cụ thể bằng Goong Directions API
@@ -230,6 +260,7 @@ export const useHomeMap = () => {
     dismissFloodBanner: () => setIsFloodBannerVisible(false),
     isLocating,
     locate,
+    userCoordinates,
     addToItinerary,
     showDirections,
     // Trạng thái dẫn đường lộ trình từ Khám phá / Của tôi
@@ -240,7 +271,7 @@ export const useHomeMap = () => {
     isLoadingRoute,
     stopTrip,
     selectStop,
-    setVehicle,
+    setVehicle: setTripVehicle,
   };
 };
 

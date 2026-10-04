@@ -1,7 +1,8 @@
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 // Màn hình đầu: giới thiệu + câu mẫu (bấm là gửi). Người dùng gõ gì cũng được, không cần theo mẫu.
-export const AiWelcome = ({ examples, llmEnabled, onPick }) => (
+// `personalized`: gợi ý theo sở thích AI đã ghi nhớ (đứng đầu, đánh dấu ★).
+export const AiWelcome = ({ examples, personalized = [], llmEnabled, onPick }) => (
   <div className="mx-auto max-w-xl py-4 sm:py-8 px-2 sm:px-4 text-center">
     <div className="relative mx-auto mb-3 sm:mb-4 w-fit">
       <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-3xl blur-md opacity-35 animate-pulse" />
@@ -19,14 +20,14 @@ export const AiWelcome = ({ examples, llmEnabled, onPick }) => (
       </p>
     )}
     <ul className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-      {examples.map((example) => (
+      {[...new Set([...personalized, ...examples])].slice(0, Math.max(examples.length, personalized.length)).map((example) => (
         <li key={example}>
           <button
             type="button"
             onClick={() => onPick(example)}
             className="group h-full w-full rounded-card border border-neutral-200 bg-surface px-3 py-2 sm:p-3 text-xs sm:text-sm text-neutral-700 hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-900 transition flex items-center justify-between gap-2 shadow-xs"
           >
-            <span className="line-clamp-2 leading-relaxed">{example}</span>
+            <span className="line-clamp-2 leading-relaxed">{personalized.includes(example) && <span className="text-accent-500" title="Gợi ý theo sở thích của bạn">★ </span>}{example}</span>
             <ArrowRight className="w-3.5 h-3.5 text-neutral-300 group-hover:text-primary-600 shrink-0 transition" />
           </button>
         </li>

@@ -12,3 +12,10 @@ export const sendAiMessageApi = (payload) => apiClient.post('/ai/chat', payload,
 export const getAiSessionsApi = () => apiClient.get('/ai/sessions');
 export const getAiSessionApi = (sessionId) => apiClient.get(`/ai/sessions/${sessionId}`);
 export const deleteAiSessionApi = (sessionId) => apiClient.delete(`/ai/sessions/${sessionId}`);
+
+// Ghi nhớ của AI về người dùng (đã đăng nhập): { enabled, facts, notes[], summary, suggestions[] }
+export const getAiMemoryApi = () => apiClient.get('/ai/memory');
+export const setAiMemoryEnabledApi = (enabled) => apiClient.patch('/ai/memory', { enabled });
+export const clearAiMemoryApi = () => apiClient.delete('/ai/memory');
+export const forgetAiFactApi = (key) => apiClient.delete(`/ai/memory/facts/${key}`);
+export const forgetAiNoteApi = (noteId) => apiClient.delete(`/ai/memory/notes/${noteId}`);

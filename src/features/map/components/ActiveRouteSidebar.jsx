@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import {
   Bike,
+  Bus,
   Car,
+  CarTaxiFront,
   Check,
   ChevronDown,
   ChevronRight,
@@ -10,12 +12,23 @@ import {
   CornerUpRight,
   MapPin,
   MoveRight,
+  Footprints,
   Navigation,
   Share2,
   X,
 } from 'lucide-react';
 import { useToast } from '../../../hooks/useToast';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
+import { normalizeTripVehicle } from '../api/goongDirections';
+
+// Phương tiện khi dẫn đường — đổi là tính lại thời gian từng chặng (đi bộ / xe buýt: ước tính theo tốc độ, Goong không hỗ trợ)
+const ROUTE_VEHICLES = [
+  { value: 'bike', label: 'Xe máy', icon: Bike },
+  { value: 'walk', label: 'Đi bộ', icon: Footprints },
+  { value: 'car', label: 'Ô tô', icon: Car },
+  { value: 'taxi', label: 'Taxi', icon: CarTaxiFront },
+  { value: 'bus', label: 'Buýt', icon: Bus },
+];
 
 // Biểu tượng tương ứng với hành động rẽ đường từ Goong API
 const getManeuverIcon = (maneuver = '') => {
@@ -43,7 +56,7 @@ export const ActiveRouteSidebar = ({
   if (!itinerary) return null;
 
   const stops = itinerary.stops || [];
-  const currentVehicle = itinerary.vehicle || 'bike';
+  const currentVehicle = normalizeTripVehicle(itinerary.vehicle || 'bike');
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href);
@@ -55,45 +68,23 @@ export const ActiveRouteSidebar = ({
       {/* 1. Header chọn phương tiện di chuyển chuẩn Goong Maps */}
       <div className="p-3 bg-white border-b border-neutral-200 space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl">
-            <button
-              type="button"
-              onClick={() => onSetVehicle?.('bike')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                currentVehicle === 'bike'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-              }`}
-            >
-              <Bike className="w-4 h-4" />
-              <span>Xe máy</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSetVehicle?.('car')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                currentVehicle === 'car'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-              }`}
-            >
-              <Car className="w-4 h-4" />
-              <span>Ô tô</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSetVehicle?.('taxi')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                currentVehicle === 'taxi'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-              }`}
-            >
-              <span>🚕</span>
-              <span>Taxi</span>
-            </button>
+          <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-xl" role="radiogroup" aria-label="Phương tiện">
+            {ROUTE_VEHICLES.map(({ value, label, icon: VehicleIcon }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={currentVehicle === value}
+                onClick={() => onSetVehicle?.(value)}
+                title={label}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition ${
+                  currentVehicle === value ? 'bg-primary-600 text-white shadow-xs' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                }`}
+              >
+                <VehicleIcon className="w-4 h-4" />
+                <span>{label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Nút thoát / dừng dẫn đường kiểu Goong */}
@@ -161,6 +152,7 @@ export const ActiveRouteSidebar = ({
               ({isLoadingRoute ? '…' : routeData?.totalDistance || `${itinerary.total_distance_km || 0} km`})
             </span>
           </div>
+          {!isLoadingRoute && routeData?.durationNote && <p className="text-[11px] text-neutral-500">{routeData.durationNote}</p>}
 
           <div className="pt-1 flex items-center justify-between">
             <button

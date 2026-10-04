@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LocateFixed, SendHorizontal } from 'lucide-react';
+import { VoiceButton } from '../../../components/VoiceButton';
 
 // Ô nhập: gõ tự do (Enter gửi, Shift+Enter xuống dòng), kèm điểm xuất phát dùng chung với trang Khám phá.
 export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocating, onLocate }) => {
@@ -32,6 +33,7 @@ export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocatin
             aria-label="Nhập yêu cầu cho MapMate AI"
             className="flex-1 resize-none bg-transparent px-1.5 py-1 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none min-h-[38px] max-h-32"
           />
+          <VoiceButton className="h-9 w-9 shrink-0" onText={(spoken) => setText((current) => (current ? `${current} ${spoken}` : spoken).slice(0, maxLength))} />
           <button
             type="button"
             onClick={submit}

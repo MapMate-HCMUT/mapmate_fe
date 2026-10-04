@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { LoginPrompt } from '../../../components/LoginPrompt';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
-import { MyItinerariesPanel, useActiveRouteStore } from '../../itinerary';
+import { MyItinerariesPanel, stayOverridesOf, useActiveRouteStore } from '../../itinerary';
 import { PinsPanel, useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { useTripDraftStore } from '../stores/tripDraftStore';
@@ -43,7 +43,7 @@ export const MineTab = () => {
         coordinates: stop.coordinates,
       };
     });
-    startEditing(itinerary.id, places, itinerary.name);
+    startEditing(itinerary.id, places, itinerary.name, { stayOverrides: stayOverridesOf(itinerary.stops), keepOrder: true });
     const criteria = itinerary.criteria || {
       origin: itinerary.origin,
       people: itinerary.people,

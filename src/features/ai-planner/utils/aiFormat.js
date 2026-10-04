@@ -54,3 +54,16 @@ export const FACT_SOURCE_LABELS = { mapmate: 'MapMate', wikipedia: 'Wikipedia', 
 export const PLACE_TOPIC_LABELS = {
   hours: 'giờ mở cửa', price: 'giá', address: 'địa chỉ', contact: 'liên hệ', about: 'giới thiệu', rating: 'đánh giá', weather: 'thời tiết', directions: 'đường đi', other: 'câu hỏi khác',
 };
+
+// Ghi nhớ của AI -> các dòng ngắn để hiển thị (bỏ mục trống)
+const MEMORY_VEHICLES = { bike: 'Xe máy', car: 'Ô tô', walk: 'Đi bộ', public: 'Xe buýt / metro' };
+export const describeMemoryFacts = (facts = {}) =>
+  [
+    { key: 'diet', label: 'Chế độ ăn', value: facts.diet === 'chay' ? 'Ăn chay' : facts.diet },
+    { key: 'vehicle', label: 'Phương tiện', value: MEMORY_VEHICLES[facts.vehicle] ?? facts.vehicle },
+    { key: 'people', label: 'Số người', value: facts.people ? `${facts.people} người` : null },
+    { key: 'budget_per_person', label: 'Ngân sách', value: facts.budget_per_person ? `${formatK(facts.budget_per_person)}/người` : null },
+    { key: 'favorite_areas', label: 'Hay đi', value: facts.favorite_areas?.join(', ') },
+    { key: 'favorite_foods', label: 'Món thích', value: facts.favorite_foods?.join(', ') },
+    { key: 'likes', label: 'Phong cách', value: facts.likes?.map((tag) => TAG_LABELS[tag] ?? tag).join(', ') },
+  ].filter((fact) => fact.value);

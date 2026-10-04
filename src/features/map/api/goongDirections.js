@@ -121,11 +121,62 @@ export const stripHtml = (html) => {
   return html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
 };
 
-// Gọi Goong Directions API giữa 2 điểm
+// Phương tiện trong app -> loại xe gửi Goong + cách tính thời gian.
+// Goong CHỈ có car / bike / taxi / truck (không có đi bộ, xe buýt) => đi bộ / xe buýt vẫn lấy đường + quãng đường từ Goong
+// nhưng tự tính thời gian theo tốc độ (cùng thông số với backend: constants/transport.js), không thì đổi phương tiện thời gian y nguyên.
+export const TRIP_VEHICLES = {
+  bike: { goong: 'bike' },
+  car: { goong: 'car' },
+  taxi: { goong: 'taxi' },
+  walk: { goong: 'bike', speedKmh: 4.5, note: 'Goong chưa hỗ trợ đi bộ — thời gian ước tính theo tốc độ đi bộ 4,5 km/h' },
+  bus: { goong: 'car', speedKmh: 15, extraMinutes: 13, note: 'Thời gian xe buýt ước tính (15 km/h + chờ xe, đi bộ ra trạm)' },
+};
+// Tên phương tiện ở các nơi khác trong app (bộ lọc bản đồ dùng "motorbike", lộ trình lưu dùng "public"...)
+const VEHICLE_ALIASES = { motorbike: 'bike', grab_bike: 'bike', grab_car: 'taxi', public: 'bus', metro: 'bus', custom: 'bike' };
+export const normalizeTripVehicle = (vehicle) => (TRIP_VEHICLES[vehicle] ? vehicle : VEHICLE_ALIASES[vehicle] ?? 'bike');
+
+const SECONDS_PER_HOUR = 3600;
+const METERS_PER_KM = 1000;
+const SECONDS_PER_MINUTE = 60;
+const minutesText = (seconds) => `${Math.max(1, Math.round(seconds / SECONDS_PER_MINUTE))} phút`;
+const secondsAtSpeed = (meters, speedKmh) => (meters / METERS_PER_KM / speedKmh) * SECONDS_PER_HOUR;
+
+// Đổi thời gian của 1 chặng Goong sang phương tiện không có trên Goong (đi bộ, xe buýt)
+const applyVehicleTiming = (leg, vehicle) => {
+  const mode = TRIP_VEHICLES[vehicle];
+  if (!mode.speedKmh) return leg;
+  const seconds = secondsAtSpeed(leg.distance.value || 0, mode.speedKmh) + (mode.extraMinutes ?? 0) * SECONDS_PER_MINUTE;
+  return {
+    ...leg,
+    duration: { text: minutesText(seconds), value: Math.round(seconds) },
+    steps: leg.steps.map((step) => ({ ...step, durationText: minutesText(secondsAtSpeed(step.distance?.value || 0, mode.speedKmh)) })),
+  };
+};
+
+// Cache đường đi 10 phút theo (điểm đi, điểm đến, loại xe Goong): đổi xe máy <-> đi bộ dùng lại đường cũ, không gọi Goong lại
+// (Goong chặn khi gọi dồn ~8 lượt liên tiếp)
+const ROUTE_CACHE_TTL_MS = 10 * 60 * 1000;
+const ROUTE_CACHE_MAX = 100;
+const routeCache = new Map();
+const COORD_DECIMALS = 5;
+const cacheKey = (from, to, goongVehicle) => [...from, ...to].map((value) => Number(value).toFixed(COORD_DECIMALS)).join(',') + `|${goongVehicle}`;
+
+// Gọi Goong Directions API giữa 2 điểm (vehicle: bike | car | taxi | walk | bus — xem TRIP_VEHICLES)
 export const fetchLegDirections = async (originCoord, destCoord, vehicle = 'bike') => {
+  const tripVehicle = normalizeTripVehicle(vehicle);
+  const goongVehicle = TRIP_VEHICLES[tripVehicle].goong;
+  const key = cacheKey(originCoord, destCoord, goongVehicle);
+  const cached = routeCache.get(key);
+  if (cached && Date.now() - cached.at < ROUTE_CACHE_TTL_MS) return { ...applyVehicleTiming(cached.leg, tripVehicle), fromCache: true };
+  const leg = await requestLegDirections(originCoord, destCoord, goongVehicle);
+  if (routeCache.size >= ROUTE_CACHE_MAX) routeCache.delete(routeCache.keys().next().value);
+  routeCache.set(key, { leg, at: Date.now() });
+  return applyVehicleTiming(leg, tripVehicle);
+};
+
+const requestLegDirections = async (originCoord, destCoord, goongVehicle) => {
   const [origLng, origLat] = originCoord;
   const [destLng, destLat] = destCoord;
-  const goongVehicle = vehicle === 'car' ? 'car' : vehicle === 'taxi' ? 'taxi' : 'bike';
 
   const url = `https://rsapi.goong.io/Direction?origin=${origLat},${origLng}&destination=${destLat},${destLng}&vehicle=${goongVehicle}&api_key=${GOONG_API_KEY}`;
   const response = await axios.get(url, { timeout: 12000 });
@@ -204,6 +255,8 @@ export const findSpaciousRoutePoint = (coordinates, waypoints) => {
   return bestPoint;
 };
 
+const GOONG_CALL_GAP_MS = 150;
+
 // Lấy toàn bộ lộ trình cho chuyến đi (User Location -> Stop 1 -> Stop 2 -> ... -> Stop N)
 export const fetchTripRoute = async (userLocation, stops, vehicle = 'bike', places = []) => {
   if (!stops || stops.length === 0) return null;
@@ -247,6 +300,8 @@ export const fetchTripRoute = async (userLocation, stops, vehicle = 'bike', plac
     const to = waypoints[i + 1];
     try {
       const legData = await fetchLegDirections(from.coordinates, to.coordinates, vehicle);
+      // Giãn cách các lượt gọi Goong thật (không tính lượt lấy từ cache) để không bị chặn vì gọi dồn
+      if (!legData.fromCache && i < waypoints.length - 2) await new Promise((resolve) => setTimeout(resolve, GOONG_CALL_GAP_MS));
       legs.push({
         from,
         to,
@@ -288,5 +343,7 @@ export const fetchTripRoute = async (userLocation, stops, vehicle = 'bike', plac
     waypoints,
     midpoint,
     primaryRoad: legs[0]?.summary || 'Tuyến đường nhanh nhất',
+    vehicle: normalizeTripVehicle(vehicle),
+    durationNote: TRIP_VEHICLES[normalizeTripVehicle(vehicle)].note ?? null, // thời gian là ước tính (Goong không hỗ trợ phương tiện này)
   };
 };

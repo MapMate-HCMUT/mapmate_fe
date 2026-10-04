@@ -6,7 +6,7 @@ export { TripSummary } from './components/TripSummary';
 export { createItineraryApi, getMyItinerariesApi, updateItineraryApi } from './api/itineraryApi';
 export { ItineraryTimeline } from './components/ItineraryTimeline';
 export { useItineraryStore } from './stores/itineraryStore';
-export { getVehicleLabel, stayOverridesOf } from './utils/itineraryFormat';
+export { getVehicleLabel, optionToTrip, stayOverridesOf, stopsToPlaces } from './utils/itineraryFormat';
 export { useStayAdjust } from './hooks/useStayAdjust';
 export { useCloneItinerary } from './hooks/useCloneItinerary';
 export { useRouteSuggestions } from './hooks/useRouteSuggestions';

@@ -1,3 +1,4 @@
+import { Map as MapIcon } from 'lucide-react';
 import { Modal } from '../../../components/Modal';
 import { getVehicleLabel } from '../utils/itineraryFormat';
 import { ItineraryTimeline } from './ItineraryTimeline';
@@ -13,8 +14,9 @@ const WARNINGS = [
 ];
 const warningText = (warning, summary) => (typeof warning.text === 'function' ? warning.text(summary) : warning.text);
 
-// Hộp thoại so sánh các lộ trình được gợi ý. Người dùng xem, có thể chỉnh thời gian ở lại, rồi bấm "Chọn lộ trình này" để đưa ra ngoài giỏ chuyến đi chỉnh sửa và lưu.
-export const RouteSuggestionsModal = ({ routes, onSelect }) => {
+// Hộp thoại so sánh các lộ trình được gợi ý. Người dùng xem, có thể chỉnh thời gian ở lại, rồi bấm "Chọn lộ trình này" để đưa ra ngoài giỏ chuyến đi chỉnh sửa và lưu,
+// hoặc "Xem trên bản đồ" (onShowOnMap) để hiện lộ trình + chỉ đường ngay trên bản đồ trang chủ.
+export const RouteSuggestionsModal = ({ routes, onSelect, onShowOnMap }) => {
   const { modal, options, criteria, selected } = routes;
   if (!selected) return null;
   const vehicle = getVehicleLabel(criteria.vehicle);
@@ -62,6 +64,16 @@ export const RouteSuggestionsModal = ({ routes, onSelect }) => {
             >
               Đóng
             </button>
+            {onShowOnMap && (
+              <button
+                type="button"
+                onClick={() => onShowOnMap(selected)}
+                className="px-4 py-2.5 rounded-button bg-primary-100 hover:bg-primary-200 text-primary-700 text-sm font-semibold transition flex items-center gap-1.5"
+              >
+                <MapIcon className="w-4 h-4" />
+                <span>Xem trên bản đồ</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onSelect?.(selected)}

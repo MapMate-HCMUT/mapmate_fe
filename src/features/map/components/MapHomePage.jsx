@@ -1,10 +1,14 @@
+import { RouteSuggestionsModal } from '../../itinerary';
+import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
 import { useHomeMap } from '../hooks/useHomeMap';
+import { useMapTripPanel } from '../hooks/useMapTripPanel';
 import { useQuickFilters } from '../hooks/useQuickFilters';
 import { ActiveRouteBanner } from './ActiveRouteBanner';
 import { ActiveRouteSidebar } from './ActiveRouteSidebar';
 import { CategoryChips } from './CategoryChips';
 import { FloodAlertBanner } from './FloodAlertBanner';
 import { MapQuickActions } from './MapQuickActions';
+import { MapTripPanel } from './MapTripPanel';
 import { MapProviderBadge, MapStatusOverlay } from './MapStatusOverlay';
 import { PlaceDetailCard } from './PlaceDetailCard';
 import { TrendingCarousel } from './TrendingCarousel';
@@ -14,6 +18,7 @@ import { TrendingSidebar } from './TrendingSidebar';
 export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
   const quickFilters = useQuickFilters();
+  const tripPanel = useMapTripPanel(home.userCoordinates);
   const vehicleEmoji = home.vehicleInfo.emoji;
   const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
 
@@ -85,6 +90,13 @@ export const MapHomePage = () => {
             </div>
           )}
 
+          {/* Giỏ chuyến đi (chung với Khám phá): gợi ý lộ trình rồi hiện thẳng lên bản đồ */}
+          {!isNavigating && (
+            <div className="absolute z-20 top-20 left-3 w-64 lg:top-auto lg:bottom-4 lg:left-4 lg:w-72">
+              <MapTripPanel panel={tripPanel} maxPlaces={TRIP_DRAFT_MAX_PLACES} />
+            </div>
+          )}
+
           <MapQuickActions
             filters={quickFilters.filters}
             openKey={quickFilters.openKey}
@@ -111,6 +123,7 @@ export const MapHomePage = () => {
           ) : null}
         </div>
       </section>
+      <RouteSuggestionsModal routes={tripPanel.routes} onSelect={tripPanel.selectSuggestion} onShowOnMap={tripPanel.showOnMap} />
     </div>
   );
 };

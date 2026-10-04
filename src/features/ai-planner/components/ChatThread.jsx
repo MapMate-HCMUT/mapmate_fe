@@ -6,7 +6,7 @@ import { AssistantMessage } from './AssistantMessage';
 const THINKING_STEPS = 'Đang hiểu yêu cầu → tìm địa điểm → lên lộ trình → viết tư vấn…';
 
 // Luồng hội thoại; tự cuộn xuống tin mới nhất.
-export const ChatThread = ({ messages, isSending, onSend, examples, llmEnabled }) => {
+export const ChatThread = ({ messages, isSending, onSend, examples, personalized = [], llmEnabled }) => {
   const endRef = useRef(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -15,7 +15,7 @@ export const ChatThread = ({ messages, isSending, onSend, examples, llmEnabled }
   return (
     <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 lg:px-8">
       {messages.length === 0 ? (
-        <AiWelcome examples={examples} llmEnabled={llmEnabled} onPick={onSend} />
+        <AiWelcome examples={examples} personalized={personalized} llmEnabled={llmEnabled} onPick={onSend} />
       ) : (
         <ol className="mx-auto max-w-3xl space-y-5" aria-live="polite">
           {messages.map((message) => (

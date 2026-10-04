@@ -60,34 +60,58 @@ const persistEditingId = (id) => {
   }
 };
 
+// Lộ trình chọn từ gợi ý (đã chỉnh ±15′): giữ thời gian ở lại từng điểm + đúng thứ tự => "Dự kiến" và khi lưu khớp với lúc chọn
+const STORAGE_PLAN_KEY = 'mapmate.tripDraftPlan';
+const EMPTY_PLAN = { stayOverrides: {}, keepOrder: false };
+const loadSavedPlan = () => {
+  try {
+    return { ...EMPTY_PLAN, ...JSON.parse(window.sessionStorage.getItem(STORAGE_PLAN_KEY)) };
+  } catch {
+    return EMPTY_PLAN;
+  }
+};
+const persistPlan = (plan) => {
+  try {
+    window.sessionStorage.setItem(STORAGE_PLAN_KEY, JSON.stringify(plan));
+  } catch {
+    // bỏ qua
+  }
+};
+const toPlan = ({ stayOverrides = {}, keepOrder = false } = {}) => ({ stayOverrides, keepOrder });
+
 // "Giỏ" địa điểm người dùng tự chọn cho chuyến đi sắp lên lộ trình (giữ trong phiên làm việc).
+// stayOverrides { placeId: phút } + keepOrder: có khi nạp từ 1 phương án gợi ý — thêm điểm mới vẫn giữ, bỏ điểm thì bỏ phần của điểm đó.
 export const useTripDraftStore = create((set, get) => ({
   places: loadSaved(),
   tripName: loadSavedName(),
   editingItineraryId: loadSavedEditingId(),
+  ...loadSavedPlan(),
   setTripName: (tripName) => {
     persistName(tripName);
     set({ tripName });
   },
-  setPlaces: (places, name) => {
+  setPlaces: (places, name, plan) => {
     const next = (places || []).slice(0, TRIP_DRAFT_MAX_PLACES);
     persist(next);
-    const updates = { places: next };
+    persistPlan(toPlan(plan));
+    const updates = { places: next, ...toPlan(plan) };
     if (typeof name === 'string') {
       persistName(name);
       updates.tripName = name;
     }
     set(updates);
   },
-  startEditing: (itineraryId, places, name) => {
+  startEditing: (itineraryId, places, name, plan) => {
     const next = (places || []).slice(0, TRIP_DRAFT_MAX_PLACES);
     persist(next);
     persistName(name || '');
     persistEditingId(itineraryId);
+    persistPlan(toPlan(plan));
     set({
       places: next,
       tripName: name || '',
       editingItineraryId: itineraryId,
+      ...toPlan(plan),
     });
   },
   cancelEditing: () => {
@@ -104,13 +128,16 @@ export const useTripDraftStore = create((set, get) => ({
   },
   removePlace: (placeId) => {
     const next = get().places.filter((place) => place.id !== placeId);
+    const stayOverrides = Object.fromEntries(Object.entries(get().stayOverrides).filter(([id]) => id !== String(placeId)));
     persist(next);
-    set({ places: next });
+    persistPlan({ stayOverrides, keepOrder: get().keepOrder });
+    set({ places: next, stayOverrides });
   },
   clearPlaces: () => {
     persist([]);
     persistName('');
     persistEditingId(null);
-    set({ places: [], tripName: '', editingItineraryId: null });
+    persistPlan(EMPTY_PLAN);
+    set({ places: [], tripName: '', editingItineraryId: null, ...EMPTY_PLAN });
   },
 }));

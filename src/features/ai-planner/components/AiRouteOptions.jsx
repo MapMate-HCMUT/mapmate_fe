@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { AlertTriangle, Bookmark, Check, Navigation, Pencil, Sparkles } from 'lucide-react';
 import { useExploreFilterStore, useTripDraftStore } from '../../explore';
-import { ItineraryTimeline, TripSummary, useActiveRouteStore, useStayAdjust } from '../../itinerary';
+import { ItineraryTimeline, optionToTrip, stayOverridesOf, stopsToPlaces, TripSummary, useActiveRouteStore, useStayAdjust } from '../../itinerary';
 import { useSaveAiItinerary } from '../hooks/useSaveAiItinerary';
 
 // Các phương án lộ trình (dữ liệu thật từ DB) + ghi chú của AI cho từng phương án; lưu được vào "Của tôi" hoặc sửa ở Khám phá.
@@ -19,40 +19,20 @@ export const AiRouteOptions = ({ options, criteria }) => {
   const selected = stays.view(options.find((option) => option.key === selectedKey) ?? options[0]);
 
   const handleStartTrip = (option) => {
-    const tripToStart = saved[option.key] || {
-      name: option.suggested_name || option.label,
-      vehicle: criteria?.vehicle || 'bike',
-      stops: option.stops,
-      total_distance_km: option.summary?.total_distance_km,
-      total_duration: option.summary?.total_duration_minutes,
-    };
+    const tripToStart = saved[option.key] || optionToTrip(option, criteria);
     startTrip(tripToStart);
     navigate('/');
   };
 
   const handleEditInExplore = (option) => {
-    const places = (option.stops || []).map((stop) => {
-      if (stop.place) {
-        return {
-          ...stop.place,
-          id: stop.place.id || stop.place_id,
-          name: stop.place.name || stop.place_name,
-          category: stop.place.category || stop.category,
-        };
-      }
-      return {
-        id: stop.place_id,
-        name: stop.place_name,
-        category: stop.category,
-        address: stop.address,
-        coordinates: stop.coordinates,
-      };
-    });
+    const places = stopsToPlaces(option.stops);
     const savedItinerary = saved[option.key];
+    // Giữ đúng thứ tự + thời gian ở lại đang thấy (kể cả đã chỉnh ±15′)
+    const plan = { stayOverrides: stayOverridesOf(option.stops), keepOrder: true };
     if (savedItinerary?.id) {
-      startEditing(savedItinerary.id, places, option.suggested_name || option.label);
+      startEditing(savedItinerary.id, places, option.suggested_name || option.label, plan);
     } else {
-      setDraftPlaces(places, option.suggested_name || option.label);
+      setDraftPlaces(places, option.suggested_name || option.label, plan);
     }
     const effectiveCriteria = criteria || savedItinerary?.criteria;
     if (effectiveCriteria) {
