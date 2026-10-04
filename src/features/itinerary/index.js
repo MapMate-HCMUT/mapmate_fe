@@ -3,7 +3,11 @@ export { ItineraryActionButton, ItineraryCard } from './components/ItineraryCard
 export { MyItinerariesPanel } from './components/MyItinerariesPanel';
 export { RouteSuggestionsModal } from './components/RouteSuggestionsModal';
 export { TripSummary } from './components/TripSummary';
-export { getMyItinerariesApi } from './api/itineraryApi';
+export { createItineraryApi, getMyItinerariesApi } from './api/itineraryApi';
+export { ItineraryTimeline } from './components/ItineraryTimeline';
+export { useItineraryStore } from './stores/itineraryStore';
+export { getVehicleLabel, stayOverridesOf } from './utils/itineraryFormat';
+export { useStayAdjust } from './hooks/useStayAdjust';
 export { useCloneItinerary } from './hooks/useCloneItinerary';
 export { useRouteSuggestions } from './hooks/useRouteSuggestions';
 export { useTripPreview } from './hooks/useTripPreview';

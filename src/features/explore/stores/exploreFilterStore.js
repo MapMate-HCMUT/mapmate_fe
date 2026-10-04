@@ -29,6 +29,10 @@ export const useExploreFilterStore = create((set, get) => ({
     persist(filters);
     set({ filters });
   },
+  replaceFilters: (filters) => {
+    persist(filters);
+    set({ filters });
+  },
   resetFilters: () => {
     const filters = createDefaultFilters();
     persist(filters);

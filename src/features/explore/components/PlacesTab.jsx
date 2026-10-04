@@ -4,6 +4,7 @@ import { usePlacesTab } from '../hooks/usePlacesTab';
 import { DataAttribution } from './DataAttribution';
 import { FilterPanel } from './FilterPanel';
 import { PlaceResultList } from './PlaceResultList';
+import { RelaxedNotice } from './RelaxedNotice';
 import { ResultToolbar } from './ResultToolbar';
 import { TripDraftPanel } from './TripDraftPanel';
 
@@ -41,6 +42,7 @@ export const PlacesTab = () => {
           activeCount={tab.activeFilterCount}
           onOpenFilters={tab.filterSheet.open}
         />
+        {places.relaxed && !places.isLoading && <RelaxedNotice relaxed={places.relaxed} onApply={tab.applyRelaxed} />}
         <div className="xl:hidden mb-3">
           <TripDraftPanel places={draft.places} preview={tab.preview} onRemove={draft.removePlace} onClear={draft.clearPlaces} onSuggest={tab.suggestRoutes} isSuggesting={routes.isSuggesting} />
         </div>

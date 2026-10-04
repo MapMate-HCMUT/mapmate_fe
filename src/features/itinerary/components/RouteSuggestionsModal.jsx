@@ -49,7 +49,7 @@ export const RouteSuggestionsModal = ({ routes, onShare }) => {
           </ul>
         )}
 
-        <ItineraryTimeline stops={selected.stops} />
+        <ItineraryTimeline stops={selected.stops} onAdjustStay={savedItinerary ? undefined : routes.adjustStay} isAdjusting={routes.isAdjusting} />
 
         <div className="pt-4 border-t border-neutral-100 space-y-3">
           {savedItinerary ? (

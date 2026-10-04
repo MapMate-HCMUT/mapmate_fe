@@ -108,6 +108,27 @@ export const buildNearbyParams = (filters, origin, keyword, page) => ({
   limit: PAGE_SIZE,
 });
 
+// Server tự nới bộ lọc khi không có kết quả (auto_relax) => trả { keys, labels, radius_km? }.
+// relaxParams: tham số đã nới (để "Xem thêm" lấy đúng trang kế); relaxFilters: bỏ hẳn các bộ lọc đó trong bảng bộ lọc.
+export const relaxParams = (params, relaxed) => {
+  const next = { ...params };
+  relaxed.keys.forEach((key) => delete next[key]);
+  return relaxed.radius_km ? { ...next, radius_km: relaxed.radius_km } : next;
+};
+
+const RELAX_TO_FILTERS = {
+  tags: () => ({ tags: [] }),
+  min_rating: () => ({ minRating: null }),
+  open_at: () => ({ openOnly: false }),
+  price_min: () => ({ priceRange: [PRICE_MIN, PRICE_MAX] }),
+  price_max: () => ({ priceRange: [PRICE_MIN, PRICE_MAX] }),
+  district: () => ({ district: '' }),
+  categories: () => ({ categories: [] }),
+  radius_km: (relaxed) => ({ radiusKm: relaxed.radius_km }),
+};
+export const relaxFilters = (filters, relaxed) =>
+  relaxed.keys.reduce((next, key) => ({ ...next, ...(RELAX_TO_FILTERS[key]?.(relaxed) ?? {}) }), filters);
+
 /**
  * Bộ lọc -> "tiêu chí chuyến đi" gửi cho POST /api/itineraries/suggest và lưu kèm lộ trình.
  * Đây là dữ liệu đầu vào cho việc lên nhiều lộ trình (và cho AI Planner sau này).
@@ -128,6 +149,26 @@ export const buildTripCriteria = (filters, origin) => ({
   duration_hours: filters.durationHours,
   open_only: filters.openOnly,
   district: filters.district || null,
+});
+
+const EXPLORE_VEHICLES = ['bike', 'car', 'walk', 'public', CUSTOM_VEHICLE];
+
+// Ngược của buildTripCriteria: "tiêu chí chuyến đi" (VD do AI Planner hiểu từ câu chat) -> bộ lọc trên giao diện Khám phá.
+export const criteriaToFilters = (criteria, current) => ({
+  ...current,
+  categories: criteria.categories ?? [],
+  tags: criteria.tags ?? [],
+  priceRange: [criteria.price_min ?? PRICE_MIN, criteria.price_max ?? PRICE_MAX],
+  radiusKm: criteria.radius_km ?? current.radiusKm,
+  minRating: criteria.min_rating ?? null,
+  district: criteria.district ?? '',
+  people: criteria.people ?? current.people,
+  vehicle: EXPLORE_VEHICLES.includes(criteria.vehicle) ? criteria.vehicle : current.vehicle,
+  customModes: criteria.transport_modes?.length ? criteria.transport_modes : current.customModes,
+  startTime: criteria.start_time ?? current.startTime,
+  durationHours: criteria.duration_hours ?? current.durationHours,
+  tripBudget: criteria.trip_budget ?? null,
+  openOnly: Boolean(criteria.open_only),
 });
 
 // Số bộ lọc địa điểm đang bật (hiện trên nút "Bộ lọc" ở mobile)

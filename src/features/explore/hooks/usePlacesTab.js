@@ -6,14 +6,14 @@ import { useRouteSuggestions, useTripPreview } from '../../itinerary';
 import { useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../stores/tripDraftStore';
-import { buildTripCriteria, countActiveFilters } from '../utils/filterConfig';
+import { buildTripCriteria, countActiveFilters, relaxFilters } from '../utils/filterConfig';
 import { useExploreOrigin } from './useExploreOrigin';
 import { useExplorePlaces } from './useExplorePlaces';
 import { useFilterOptions } from './useFilterOptions';
 
 // Gom logic tab "Địa điểm": bộ lọc → kết quả → giỏ chuyến đi → gợi ý lộ trình → chia sẻ.
 export const usePlacesTab = () => {
-  const { filters, setFilter, resetFilters } = useExploreFilterStore();
+  const { filters, setFilter, resetFilters, replaceFilters } = useExploreFilterStore();
   const options = useFilterOptions();
   const places = useExplorePlaces();
   const origin = useExploreOrigin();
@@ -39,6 +39,8 @@ export const usePlacesTab = () => {
 
   return {
     filters, options, setFilter, resetFilters,
+    // Bỏ hẳn các bộ lọc server đã tạm nới (bảng bộ lọc khớp với kết quả đang thấy)
+    applyRelaxed: () => places.relaxed && replaceFilters(relaxFilters(filters, places.relaxed)),
     activeFilterCount: countActiveFilters(filters),
     origin, places, draft, draftIds, tagLabels, toggleDraft, preview,
     filterSheet, filterSheetRef,
