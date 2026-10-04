@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import { Modal } from '../../../components/Modal';
 import { getVehicleLabel } from '../utils/itineraryFormat';
 import { ItineraryTimeline } from './ItineraryTimeline';
@@ -14,9 +13,9 @@ const WARNINGS = [
 ];
 const warningText = (warning, summary) => (typeof warning.text === 'function' ? warning.text(summary) : warning.text);
 
-// Hộp thoại so sánh các lộ trình được gợi ý, đặt tên và lưu. `onShare(itinerary)` mở khung đăng bài.
-export const RouteSuggestionsModal = ({ routes, onShare }) => {
-  const { modal, options, criteria, selected, selectedName, savedItinerary, isSaving, isAuthenticated } = routes;
+// Hộp thoại so sánh các lộ trình được gợi ý. Người dùng xem, có thể chỉnh thời gian ở lại, rồi bấm "Chọn lộ trình này" để đưa ra ngoài giỏ chuyến đi chỉnh sửa và lưu.
+export const RouteSuggestionsModal = ({ routes, onSelect }) => {
+  const { modal, options, criteria, selected } = routes;
   if (!selected) return null;
   const vehicle = getVehicleLabel(criteria.vehicle);
   const { summary } = selected;
@@ -49,35 +48,29 @@ export const RouteSuggestionsModal = ({ routes, onShare }) => {
           </ul>
         )}
 
-        <ItineraryTimeline stops={selected.stops} onAdjustStay={savedItinerary ? undefined : routes.adjustStay} isAdjusting={routes.isAdjusting} />
+        <ItineraryTimeline stops={selected.stops} onAdjustStay={routes.adjustStay} isAdjusting={routes.isAdjusting} />
 
-        <div className="pt-4 border-t border-neutral-100 space-y-3">
-          {savedItinerary ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="flex-1 text-sm font-semibold text-success-700">✓ Đã lưu “{savedItinerary.name}”</p>
-              <button type="button" onClick={() => onShare(savedItinerary)} className="px-4 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold">
-                Chia sẻ lên bảng tin
-              </button>
-            </div>
-          ) : isAuthenticated ? (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                value={selectedName}
-                onChange={(event) => routes.renameSelected(event.target.value)}
-                maxLength={80}
-                aria-label="Tên lộ trình"
-                className="flex-1 py-2.5 px-3 bg-surface border border-neutral-300 rounded-input text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
-              />
-              <button type="button" onClick={routes.saveSelected} disabled={isSaving} className="px-5 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold disabled:opacity-70">
-                {isSaving ? 'Đang lưu…' : 'Lưu lộ trình này'}
-              </button>
-            </div>
-          ) : (
-            <p className="text-sm text-neutral-600">
-              <Link to={`/login?redirect=${encodeURIComponent('/explore')}`} className="font-semibold text-primary-700 hover:underline">Đăng nhập</Link> để lưu và chia sẻ lộ trình này.
-            </p>
-          )}
+        <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-neutral-500">
+            Bấm <b>Chọn lộ trình này</b> để nạp vào danh sách Chuyến đi, tự do thêm/bớt điểm trước khi lưu.
+          </p>
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+            <button
+              type="button"
+              onClick={modal.close}
+              className="px-4 py-2.5 rounded-button border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-sm font-semibold transition"
+            >
+              Đóng
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelect?.(selected)}
+              className="px-5 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold shadow-card transition flex items-center gap-1.5"
+            >
+              <span>Chọn lộ trình này</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
       </div>
     </Modal>

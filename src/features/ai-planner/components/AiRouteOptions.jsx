@@ -1,15 +1,47 @@
 import { useState } from 'react';
-import { Bookmark, Check, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Bookmark, Check, Pencil, Sparkles } from 'lucide-react';
+import { useTripDraftStore } from '../../explore';
 import { ItineraryTimeline, TripSummary, useStayAdjust } from '../../itinerary';
 import { useSaveAiItinerary } from '../hooks/useSaveAiItinerary';
 
-// Các phương án lộ trình (dữ liệu thật từ DB) + ghi chú của AI cho từng phương án; lưu được vào "Của tôi".
+// Các phương án lộ trình (dữ liệu thật từ DB) + ghi chú của AI cho từng phương án; lưu được vào "Của tôi" hoặc sửa ở Khám phá.
 export const AiRouteOptions = ({ options, criteria }) => {
+  const navigate = useNavigate();
+  const setDraftPlaces = useTripDraftStore((state) => state.setPlaces);
+  const startEditing = useTripDraftStore((state) => state.startEditing);
   const [selectedKey, setSelectedKey] = useState(options[0].key);
   const { save, saved, savingKey } = useSaveAiItinerary(criteria);
   const stays = useStayAdjust(criteria);
   // Phương án đang xem — đã áp thời gian ở lại người dùng tự chỉnh ±15′ (nếu có)
   const selected = stays.view(options.find((option) => option.key === selectedKey) ?? options[0]);
+
+  const handleEditInExplore = (option) => {
+    const places = (option.stops || []).map((stop) => {
+      if (stop.place) {
+        return {
+          ...stop.place,
+          id: stop.place.id || stop.place_id,
+          name: stop.place.name || stop.place_name,
+          category: stop.place.category || stop.category,
+        };
+      }
+      return {
+        id: stop.place_id,
+        name: stop.place_name,
+        category: stop.category,
+        address: stop.address,
+        coordinates: stop.coordinates,
+      };
+    });
+    const savedItinerary = saved[option.key];
+    if (savedItinerary?.id) {
+      startEditing(savedItinerary.id, places, option.suggested_name || option.label);
+    } else {
+      setDraftPlaces(places, option.suggested_name || option.label);
+    }
+    navigate('/explore?tab=places');
+  };
 
   return (
     <div className="rounded-card border border-neutral-200 bg-surface p-3 space-y-3">
@@ -48,15 +80,26 @@ export const AiRouteOptions = ({ options, criteria }) => {
       {selected.adjusted && !saved[selected.key] && (
         <button type="button" onClick={() => stays.reset(selected.key)} className="text-xs font-semibold text-primary-700 hover:underline">Về thời gian gợi ý ban đầu</button>
       )}
-      <button
-        type="button"
-        onClick={() => save(selected)}
-        disabled={Boolean(saved[selected.key]) || savingKey === selected.key}
-        className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-button bg-primary-600 hover:bg-primary-700 disabled:bg-primary-100 disabled:text-primary-700 text-white text-sm font-semibold transition"
-      >
-        {saved[selected.key] ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-        {saved[selected.key] ? 'Đã lưu vào "Của tôi"' : savingKey === selected.key ? 'Đang lưu…' : 'Lưu lộ trình này'}
-      </button>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={() => save(selected)}
+          disabled={Boolean(saved[selected.key]) || savingKey === selected.key}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-button bg-primary-600 hover:bg-primary-700 disabled:bg-primary-100 disabled:text-primary-700 text-white text-sm font-semibold transition"
+        >
+          {saved[selected.key] ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          {saved[selected.key] ? 'Đã lưu vào "Của tôi"' : savingKey === selected.key ? 'Đang lưu…' : 'Lưu lộ trình này'}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleEditInExplore(selected)}
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-button border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-sm font-semibold transition"
+          title="Đưa lộ trình sang tab Khám phá để tự do thêm, bớt điểm"
+        >
+          <Pencil className="w-4 h-4" />
+          <span>Sửa ở Khám phá</span>
+        </button>
+      </div>
     </div>
   );
 };

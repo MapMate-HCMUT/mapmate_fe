@@ -3,7 +3,7 @@ export { ItineraryActionButton, ItineraryCard } from './components/ItineraryCard
 export { MyItinerariesPanel } from './components/MyItinerariesPanel';
 export { RouteSuggestionsModal } from './components/RouteSuggestionsModal';
 export { TripSummary } from './components/TripSummary';
-export { createItineraryApi, getMyItinerariesApi } from './api/itineraryApi';
+export { createItineraryApi, getMyItinerariesApi, updateItineraryApi } from './api/itineraryApi';
 export { ItineraryTimeline } from './components/ItineraryTimeline';
 export { useItineraryStore } from './stores/itineraryStore';
 export { getVehicleLabel, stayOverridesOf } from './utils/itineraryFormat';

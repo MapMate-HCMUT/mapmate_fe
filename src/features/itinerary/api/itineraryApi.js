@@ -12,6 +12,7 @@ export const previewItineraryApi = (criteria, placeIds, { keepOrder = false, sta
 export const createItineraryApi = (payload) => apiClient.post('/itineraries', payload);
 
 export const getMyItinerariesApi = () => apiClient.get('/itineraries');
+export const updateItineraryApi = (itineraryId, payload) => apiClient.patch(`/itineraries/${itineraryId}`, payload);
 export const deleteItineraryApi = (itineraryId) => apiClient.delete(`/itineraries/${itineraryId}`);
 // POST /api/itineraries/:id/clone -> "Dùng lộ trình này"
 export const cloneItineraryApi = (itineraryId) => apiClient.post(`/itineraries/${itineraryId}/clone`);

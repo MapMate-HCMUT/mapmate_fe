@@ -1,4 +1,4 @@
-import { Compass, Sparkles, X } from 'lucide-react';
+import { Compass, Sparkles, X, Bookmark, Pencil } from 'lucide-react';
 import { TripSummary } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../stores/tripDraftStore';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
@@ -21,8 +21,21 @@ const PreviewNotes = ({ summary }) => (
   </ul>
 );
 
-// "Giỏ" chuyến đi: các điểm người dùng tự chọn, bảng tổng hợp dự kiến (tính lại khi đổi bộ lọc) và nút lên lộ trình.
-export const TripDraftPanel = ({ places, preview, onRemove, onClear, onSuggest, isSuggesting }) => (
+// "Giỏ" chuyến đi: các điểm người dùng tự chọn, bảng tổng hợp dự kiến (tính lại khi đổi bộ lọc), đặt tên và lưu/cập nhật lộ trình.
+export const TripDraftPanel = ({
+  places,
+  preview,
+  tripName,
+  onNameChange,
+  onSave,
+  isSaving,
+  isEditing,
+  onCancelEdit,
+  onRemove,
+  onClear,
+  onSuggest,
+  isSuggesting,
+}) => (
   <section className="bg-surface rounded-card shadow-card p-4">
     <div className="flex items-center justify-between">
       <h2 className="text-base font-bold text-neutral-900 inline-flex items-center gap-1.5">
@@ -33,6 +46,22 @@ export const TripDraftPanel = ({ places, preview, onRemove, onClear, onSuggest, 
         <button type="button" onClick={onClear} className="text-xs font-semibold text-neutral-500 hover:text-danger-600">Xoá hết</button>
       )}
     </div>
+
+    {isEditing && (
+      <div className="mt-2.5 flex items-center justify-between bg-primary-50 text-primary-800 text-xs px-2.5 py-1.5 rounded-input border border-primary-200">
+        <span className="font-semibold flex items-center gap-1.5">
+          <Pencil className="w-3.5 h-3.5 text-primary-600 shrink-0" />
+          Đang sửa lộ trình
+        </span>
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          className="text-primary-700 hover:text-danger-600 hover:underline font-medium"
+        >
+          Hủy sửa
+        </button>
+      </div>
+    )}
 
     {places.length === 0 ? (
       <p className="mt-2 text-sm text-neutral-500">
@@ -58,6 +87,30 @@ export const TripDraftPanel = ({ places, preview, onRemove, onClear, onSuggest, 
             <PreviewNotes summary={preview.summary} />
           </div>
         )}
+
+        <div className="mt-4 pt-3 border-t border-neutral-100 space-y-2">
+          <label className="block text-xs font-semibold text-neutral-600">
+            Tên lộ trình
+          </label>
+          <input
+            type="text"
+            value={tripName || ''}
+            onChange={(event) => onNameChange?.(event.target.value)}
+            placeholder={`Chuyến đi ${places.length} điểm`}
+            maxLength={80}
+            aria-label="Tên lộ trình"
+            className="w-full py-2 px-3 bg-surface border border-neutral-300 rounded-input text-sm text-neutral-800 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+          />
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold shadow-card disabled:opacity-70 transition"
+          >
+            {isEditing ? <Pencil className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+            {isSaving ? 'Đang cập nhật…' : isEditing ? 'Cập nhật lộ trình' : 'Lưu lộ trình'}
+          </button>
+        </div>
       </>
     )}
 
@@ -65,11 +118,19 @@ export const TripDraftPanel = ({ places, preview, onRemove, onClear, onSuggest, 
       type="button"
       onClick={onSuggest}
       disabled={isSuggesting}
-      className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-button bg-accent-500 hover:bg-accent-600 text-white text-sm font-bold shadow-card disabled:opacity-70 transition"
+      className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-button text-sm font-bold shadow-card disabled:opacity-70 transition ${
+        places.length > 0
+          ? 'mt-2 border border-accent-400 bg-accent-50 hover:bg-accent-100 text-accent-700'
+          : 'mt-4 bg-accent-500 hover:bg-accent-600 text-white'
+      }`}
     >
       <Sparkles className="w-4 h-4" />
       {isSuggesting ? 'Đang lên lộ trình…' : 'Gợi ý lộ trình'}
     </button>
-    <p className="mt-2 text-[11px] text-neutral-400 text-center">Tạo tối đa 3 lộ trình từ bộ lọc và các điểm bạn đã chọn</p>
+    <p className="mt-2 text-[11px] text-neutral-400 text-center">
+      {places.length > 0
+        ? 'Tối ưu thứ tự & gợi ý thêm điểm phù hợp'
+        : 'Tạo tối đa 3 lộ trình từ bộ lọc và các điểm bạn đã chọn'}
+    </p>
   </section>
 );
