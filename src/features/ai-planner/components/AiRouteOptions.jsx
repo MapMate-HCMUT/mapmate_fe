@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bookmark, Check, Pencil, Sparkles } from 'lucide-react';
-import { useTripDraftStore } from '../../explore';
+import { AlertTriangle, Bookmark, Check, Pencil, Sparkles } from 'lucide-react';
+import { useExploreFilterStore, useTripDraftStore } from '../../explore';
 import { ItineraryTimeline, TripSummary, useStayAdjust } from '../../itinerary';
 import { useSaveAiItinerary } from '../hooks/useSaveAiItinerary';
 
@@ -10,6 +10,7 @@ export const AiRouteOptions = ({ options, criteria }) => {
   const navigate = useNavigate();
   const setDraftPlaces = useTripDraftStore((state) => state.setPlaces);
   const startEditing = useTripDraftStore((state) => state.startEditing);
+  const applyCriteria = useExploreFilterStore((state) => state.applyCriteria);
   const [selectedKey, setSelectedKey] = useState(options[0].key);
   const { save, saved, savingKey } = useSaveAiItinerary(criteria);
   const stays = useStayAdjust(criteria);
@@ -40,6 +41,10 @@ export const AiRouteOptions = ({ options, criteria }) => {
     } else {
       setDraftPlaces(places, option.suggested_name || option.label);
     }
+    const effectiveCriteria = criteria || savedItinerary?.criteria;
+    if (effectiveCriteria) {
+      applyCriteria(effectiveCriteria);
+    }
     navigate('/explore?tab=places');
   };
 
@@ -67,9 +72,14 @@ export const AiRouteOptions = ({ options, criteria }) => {
       </p>
       <TripSummary summary={selected.summary} />
       {selected.summary.issues?.length > 0 && (
-        <ul className="space-y-0.5 text-[11px] text-warning-700">
-          {selected.summary.issues.map((issue) => <li key={issue}>⚠ {issue}</li>)}
-        </ul>
+        <div className="rounded-input border border-warning-200 bg-warning-50/80 p-2.5 text-xs text-warning-900 space-y-1">
+          {selected.summary.issues.map((issue) => (
+            <div key={issue} className="flex items-start gap-1.5 font-medium">
+              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-warning-600" />
+              <span>{issue}</span>
+            </div>
+          ))}
+        </div>
       )}
       <ItineraryTimeline
         stops={selected.stops}

@@ -8,20 +8,43 @@ import { RefusalCard } from './RefusalCard';
 import { UnderstoodCard } from './UnderstoodCard';
 import { WeatherChip } from './WeatherChip';
 
-const BULLET_TONES = {
-  warning: { icon: AlertTriangle, className: 'text-warning-700' },
-  tip: { icon: Lightbulb, className: 'text-neutral-600' },
+const WarningsBox = ({ items }) => {
+  if (!items?.length) return null;
+  return (
+    <div className="rounded-card border border-amber-200 bg-amber-50/90 p-3 sm:p-3.5 space-y-2 shadow-xs">
+      <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wide">
+        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+        <span>Lưu ý & Cảnh báo</span>
+      </div>
+      <ul className="space-y-1.5 text-xs sm:text-[13px] text-amber-950 leading-relaxed font-medium">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-2">
+            <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
-const Bullets = ({ items, tone }) => {
+const TipsBox = ({ items }) => {
   if (!items?.length) return null;
-  const { icon: ToneIcon, className } = BULLET_TONES[tone];
   return (
-    <ul className={`space-y-1 text-xs ${className}`}>
-      {items.map((item) => (
-        <li key={item} className="flex gap-1.5"><ToneIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />{item}</li>
-      ))}
-    </ul>
+    <div className="rounded-card border border-primary-200/90 bg-primary-50/50 p-3 sm:p-3.5 space-y-2 shadow-xs">
+      <div className="flex items-center gap-1.5 text-xs font-bold text-primary-900 uppercase tracking-wide">
+        <Lightbulb className="w-4 h-4 text-primary-600 shrink-0" />
+        <span>Lời khuyên & Gợi ý từ AI</span>
+      </div>
+      <ul className="space-y-1.5 text-xs sm:text-[13px] text-neutral-800 leading-relaxed font-medium">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-2">
+            <span className="text-primary-500 font-bold shrink-0 mt-0.5">•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
@@ -52,8 +75,8 @@ export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
       {data.understood && !data.refusal && <UnderstoodCard understood={data.understood} />}
       {data.options?.length > 0 && <AiRouteOptions options={data.options} criteria={data.understood.criteria} />}
       {data.places?.length > 0 && <AiPlaceList places={data.places} />}
-      <Bullets items={data.warnings} tone="warning" />
-      <Bullets items={data.tips} tone="tip" />
+      <WarningsBox items={data.warnings} />
+      <TipsBox items={data.tips} />
       {data.follow_up_suggestions?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {data.follow_up_suggestions.map((suggestion) => (

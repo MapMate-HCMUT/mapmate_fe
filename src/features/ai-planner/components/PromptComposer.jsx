@@ -5,8 +5,11 @@ import { LocateFixed, SendHorizontal } from 'lucide-react';
 export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocating, onLocate }) => {
   const [text, setText] = useState('');
 
-  const submit = async () => {
-    if (await onSend(text)) setText('');
+  const submit = () => {
+    const trimmed = text.trim();
+    if (!trimmed || isSending) return;
+    setText('');
+    onSend(trimmed);
   };
   const onKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -16,18 +19,18 @@ export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocatin
   };
 
   return (
-    <div className="border-t border-neutral-200 bg-surface px-4 py-3 lg:px-8">
+    <div className="border-t border-neutral-200 bg-surface px-3 py-2.5 sm:px-4 sm:py-3 lg:px-8">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-end gap-2 rounded-card border border-neutral-200 bg-neutral-50 p-2 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20">
           <textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={onKeyDown}
-            rows={2}
+            rows={1}
             maxLength={maxLength}
             placeholder="VD: Tối nay 2 người đi hẹn hò ở Quận 1, khoảng 500k/người…"
             aria-label="Nhập yêu cầu cho MapMate AI"
-            className="flex-1 resize-none bg-transparent px-1.5 py-1 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+            className="flex-1 resize-none bg-transparent px-1.5 py-1 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none min-h-[38px] max-h-32"
           />
           <button
             type="button"

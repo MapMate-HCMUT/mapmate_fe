@@ -43,7 +43,7 @@ export const TRACE_STATUS = {
 };
 
 export const describeSource = (step) => {
-  if (step.model) return `Groq · ${step.model}`;
+  if (step.model) return `AI · ${step.model}`;
   if (step.source === 'rules') return 'Bộ hiểu câu theo luật';
   if (step.source === 'template') return 'Mẫu có sẵn';
   return null;
