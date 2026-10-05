@@ -1,4 +1,5 @@
 import { Icon } from '../../../components/Icon';
+import { formatPlaceHours } from '../../../utils/formatPlace';
 import { getCategory } from '../utils/placeCategory';
 import { PlaceRating, PlaceTravelInfo } from './PlaceMeta';
 import { PlaceThumb } from './PlaceThumb';
@@ -39,7 +40,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         </div>
         <div className="flex gap-2">
           <dt><Icon name="clock" className="w-4 h-4 text-neutral-400" /></dt>
-          <dd className="flex-1">Giờ mở cửa: {place.opening_hours}</dd>
+          <dd className="flex-1">Giờ mở cửa: {formatPlaceHours(place)}</dd>
         </div>
       </dl>
 

@@ -12,6 +12,7 @@ export const SessionSidebar = ({
   onDelete,
   onNew,
   isAuthenticated,
+  footer = null, // VD khung "Ghi nhớ của AI"
 }) => {
   const content = (
     <div className="flex h-full flex-col bg-surface border-r border-neutral-200">
@@ -91,6 +92,7 @@ export const SessionSidebar = ({
           ))
         )}
       </ul>
+      {footer}
     </div>
   );
 

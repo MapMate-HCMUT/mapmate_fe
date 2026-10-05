@@ -1,5 +1,6 @@
 import { CheckCircle2, ChevronRight, Navigation, Square } from 'lucide-react';
 import { getVehicleLabel } from '../../itinerary';
+import { normalizeTripVehicle } from '../api/goongDirections';
 
 // Thanh điều hướng nổi trên mobile hoặc bản đồ khi đang đi theo lộ trình
 export const ActiveRouteBanner = ({
@@ -14,7 +15,7 @@ export const ActiveRouteBanner = ({
 
   const stops = itinerary.stops || [];
   const currentStop = stops[activeStopIndex] || stops[0];
-  const vehicle = getVehicleLabel(itinerary.vehicle);
+  const vehicle = getVehicleLabel(normalizeTripVehicle(itinerary.vehicle));
   const currentLeg = routeData?.legs?.[activeStopIndex];
 
   return (

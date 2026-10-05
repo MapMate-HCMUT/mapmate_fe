@@ -5,6 +5,7 @@ export const VEHICLE_LABELS = {
   bike: { label: 'Xe máy', emoji: '🛵', icon: Bike },
   bus: { label: 'Xe buýt', emoji: '🚌', icon: Bus },
   car: { label: 'Ô tô', emoji: '🚗', icon: Car },
+  taxi: { label: 'Taxi', emoji: '🚕', icon: Car },
   public: { label: 'Phương tiện công cộng', emoji: '🚍', icon: Bus },
   metro_grab: { label: 'Metro + Grab', emoji: '🚇', icon: Train },
   custom: { label: 'Kết hợp tuỳ chỉnh', emoji: '⚙️', icon: Settings },
@@ -26,7 +27,27 @@ export const getStopRoleLabel = (stop) => (stop.meal ? MEAL_LABELS[stop.meal] : 
 export const STAY_STEP_MINUTES = 15;
 export const STAY_LIMITS = { min: 10, max: 300 };
 // Thời gian ở lại đang hiển thị => gửi kèm khi lưu / xem trước để server giữ đúng như vậy
-export const stayOverridesOf = (stops) => Object.fromEntries(stops.map((stop) => [stop.place.id, stop.stay_minutes]));
+// (trạm gợi ý có dạng { place: { id } }, trạm đã lưu có dạng phẳng { place_id })
+export const stayOverridesOf = (stops = []) =>
+  Object.fromEntries(stops.filter((stop) => stop.stay_minutes > 0).map((stop) => [String(stop.place?.id ?? stop.place_id), stop.stay_minutes]));
+
+// Trạm của 1 lộ trình -> địa điểm cho giỏ chuyến đi (trạm gợi ý có { place }, trạm đã lưu dạng phẳng)
+export const stopsToPlaces = (stops = []) =>
+  stops.map((stop) =>
+    stop.place
+      ? { ...stop.place, id: stop.place.id || stop.place_id, name: stop.place.name || stop.place_name, category: stop.place.category || stop.category }
+      : { id: stop.place_id, name: stop.place_name, category: stop.category, address: stop.address, coordinates: stop.coordinates },
+  );
+
+// 1 phương án lộ trình gợi ý (đã áp thời gian tự chỉnh nếu có) -> chuyến đi để dẫn đường trên bản đồ trang chủ
+export const optionToTrip = (option, criteria) => ({
+  name: option.suggested_name || option.label,
+  vehicle: criteria?.vehicle || 'bike',
+  criteria,
+  stops: option.stops,
+  total_distance_km: option.summary?.total_distance_km,
+  total_duration: option.summary?.total_minutes,
+});
 
 // Trạm của lộ trình GỢI Ý có dạng { place: {...} }, trạm ĐÃ LƯU có dạng phẳng { place_name } => đưa về 1 dạng để hiển thị.
 export const toTimelineStops = (stops) =>

@@ -1,4 +1,5 @@
 import { Icon } from './Icon';
+import { VoiceButton } from './VoiceButton';
 
 export const SearchBar = ({ value, onChange, onClear, onSubmit, placeholder = 'Bạn muốn đi đâu hôm nay?' }) => (
   <form
@@ -28,7 +29,13 @@ export const SearchBar = ({ value, onChange, onClear, onSubmit, placeholder = 'B
         <Icon name="close" className="w-4 h-4" />
       </button>
     ) : (
-      <Icon name="mic" className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-primary-500" />
+      <VoiceButton
+        className="absolute right-1.5 top-1/2 -translate-y-1/2"
+        onText={(text) => {
+          onChange(text);
+          onSubmit?.();
+        }}
+      />
     )}
   </form>
 );

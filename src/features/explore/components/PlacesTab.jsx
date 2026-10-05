@@ -97,7 +97,7 @@ export const PlacesTab = () => {
           Xem {places.totalLabel} địa điểm
         </button>
       </Modal>
-      <RouteSuggestionsModal routes={routes} onSelect={tab.selectSuggestion} />
+      <RouteSuggestionsModal routes={routes} onSelect={tab.selectSuggestion} onShowOnMap={tab.showOnMap} />
     </div>
   );
 };
