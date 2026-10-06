@@ -94,9 +94,10 @@ export const useItineraryMarkers = (map, stops, activeStopIndex, onSelectStop, u
 
       if (isLast) {
         // Điểm đích đến cuối: icon ghim đỏ mặc định chuẩn Goong / MapLibre
+        // Luôn đỏ (dễ nhận ra là điểm đến); đang xem chặng này thì to hơn
         const destMarker = new Marker({
-          color: isActive ? '#2563eb' : '#ea4335',
-          scale: 1.0,
+          color: '#ea4335',
+          scale: isActive ? 1.25 : 1.0,
         })
           .setLngLat(coords)
           .addTo(map);

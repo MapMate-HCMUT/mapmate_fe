@@ -5,7 +5,9 @@ import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../../explore';
 import { useActiveRouteStore } from '../../itinerary';
+import { useTransitPrefsStore } from '../../transit';
 import { fetchTripRoute, getStopCoordinates, normalizeTripVehicle } from '../api/goongDirections';
+import { fetchTransitTripRoute } from '../api/transitTrip';
 import { useMapStore } from '../stores/mapStore';
 import { enrichAndFilterPlaces } from '../utils/enrichPlaces';
 import { pickMostSevere } from '../utils/floodSeverity';
@@ -111,8 +113,12 @@ export const useHomeMap = () => {
   );
 
   const fetchRequestIdRef = useRef(0);
+  // Chế độ "Công cộng": tìm tuyến xe buýt / metro ở backend (đổi ưu tiên / cách ra trạm => tìm lại)
+  const transitPrefs = useTransitPrefsStore((state) => state.prefs);
+  const isTransitTrip = normalizeTripVehicle(activeItinerary?.vehicle || vehicle) === 'bus';
+  const transitKey = isTransitTrip ? JSON.stringify(transitPrefs) : '';
 
-  // 1. Tính toán lộ trình từ Goong Directions API khi có lộ trình đang dẫn đường
+  // 1. Tính toán lộ trình từ Goong Directions API (hoặc tuyến xe công cộng) khi có lộ trình đang dẫn đường
   useEffect(() => {
     if (!isNavigating || !activeItinerary?.stops?.length) return undefined;
 
@@ -130,7 +136,10 @@ export const useHomeMap = () => {
     const currentVehicle = activeItinerary.vehicle || vehicle;
 
     setIsLoadingRoute(true);
-    fetchTripRoute(effectiveOrigin, activeItinerary.stops, currentVehicle, places)
+    const request = transitKey
+      ? fetchTransitTripRoute(effectiveOrigin, activeItinerary.stops, places, JSON.parse(transitKey))
+      : fetchTripRoute(effectiveOrigin, activeItinerary.stops, currentVehicle, places);
+    request
       .then((data) => {
         // Chỉ cập nhật nếu đây vẫn là request mới nhất
         if (requestId !== fetchRequestIdRef.current) return;
@@ -145,7 +154,7 @@ export const useHomeMap = () => {
         if (requestId === fetchRequestIdRef.current) {
           setIsLoadingRoute(false);
           setRouteError(err.message);
-          showToast('Lỗi tải đường đi từ Goong: ' + err.message, 'warning');
+          showToast(`${transitKey ? 'Lỗi tìm tuyến xe buýt / metro' : 'Lỗi tải đường đi từ Goong'}: ${err.message}`, 'warning');
         }
       });
 
@@ -156,6 +165,7 @@ export const useHomeMap = () => {
     userCoordinates,
     vehicle,
     places,
+    transitKey,
     setIsLoadingRoute,
     setRouteData,
     setRouteError,
@@ -164,7 +174,7 @@ export const useHomeMap = () => {
 
   // 2. Tự động căn góc nhìn bao quát toàn bộ lộ trình khi có routeData và map đã sẵn sàng
   useEffect(() => {
-    if (!map || !routeData?.coordinates?.length || routeData.coordinates.length < 2) return;
+    if (!map || !routeData?.coordinates?.length || routeData.coordinates.length < 2 || routeData.transit) return; // xe công cộng: căn theo từng chặng
     const bounds = routeData.coordinates.reduce(
       (b, coord) => b.extend(coord),
       new LngLatBounds(routeData.coordinates[0], routeData.coordinates[0]),
@@ -196,7 +206,8 @@ export const useHomeMap = () => {
     isNavigating ? routeData : null,
     places,
   );
-  useItineraryRoute(map, isNavigating ? routeData?.coordinates : null);
+  // Đi xe công cộng: lớp riêng vẽ từng chặng theo màu tuyến (MapHomePage) thay cho đường xanh của Goong
+  useItineraryRoute(map, isNavigating && !routeData?.transit ? routeData?.coordinates : null);
   useFloodMarkers(map, isNavigating ? [] : floodAlerts, selectFloodAlert);
   useUserMarker(map, isNavigating ? null : userCoordinates);
 
@@ -235,14 +246,16 @@ export const useHomeMap = () => {
           },
         ],
       };
+      setSelectedPlaceId(null); // đóng thẻ địa điểm để không che bản đồ khi dẫn đường
       useActiveRouteStore.getState().startTrip(singleTrip);
       showToast(`Đang tìm đường đến ${place.name} qua Goong Maps`);
     },
-    [vehicle, showToast],
+    [vehicle, showToast, setSelectedPlaceId],
   );
 
   return {
     mapContainerRef: containerRef,
+    map,
     isMapReady: Boolean(map),
     mapError,
     mapProvider: MAP_PROVIDER,

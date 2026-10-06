@@ -33,8 +33,12 @@ export const useMapInstance = () => {
       collapseAttribution(instance);
       setMap(instance);
     });
+    // Chỉ báo "không tải được bản đồ" khi bản đồ CHƯA từng tải xong; lỗi lẻ sau đó (1 ô bản đồ, 1 lớp dữ liệu) chỉ ghi log
+    let hasLoaded = false;
+    instance.once('load', () => (hasLoaded = true));
     instance.on('error', (event) => {
-      if (!instance.isStyleLoaded()) setError(event.error?.message ?? 'Không tải được bản đồ');
+      if (!hasLoaded) setError(event.error?.message ?? 'Không tải được bản đồ');
+      else console.warn('[map]', event.error?.message ?? event);
     });
 
     return () => instance.remove();
