@@ -1,5 +1,18 @@
-import { RouteSuggestionsModal } from '../../itinerary';
+import { useCallback, useMemo, useState } from 'react';
+import { RouteSuggestionsModal, useActiveRouteStore } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
+import {
+  buildTransitRouteData,
+  RoutePanel,
+  StopPanel,
+  TransitLegend,
+  TransitTripPanel,
+  useRouteDetail,
+  useTransitJourneyLayer,
+  useTransitLayer,
+  useTransitPrefsStore,
+} from '../../transit';
+import { fetchLegDirections } from '../api/goongDirections';
 import { useHomeMap } from '../hooks/useHomeMap';
 import { useMapTripPanel } from '../hooks/useMapTripPanel';
 import { useQuickFilters } from '../hooks/useQuickFilters';
@@ -17,10 +30,40 @@ import { TrendingSidebar } from './TrendingSidebar';
 // Trang chủ: Sidebar (desktop) + Bản đồ toàn màn hình + các lớp nổi (banner ngập, FABs, thẻ chi tiết, dẫn đường Goong).
 export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
+  const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
   const quickFilters = useQuickFilters();
   const tripPanel = useMapTripPanel(home.userCoordinates);
+  // Khung nổi bên trái bản đồ (1 khung 1 lúc): trạm xe buýt | tuyến xe buýt
+  const [overlay, setOverlay] = useState(null);
+  // Phương tiện "Buýt & Metro" (nút lọc phương tiện / cột chỉ đường): bản đồ hiện metro, trạm buýt (bấm xem xe sắp tới);
+  // chỉ đường tìm tuyến xe buýt / metro và vẽ từng chặng theo màu tuyến
+  const isTransitMode = home.vehicleInfo.value === 'bus';
+  const openStop = useCallback((id) => setOverlay({ type: 'stop', id }), []);
+  const openRoute = useCallback((routeId, varId) => setOverlay({ type: 'route', routeId, varId }), []);
+  const routeDetail = useRouteDetail(overlay?.type === 'route' ? overlay.routeId : null, overlay?.varId ?? null);
+  const selectedRoute = useMemo(
+    () => (routeDetail.variant ? { path: routeDetail.variant.path, stops: routeDetail.variant.stops, color: routeDetail.route?.color } : null),
+    [routeDetail.variant, routeDetail.route],
+  );
+  // Đang dẫn đường: chỉ vẽ cách đi đã chọn (ẩn trạm / tuyến chung cho đỡ rối)
+  const transitLayer = useTransitLayer(home.map, isTransitMode && !isNavigating, openStop, selectedRoute);
+  useTransitJourneyLayer(home.map, isNavigating ? home.routeData?.transit : null, {
+    fetchRoadGeometry: fetchLegDirections,
+    activeLeg: home.activeStopIndex,
+    waypoints: home.routeData?.waypoints,
+  });
+  const transitPrefs = useTransitPrefsStore((state) => state.prefs);
+  const setTransitPref = useTransitPrefsStore((state) => state.setPref);
+  const routeError = useActiveRouteStore((state) => state.routeError);
+  // Chọn phương án khác cho 1 chặng => dựng lại lộ trình (không tìm lại)
+  const selectTransitOption = useCallback((legIndex, optionIndex) => {
+    const { routeData, setRouteData } = useActiveRouteStore.getState();
+    if (!routeData?.transit) return;
+    const selected = [...routeData.transit.selected];
+    selected[legIndex] = optionIndex;
+    setRouteData(buildTransitRouteData(routeData.transit.plans, selected, routeData.waypoints));
+  }, []);
   const vehicleEmoji = home.vehicleInfo.emoji;
-  const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
 
   return (
     <div className="flex-1 min-h-0 flex">
@@ -33,6 +76,19 @@ export const MapHomePage = () => {
           onStopTrip={home.stopTrip}
           isLoadingRoute={home.isLoadingRoute}
           onSetVehicle={home.setVehicle}
+          transitPanel={
+            <TransitTripPanel
+              routeData={home.routeData}
+              isLoading={home.isLoadingRoute}
+              error={routeError}
+              prefs={transitPrefs}
+              onChangePref={setTransitPref}
+              onSelectOption={selectTransitOption}
+              activeStopIndex={home.activeStopIndex}
+              onSelectLeg={(index) => home.selectStop(index, home.activeItinerary.stops[index])}
+              onOpenStop={openStop}
+            />
+          }
         />
       ) : (
         <TrendingSidebar
@@ -97,6 +153,19 @@ export const MapHomePage = () => {
             </div>
           )}
 
+          {isTransitMode && !isNavigating && (
+            <div className="absolute z-20 top-3 right-14">
+              <TransitLegend stopCount={transitLayer.stopCount} tooFar={transitLayer.tooFar} />
+            </div>
+          )}
+          {/* Khung trạm / tuyến chỉ có ý nghĩa khi đang chọn Buýt & Metro */}
+          {overlay && isTransitMode && (
+            <div className="absolute z-30 inset-x-0 bottom-0 lg:inset-x-auto lg:left-4 lg:top-4 lg:bottom-auto lg:w-80">
+              {overlay.type === 'stop' && <StopPanel key={overlay.id} stopId={overlay.id} onClose={() => setOverlay(null)} onOpenRoute={openRoute} />}
+              {overlay.type === 'route' && <RoutePanel detail={routeDetail} onClose={() => setOverlay(null)} onSelectStop={openStop} />}
+            </div>
+          )}
+
           <MapQuickActions
             filters={quickFilters.filters}
             openKey={quickFilters.openKey}
@@ -106,7 +175,7 @@ export const MapHomePage = () => {
             isLocating={home.isLocating}
           />
 
-          {home.selectedPlace ? (
+          {home.selectedPlace && !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
               <PlaceDetailCard
                 place={home.selectedPlace}

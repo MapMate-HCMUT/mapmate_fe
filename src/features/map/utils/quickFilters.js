@@ -19,7 +19,7 @@ export const RADIUS_OPTIONS = [
 export const VEHICLE_OPTIONS = [
   { value: 'walk', label: 'Đi bộ', emoji: '🚶', speedKmh: 5 },
   { value: 'motorbike', label: 'Xe máy', emoji: '🛵', speedKmh: 25 },
-  { value: 'bus', label: 'Xe buýt', emoji: '🚌', speedKmh: 15 },
+  { value: 'bus', label: 'Buýt & Metro', emoji: '🚌', speedKmh: 15 }, // chọn => bản đồ hiện tuyến metro, trạm buýt; chỉ đường theo tuyến
   { value: 'car', label: 'Ô tô', emoji: '🚗', speedKmh: 20 },
 ];
 

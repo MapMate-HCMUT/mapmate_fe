@@ -21,13 +21,14 @@ import { useToast } from '../../../hooks/useToast';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
 import { normalizeTripVehicle } from '../api/goongDirections';
 
-// Phương tiện khi dẫn đường — đổi là tính lại thời gian từng chặng (đi bộ / xe buýt: ước tính theo tốc độ, Goong không hỗ trợ)
+// Phương tiện khi dẫn đường — đổi là tính lại thời gian từng chặng (đi bộ: ước tính theo tốc độ, Goong không hỗ trợ;
+// công cộng: tìm tuyến xe buýt / metro thật ở backend, kết hợp đi bộ / gọi xe ra trạm)
 const ROUTE_VEHICLES = [
   { value: 'bike', label: 'Xe máy', icon: Bike },
   { value: 'walk', label: 'Đi bộ', icon: Footprints },
   { value: 'car', label: 'Ô tô', icon: Car },
   { value: 'taxi', label: 'Taxi', icon: CarTaxiFront },
-  { value: 'bus', label: 'Buýt', icon: Bus },
+  { value: 'bus', label: 'Buýt & Metro', icon: Bus },
 ];
 
 // Biểu tượng tương ứng với hành động rẽ đường từ Goong API
@@ -49,6 +50,7 @@ export const ActiveRouteSidebar = ({
   onStopTrip,
   isLoadingRoute,
   onSetVehicle,
+  transitPanel = null,
 }) => {
   const [showSteps, setShowSteps] = useState(false);
   const { showToast } = useToast();
@@ -77,12 +79,14 @@ export const ActiveRouteSidebar = ({
                 aria-checked={currentVehicle === value}
                 onClick={() => onSetVehicle?.(value)}
                 title={label}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition ${
+                aria-label={label}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
                   currentVehicle === value ? 'bg-primary-600 text-white shadow-xs' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
                 }`}
               >
                 <VehicleIcon className="w-4 h-4" />
-                <span>{label}</span>
+                {/* Chỉ ghi chữ cho phương tiện đang chọn (5 phương tiện + nút đóng phải vừa 1 hàng) */}
+                {currentVehicle === value && <span>{label}</span>}
               </button>
             ))}
           </div>
@@ -131,8 +135,11 @@ export const ActiveRouteSidebar = ({
         </div>
       </div>
 
+      {/* 3. Đi xe công cộng: các phương án xe buýt / metro thay cho thẻ đường đi Goong */}
+      {currentVehicle === 'bus' && transitPanel}
+
       {/* 3. Thẻ kết quả lộ trình Goong (Route Card) */}
-      <div className="p-3 border-b border-neutral-200 bg-white">
+      <div className={`p-3 border-b border-neutral-200 bg-white ${currentVehicle === 'bus' && transitPanel ? 'hidden' : ''}`}>
         <div className="p-3.5 rounded-2xl border border-blue-200 bg-blue-50/60 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950 truncate max-w-[240px]">
