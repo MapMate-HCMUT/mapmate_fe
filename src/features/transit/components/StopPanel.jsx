@@ -1,3 +1,4 @@
+import { ErrorState } from '../../../components/ErrorState';
 import { Accessibility, Bus, RefreshCw, X } from 'lucide-react';
 import { useStopArrivals, useStopDetail } from '../hooks/useStopDetail';
 import { formatDistance } from '../utils/transitFormat';
@@ -24,7 +25,7 @@ export const StopPanel = ({ stopId, onClose, onOpenRoute }) => {
           <X className="w-4 h-4" />
         </button>
       </div>
-      {error && <p className="px-3 text-xs text-danger-600">{error}</p>}
+      {error && <ErrorState compact error={{ message: error }} title="Chưa tải được thông tin trạm" className="mx-3" />}
 
       <section className="px-3 pb-3 space-y-1.5">
         <h4 className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-neutral-500">

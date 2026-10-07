@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
 import { getAiOptionsApi } from '../api/aiApi';
 
 const FALLBACK = {
@@ -15,14 +16,16 @@ const FALLBACK = {
 // Chế độ AI, câu mẫu, giới hạn độ dài — lấy từ server (không hardcode ở giao diện).
 export const useAiOptions = () => {
   const [options, setOptions] = useState(FALLBACK);
+  const redirectOnError = useErrorRedirect();
   useEffect(() => {
     let isActive = true;
     getAiOptionsApi()
       .then((data) => isActive && setOptions(data))
-      .catch(() => {});
+      .catch((error) => isActive && redirectOnError(error)); // máy chủ không phản hồi => trang lỗi (lỗi khác: dùng cấu hình mặc định)
     return () => {
       isActive = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ tải 1 lần khi vào trang
   }, []);
   return options;
 };

@@ -1,8 +1,9 @@
 import { Link } from 'react-router';
 import { Avatar } from '../../../components/Avatar';
+import { ErrorState } from '../../../components/ErrorState';
 import { formatNumber, MEDALS, PERIOD_OPTIONS } from '../utils/leaderboard';
 
-export const LeaderboardCard = ({ period, onPeriodChange, rankings, me, currentUserId, isLoading, error }) => (
+export const LeaderboardCard = ({ period, onPeriodChange, rankings, me, currentUserId, isLoading, error, onRetry }) => (
   <section className="bg-surface rounded-card shadow-card p-5">
     <h2 className="text-base font-bold text-neutral-900 mb-3">🏆 Bảng xếp hạng</h2>
     <div className="grid grid-cols-3 gap-1 p-1 bg-neutral-100 rounded-button mb-4" role="tablist">
@@ -22,7 +23,7 @@ export const LeaderboardCard = ({ period, onPeriodChange, rankings, me, currentU
       ))}
     </div>
 
-    {error && <p className="text-sm text-danger-600 py-6 text-center">{error.message}</p>}
+    {error && <ErrorState compact error={error} title="Chưa tải được bảng xếp hạng" onRetry={onRetry} className="my-3" />}
     {!error && rankings.length === 0 && !isLoading && (
       <p className="text-sm text-neutral-500 py-6 text-center">Chưa có ai ghi điểm trong kỳ này. Hãy là người đầu tiên! 🚀</p>
     )}

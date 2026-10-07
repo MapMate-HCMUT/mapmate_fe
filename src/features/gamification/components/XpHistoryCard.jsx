@@ -1,12 +1,13 @@
+import { ErrorState } from '../../../components/ErrorState';
 import { formatNumber } from '../utils/leaderboard';
 import { formatDateTime, getXpAction } from '../utils/xpActions';
 
 // Lịch sử nhận XP / sao, mới nhất trước.
-export const XpHistoryCard = ({ items, hasMore, isLoading, error, onLoadMore }) => (
+export const XpHistoryCard = ({ items, hasMore, isLoading, error, onLoadMore, reload }) => (
   <section className="bg-surface rounded-card shadow-card p-5">
     <h2 className="text-base font-bold text-neutral-900 mb-3">🗓️ Hoạt động gần đây</h2>
 
-    {error && <p className="py-4 text-center text-sm text-danger-600">{error.message}</p>}
+    {error && <ErrorState compact error={error} title="Chưa tải được hoạt động" onRetry={items.length ? onLoadMore : reload} />}
     {!error && !isLoading && items.length === 0 && (
       <p className="py-6 text-center text-sm text-neutral-500">Chưa có hoạt động nào. Check-in hoặc báo cáo đường để nhận XP nhé!</p>
     )}

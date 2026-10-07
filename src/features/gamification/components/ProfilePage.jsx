@@ -19,7 +19,7 @@ export const ProfilePage = () => {
     <section className="flex-1 overflow-y-auto bg-neutral-50">
       <div className="w-full max-w-5xl mx-auto p-4 lg:p-6">
         {me.isLoading && !me.profile && <ProfileSkeleton />}
-        {me.error && !me.profile && <ProfileError message={me.error.message} onRetry={me.reload} />}
+        {me.error && !me.profile && <ProfileError error={me.error} onRetry={me.reload} />}
         {me.profile && (
           <div className="grid lg:grid-cols-[1fr_380px] gap-5 items-start">
             <div className="space-y-5 min-w-0">
@@ -41,6 +41,7 @@ export const ProfilePage = () => {
                 currentUserId={me.profile.id}
                 isLoading={leaderboard.isLoading}
                 error={leaderboard.error}
+                onRetry={leaderboard.reload}
               />
               <AccountSettingsCard
                 onEditProfile={editProfile.openEditor}

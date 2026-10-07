@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { isPageLevelError } from '../../../utils/errorMessages';
 import { useExploreOrigin } from '../../explore';
 import { getAiSessionApi, sendAiMessageApi } from '../api/aiApi';
 
@@ -54,6 +55,8 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
   const [sessionId, setSessionId] = useState(null);
   const [context, setContext] = useState(null);
   const [isSending, setIsSending] = useState(false);
+  // Mất mạng / máy chủ không phản hồi => cả trang AI hiện màn hình lỗi (như khi mất Wi‑Fi), giữ nguyên cuộc trò chuyện
+  const [pageError, setPageError] = useState(null); // { kind, retryText }
   const [tier, setTierState] = useState(() => loadTier(defaultTier));
 
   const setTier = (value) => {
@@ -83,14 +86,27 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
       setContext((prev) => toContext(data, prev));
       onSent?.();
     } catch (error) {
-      setMessages((prev) => [...prev, { id: newId(), role: 'assistant', error: error.message, retryText: text }]);
+      if (isPageLevelError(error)) {
+        setMessages((prev) => prev.slice(0, -1)); // gửi lại sẽ thêm lại đúng câu này
+        setPageError({ kind: error.kind, retryText: text });
+      } else {
+        setMessages((prev) => [...prev, { id: newId(), role: 'assistant', error: error.message, errorKind: error.kind, retryText: text }]);
+      }
     } finally {
       setIsSending(false);
     }
     return true;
   };
 
+  const retryAfterError = () => {
+    const text = pageError?.retryText;
+    setPageError(null);
+    if (text) send(text);
+  };
+  const dismissPageError = () => setPageError(null);
+
   const newChat = () => {
+    setPageError(null);
     setMessages([]);
     setSessionId(null);
     setContext(null);
@@ -110,5 +126,5 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
     setContext(null);
   };
 
-  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe };
+  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe, pageError, retryAfterError, dismissPageError };
 };

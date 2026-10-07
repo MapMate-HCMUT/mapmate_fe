@@ -1,5 +1,6 @@
 import { PenSquare, Send, Users, FileText } from 'lucide-react';
 import { Avatar } from '../../../components/Avatar';
+import { ErrorState } from '../../../components/ErrorState';
 import { LoginPrompt } from '../../../components/LoginPrompt';
 import { useFeedTab } from '../hooks/useFeedTab';
 import { FEED_SCOPES } from '../utils/socialConfig';
@@ -79,7 +80,9 @@ export const FeedTab = () => {
           <LoginPrompt icon={<Users className="w-10 h-10 text-primary-600" />} title="Bảng tin dành cho thành viên" description="Đăng nhập để xem bài viết của bạn bè và của chính bạn." />
         ) : (
           <>
-            {feed.error && <p className="bg-surface rounded-card shadow-card p-6 text-center text-sm text-danger-600">{feed.error.message}</p>}
+            {feed.error && (feed.items.length
+              ? <ErrorState compact error={feed.error} title="Chưa tải thêm được bài viết" onRetry={feed.loadMore} />
+              : <ErrorState error={feed.error} title="Chưa tải được bảng tin" onRetry={feed.reload} />)}
             {feed.isLoading && feed.items.length === 0 && Array.from({ length: SKELETON_ROWS }, (_, index) => <div key={index} className="h-40 bg-surface rounded-card shadow-card animate-pulse" />)}
             {!feed.isLoading && !feed.error && feed.items.length === 0 && (
               <div className="bg-surface rounded-card shadow-card p-10 text-center">

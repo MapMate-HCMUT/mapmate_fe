@@ -1,10 +1,11 @@
 import { Compass, Navigation } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { useMyItineraries } from '../hooks/useMyItineraries';
 import { ItineraryActionButton, ItineraryCard } from './ItineraryCard';
 
 // Danh sách lộ trình đã lưu của tôi. `onStart(itinerary)` chuyển sang tab Bản đồ để bắt đầu, `onShare(itinerary)` mở khung đăng bài chia sẻ, `onEdit(itinerary)` chuyển sang tab Khám phá để sửa.
 export const MyItinerariesPanel = ({ onShare, onEdit, onStart }) => {
-  const { itineraries, isLoading, error, remove } = useMyItineraries();
+  const { itineraries, isLoading, error, remove, reload } = useMyItineraries();
 
   return (
     <section className="bg-surface rounded-card shadow-card p-5">
@@ -13,7 +14,7 @@ export const MyItinerariesPanel = ({ onShare, onEdit, onStart }) => {
         <span>Lộ trình đã lưu</span>
         <span className="text-sm font-semibold text-neutral-400">{itineraries.length}</span>
       </h2>
-      {error && <p className="text-sm text-danger-600">{error.message}</p>}
+      {error && <ErrorState compact error={error} title="Chưa tải được lộ trình đã lưu" onRetry={reload} />}
       {isLoading && itineraries.length === 0 && <div className="h-40 rounded-card bg-neutral-100 animate-pulse" />}
       {!isLoading && !error && itineraries.length === 0 && (
         <p className="py-6 text-center text-sm text-neutral-500">

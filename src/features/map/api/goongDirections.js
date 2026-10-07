@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GOONG_API_KEY, MAP_DEFAULT_CENTER } from '../../../config/map';
+import { toFriendlyError } from '../../../utils/errorMessages';
 
 // Giải mã chuỗi polyline chuẩn Google / Goong thành mảng [lng, lat] cho MapLibre
 export const decodePolyline = (str, precision = 5) => {
@@ -128,7 +129,7 @@ export const TRIP_VEHICLES = {
   bike: { goong: 'bike' },
   car: { goong: 'car' },
   taxi: { goong: 'taxi' },
-  walk: { goong: 'bike', speedKmh: 4.5, note: 'Goong chưa hỗ trợ đi bộ — thời gian ước tính theo tốc độ đi bộ 4,5 km/h' },
+  walk: { goong: 'bike', speedKmh: 4.5, note: 'Thời gian đi bộ là ước tính (khoảng 4,5 km/h)' },
   bus: { goong: 'car', speedKmh: 15, extraMinutes: 13, note: 'Thời gian xe buýt ước tính (15 km/h + chờ xe, đi bộ ra trạm)' },
 };
 // Tên phương tiện ở các nơi khác trong app (bộ lọc bản đồ dùng "motorbike", lộ trình lưu dùng "public"...)
@@ -174,6 +175,8 @@ export const fetchLegDirections = async (originCoord, destCoord, vehicle = 'bike
   return applyVehicleTiming(leg, tripVehicle);
 };
 
+const NO_ROUTE_MESSAGE = 'Không có đường đi giữa 2 điểm này';
+
 const requestLegDirections = async (originCoord, destCoord, goongVehicle) => {
   const [origLng, origLat] = originCoord;
   const [destLng, destLat] = destCoord;
@@ -181,7 +184,7 @@ const requestLegDirections = async (originCoord, destCoord, goongVehicle) => {
   const url = `https://rsapi.goong.io/Direction?origin=${origLat},${origLng}&destination=${destLat},${destLng}&vehicle=${goongVehicle}&api_key=${GOONG_API_KEY}`;
   const response = await axios.get(url, { timeout: 12000 });
   const route = response.data?.routes?.[0];
-  if (!route) throw new Error('Không tìm thấy đường đi từ Goong API');
+  if (!route) throw new Error(NO_ROUTE_MESSAGE);
 
   const leg = route.legs?.[0];
   const polylineStr = route.overview_polyline?.points;
@@ -197,7 +200,7 @@ const requestLegDirections = async (originCoord, destCoord, goongVehicle) => {
   }
 
   if (!coordinates.length) {
-    throw new Error('Dữ liệu toạ độ đường đi từ Goong bị trống');
+    throw new Error(NO_ROUTE_MESSAGE);
   }
 
   return {
@@ -325,7 +328,9 @@ export const fetchTripRoute = async (userLocation, stops, vehicle = 'bike', plac
       });
     } catch (err) {
       console.warn(`Lỗi Goong Directions chặng ${i + 1} (${from.name} -> ${to.name}):`, err.message);
-      throw new Error(`Không thể tìm tuyến đường từ "${from.name}" đến "${to.name}": ${err.message}`, { cause: err });
+      const action = `Chưa tìm được đường từ "${from.name}" đến "${to.name}"`;
+      if (err.message === NO_ROUTE_MESSAGE) throw new Error(`${action} — ${NO_ROUTE_MESSAGE.toLowerCase()}.`, { cause: err });
+      throw toFriendlyError(err, action);
     }
   }
 

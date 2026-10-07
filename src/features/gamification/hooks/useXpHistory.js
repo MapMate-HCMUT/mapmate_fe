@@ -7,6 +7,7 @@ const fetchPage = (before) => getXpHistoryApi({ limit: XP_HISTORY_PAGE_SIZE, bef
 // Lịch sử XP phân trang kiểu cursor: "Xem thêm" lấy tiếp các dòng cũ hơn.
 export const useXpHistory = (refreshKey) => {
   const [state, setState] = useState({ items: [], cursor: null, isLoading: true, error: null });
+  const [reloadCount, setReloadCount] = useState(0);
 
   // Trang đầu: tải lại mỗi khi refreshKey đổi.
   useEffect(() => {
@@ -17,7 +18,11 @@ export const useXpHistory = (refreshKey) => {
     return () => {
       isActive = false;
     };
-  }, [refreshKey]);
+  }, [refreshKey, reloadCount]);
+  const reload = useCallback(() => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    setReloadCount((count) => count + 1);
+  }, []);
 
   const loadMore = useCallback(async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
@@ -29,5 +34,5 @@ export const useXpHistory = (refreshKey) => {
     }
   }, [state.cursor]);
 
-  return { items: state.items, hasMore: Boolean(state.cursor), isLoading: state.isLoading, error: state.error, loadMore };
+  return { items: state.items, hasMore: Boolean(state.cursor), isLoading: state.isLoading, error: state.error, loadMore, reload };
 };

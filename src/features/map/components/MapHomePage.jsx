@@ -20,6 +20,7 @@ import { ActiveRouteBanner } from './ActiveRouteBanner';
 import { ActiveRouteSidebar } from './ActiveRouteSidebar';
 import { CategoryChips } from './CategoryChips';
 import { FloodAlertBanner } from './FloodAlertBanner';
+import { MapPointCard } from './MapPointCard';
 import { MapQuickActions } from './MapQuickActions';
 import { MapTripPanel } from './MapTripPanel';
 import { MapProviderBadge, MapStatusOverlay } from './MapStatusOverlay';
@@ -55,6 +56,7 @@ export const MapHomePage = () => {
   const transitPrefs = useTransitPrefsStore((state) => state.prefs);
   const setTransitPref = useTransitPrefsStore((state) => state.setPref);
   const routeError = useActiveRouteStore((state) => state.routeError);
+  const retryRoute = useActiveRouteStore((state) => state.retryRoute);
   // Chọn phương án khác cho 1 chặng => dựng lại lộ trình (không tìm lại)
   const selectTransitOption = useCallback((legIndex, optionIndex) => {
     const { routeData, setRouteData } = useActiveRouteStore.getState();
@@ -75,6 +77,8 @@ export const MapHomePage = () => {
           onSelectStop={home.selectStop}
           onStopTrip={home.stopTrip}
           isLoadingRoute={home.isLoadingRoute}
+          routeError={home.routeData?.transit ? null : routeError}
+          onRetryRoute={retryRoute}
           onSetVehicle={home.setVehicle}
           transitPanel={
             <TransitTripPanel
@@ -142,6 +146,8 @@ export const MapHomePage = () => {
                 onSelectStop={home.selectStop}
                 onStopTrip={home.stopTrip}
                 isLoadingRoute={home.isLoadingRoute}
+                routeError={isTransitMode ? null : routeError}
+                onRetryRoute={retryRoute}
               />
             </div>
           )}
@@ -173,6 +179,8 @@ export const MapHomePage = () => {
             onSelectOption={quickFilters.selectOption}
             onLocate={home.locate}
             isLocating={home.isLocating}
+            showLocateHint={home.showLocateHint && !isNavigating}
+            onDismissLocateHint={home.dismissLocateHint}
           />
 
           {home.selectedPlace && !isNavigating ? (
@@ -184,6 +192,10 @@ export const MapHomePage = () => {
                 onDirections={home.showDirections}
                 onAddToItinerary={home.addToItinerary}
               />
+            </div>
+          ) : home.mapPoint && !isNavigating ? (
+            <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
+              <MapPointCard point={home.mapPoint} vehicleEmoji={vehicleEmoji} onClose={home.closeMapPoint} onDirections={home.showPointDirections} onZoomIn={home.zoomToPoint} />
             </div>
           ) : !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:hidden">

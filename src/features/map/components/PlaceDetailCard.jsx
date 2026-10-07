@@ -15,7 +15,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         <PlaceThumb place={place} size="md" />
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-start gap-2">
-            <h3 className="flex-1 font-bold text-base leading-snug text-neutral-900">{place.name}</h3>
+            <h3 className="flex-1 min-w-0 font-bold text-base leading-snug text-neutral-900 line-clamp-3 [overflow-wrap:anywhere]">{place.name}</h3>
             <button
               type="button"
               onClick={onClose}
@@ -25,7 +25,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
               <Icon name="close" className="w-4.5 h-4.5" />
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <PlaceRating rating={place.rating} reviewCount={place.review_count} />
             <span className={`${soft} px-2 py-0.5 rounded-pill text-[11px] font-medium`}>{label}</span>
           </div>
@@ -36,11 +36,11 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
       <dl className="mt-3 space-y-1.5 text-xs text-neutral-600">
         <div className="flex gap-2">
           <dt><Icon name="pin" className="w-4 h-4 text-neutral-400" /></dt>
-          <dd className="flex-1">{place.address}</dd>
+          <dd className="flex-1 min-w-0 [overflow-wrap:anywhere]">{place.address}</dd>
         </div>
         <div className="flex gap-2">
           <dt><Icon name="clock" className="w-4 h-4 text-neutral-400" /></dt>
-          <dd className="flex-1">Giờ mở cửa: {formatPlaceHours(place)}</dd>
+          <dd className="flex-1 min-w-0">Giờ mở cửa: {formatPlaceHours(place)}</dd>
         </div>
       </dl>
 

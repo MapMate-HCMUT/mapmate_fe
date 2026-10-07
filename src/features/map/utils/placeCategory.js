@@ -2,7 +2,9 @@
 export const PLACE_CATEGORIES = {
   food: { label: 'Ăn uống', emoji: '🍜', marker: 'bg-warning-500', soft: 'bg-warning-100 text-warning-700', tile: 'bg-warning-100' },
   cafe: { label: 'Cà phê', emoji: '☕', marker: 'bg-primary-600', soft: 'bg-primary-100 text-primary-700', tile: 'bg-primary-100' },
-  sightseeing: { label: 'Tham quan', emoji: '🏛️', marker: 'bg-info-500', soft: 'bg-info-100 text-info-700', tile: 'bg-info-100' },
+  // Khớp Place.category của backend (attraction / park) — trước đây là "sightseeing" nên chip "Tham quan" không lọc ra gì
+  attraction: { label: 'Tham quan', emoji: '🏛️', marker: 'bg-info-500', soft: 'bg-info-100 text-info-700', tile: 'bg-info-100' },
+  park: { label: 'Công viên', emoji: '🌳', marker: 'bg-success-500', soft: 'bg-success-100 text-success-700', tile: 'bg-success-100' },
   entertainment: { label: 'Giải trí', emoji: '🎭', marker: 'bg-accent-500', soft: 'bg-accent-100 text-accent-700', tile: 'bg-accent-100' },
   shopping: { label: 'Mua sắm', emoji: '🛍️', marker: 'bg-secondary-500', soft: 'bg-secondary-100 text-secondary-700', tile: 'bg-secondary-100' },
 };

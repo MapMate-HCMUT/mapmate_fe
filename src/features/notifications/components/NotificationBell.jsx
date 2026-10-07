@@ -37,7 +37,7 @@ export const NotificationBell = () => {
             )}
           </div>
           <div className="max-h-96 overflow-y-auto px-2">
-            <NotificationList items={list.items} isLoading={list.isLoading} error={list.error} onOpen={list.openNotification} />
+            <NotificationList items={list.items} isLoading={list.isLoading} error={list.error} onOpen={list.openNotification} onRetry={list.reload} />
           </div>
           <Link
             to="/profile?tab=notifications"

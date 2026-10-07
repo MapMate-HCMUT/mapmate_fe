@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PanelLeft, SquarePen } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
+import { ErrorPage } from '../../../components/ErrorPage';
 import { useAiChat } from '../hooks/useAiChat';
 import { useAiOptions } from '../hooks/useAiOptions';
 import { useAiMemory } from '../hooks/useAiMemory';
@@ -9,6 +10,8 @@ import { AiMemoryPanel } from './AiMemoryPanel';
 import { ChatThread } from './ChatThread';
 import { PromptComposer } from './PromptComposer';
 import { SessionSidebar } from './SessionSidebar';
+
+const DESKTOP_QUERY = '(min-width: 1024px)'; // = breakpoint lg của Tailwind (thanh bên cố định thay vì drawer)
 
 // Chọn model AI: Nhanh (rẻ, nhanh) / Thông minh (tư vấn kỹ hơn)
 const ModelToggle = ({ models, value, onChange }) => (
@@ -34,7 +37,8 @@ export const AiPlannerPage = () => {
   const options = useAiOptions();
   const { isAuthenticated } = useAuth();
   const [version, setVersion] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // Desktop: thanh bên mở sẵn. Điện thoại: là drawer che cả màn hình => đóng sẵn, bấm nút mới mở
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.matchMedia(DESKTOP_QUERY).matches);
   const chat = useAiChat({ defaultTier: options.default_model, onSent: () => setVersion((value) => value + 1) });
   const sessions = useAiSessions(version);
   const memory = useAiMemory(version);
@@ -79,8 +83,15 @@ export const AiPlannerPage = () => {
             <ModelToggle models={options.models} value={chat.tier} onChange={chat.setTier} />
           </div>
         </header>
-        <ChatThread messages={chat.messages} isSending={chat.isSending} onSend={chat.send} examples={options.examples} personalized={memory.memory?.suggestions ?? []} llmEnabled={options.llm_enabled} />
-        <PromptComposer onSend={chat.send} isSending={chat.isSending} maxLength={options.prompt_max_length} origin={chat.origin} isLocating={chat.isLocating} onLocate={chat.locateMe} />
+        {chat.pageError ? (
+          // Cùng giao diện với trang lỗi chung; "Thử lại" = gửi lại đúng câu vừa hỏi, cuộc trò chuyện vẫn còn nguyên
+          <ErrorPage kind={chat.pageError.kind} onRetry={chat.retryAfterError} />
+        ) : (
+          <>
+            <ChatThread messages={chat.messages} isSending={chat.isSending} onSend={chat.send} examples={options.examples} personalized={memory.memory?.suggestions ?? []} llmEnabled={options.llm_enabled} />
+            <PromptComposer onSend={chat.send} isSending={chat.isSending} maxLength={options.prompt_max_length} origin={chat.origin} isLocating={chat.isLocating} onLocate={chat.locateMe} />
+          </>
+        )}
       </div>
     </section>
   );

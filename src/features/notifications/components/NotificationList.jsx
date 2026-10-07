@@ -1,9 +1,10 @@
+import { ErrorState } from '../../../components/ErrorState';
 import { NotificationItem } from './NotificationItem';
 
 const SKELETON_ROWS = 3;
 
-export const NotificationList = ({ items, isLoading, error, onOpen }) => {
-  if (error) return <p className="py-6 text-center text-sm text-danger-600">{error.message}</p>;
+export const NotificationList = ({ items, isLoading, error, onOpen, onRetry }) => {
+  if (error) return <ErrorState compact error={error} title="Chưa tải được thông báo" onRetry={onRetry} className="my-2" />;
   if (isLoading && items.length === 0) {
     return (
       <ul className="space-y-2 animate-pulse" aria-label="Đang tải thông báo">

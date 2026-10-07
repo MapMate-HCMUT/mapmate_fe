@@ -11,6 +11,6 @@ const EMPTY = { friends: [], incoming: [], outgoing: [], suggestions: [] };
 // Bạn bè + lời mời + gợi ý, tự tải lại sau mỗi thao tác kết bạn (friendsVersion).
 export const useFriends = () => {
   const version = useSocialStore((state) => state.friendsVersion);
-  const { data, error, isLoading } = useAsyncData(loadAll, version);
-  return { ...(data ?? EMPTY), error, isLoading: isLoading && !data };
+  const { data, error, isLoading, reload } = useAsyncData(loadAll, version, { pageLevel: true });
+  return { ...(data ?? EMPTY), error, isLoading: isLoading && !data, reload };
 };

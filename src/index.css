@@ -165,6 +165,17 @@
   overflow: hidden;
 }
 
+/* Tên địa điểm khi rê chuột lên chấm của bản đồ nền (usePoiHover) */
+.poi-hover-popup .maplibregl-popup-content {
+  padding: 6px 10px;
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-card-hover);
+  pointer-events: none;
+}
+.poi-hover-popup .maplibregl-popup-tip {
+  display: none;
+}
+
 /* Thanh trượt 2 đầu (DualRangeSlider): 2 input chồng nhau, nền trong suốt, chỉ núm kéo nhận chuột/chạm */
 .dual-range {
   position: absolute;
