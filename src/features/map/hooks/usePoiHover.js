@@ -2,7 +2,7 @@ import { Popup } from 'maplibre-gl';
 import { useEffect } from 'react';
 import { basemapPoiAt } from '../utils/mapPoint';
 
-const POPUP_OFFSET_PX = 12; // hiện ngay dưới chấm (phía trên hay bị banner cảnh báo ngập che)
+const POPUP_OFFSET_PX = 12; // hiện ngay dưới chấm (phía trên hay bị các thẻ nổi đầu bản đồ che)
 
 // Rê chuột lên 1 chấm / nhãn địa điểm của bản đồ nền => con trỏ bàn tay + tên địa điểm (chấm chưa có chữ cũng biết là gì),
 // không cần phóng to mới đọc được. Điện thoại không có "rê chuột" => bấm thẳng vào chấm để xem thẻ.

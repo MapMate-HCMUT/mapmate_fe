@@ -42,7 +42,7 @@ const middlePoint = (coordinates) => coordinates[Math.floor(coordinates.length /
 
 /**
  * Kết quả tìm cách đi cho cả chuyến + phương án đang chọn ở mỗi chặng => dữ liệu lộ trình dùng chung với dẫn đường Goong
- * (tổng thời gian, quãng đường, toạ độ để vẽ / kiểm tra ngập trên tuyến...). `transit` giữ nguyên kết quả để đổi phương án.
+ * (tổng thời gian, quãng đường, toạ độ để vẽ trên bản đồ...). `transit` giữ nguyên kết quả để đổi phương án.
  */
 export const buildTransitRouteData = (plans, selected, waypoints) => {
   const legs = plans.map((plan, index) => {

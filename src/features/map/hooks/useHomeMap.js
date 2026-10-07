@@ -1,6 +1,6 @@
 import { LngLatBounds } from 'maplibre-gl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
+import { MAP_DEFAULT_CENTER, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
 import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
 import { useFeatureHint } from '../../../hooks/useFeatureHint';
 import { useToast } from '../../../hooks/useToast';
@@ -13,7 +13,6 @@ import { findPlaceAt } from '../api/getMapPlaces';
 import { fetchTransitTripRoute } from '../api/transitTrip';
 import { useMapStore } from '../stores/mapStore';
 import { enrichAndFilterPlaces } from '../utils/enrichPlaces';
-import { pickMostSevere } from '../utils/floodSeverity';
 import { basemapPoiAt, hitsAppLayer, isSameSpot, nearestPlace } from '../utils/mapPoint';
 import { ALL_CATEGORIES } from '../utils/placeCategory';
 import { getVehicle } from '../utils/quickFilters';
@@ -21,7 +20,7 @@ import { useMapData } from './useMapData';
 import { useMapInstance } from './useMapInstance';
 import { useMapPointInfo } from './useMapPointInfo';
 import { usePoiHover } from './usePoiHover';
-import { useFloodMarkers, useItineraryMarkers, useItineraryRoute, usePlaceMarkers, useUserMarker } from './useMapMarkers';
+import { useItineraryMarkers, useItineraryRoute, usePlaceMarkers, useUserMarker } from './useMapMarkers';
 import { getStoredUserLocation, useUserLocation } from './useUserLocation';
 
 const POINT_ZOOM_STEP = 2;
@@ -34,10 +33,9 @@ export const useHomeMap = () => {
   const redirectMapError = useCallback((error) => redirectOnError(error, { force: true }), [redirectOnError]);
   const { containerRef, map, error: mapError } = useMapInstance(redirectMapError);
   const query = useSearchStore((state) => state.query);
-  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId, activeFloodId } = useMapStore();
-  const { setCategory, setSelectedPlaceId, setActiveFloodId, setVehicle: setMapVehicle } = useMapStore();
+  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId } = useMapStore();
+  const { setCategory, setSelectedPlaceId, setVehicle: setMapVehicle } = useMapStore();
   const { showToast } = useToast();
-  const [isFloodBannerVisible, setIsFloodBannerVisible] = useState(true);
 
   // Lộ trình đang được dẫn đường từ tab Khám phá / Của tôi
   const {
@@ -67,7 +65,7 @@ export const useHomeMap = () => {
     locate();
   }, [dismissLocateHint, locate]);
   // Địa điểm thật quanh vị trí người dùng (chưa có thì quanh trung tâm), tìm theo từ khoá trên Navbar ở server
-  const { places, floodAlerts, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query, redirectOnError);
+  const { places, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query, redirectOnError);
 
   const visiblePlaces = useMemo(
     // Từ khoá đã được server lọc (khớp cả món / địa chỉ) => không lọc lại theo tên ở đây
@@ -86,7 +84,6 @@ export const useHomeMap = () => {
     () => (pickedView && pickedView.id === selectedPlaceId && !visiblePlaces.some((place) => place.id === pickedView.id) ? [...visiblePlaces, pickedView] : visiblePlaces),
     [visiblePlaces, pickedView, selectedPlaceId],
   );
-  const floodAlert = floodAlerts.find((alert) => alert.id === activeFloodId) ?? pickMostSevere(floodAlerts);
 
   // Bấm 1 địa điểm (ghim đỏ / danh sách) => mở thẻ; bấm lại đúng địa điểm đang mở => ẩn thẻ (bật / tắt)
   const selectPlace = useCallback(
@@ -104,16 +101,6 @@ export const useHomeMap = () => {
   );
 
   const clearSelection = useCallback(() => setSelectedPlaceId(null), [setSelectedPlaceId]);
-
-  const selectFloodAlert = useCallback(
-    (alertId) => {
-      setActiveFloodId(alertId);
-      setIsFloodBannerVisible(true);
-      const alert = floodAlerts.find((item) => item.id === alertId);
-      if (alert) flyTo(alert.location.coordinates, MAP_DEFAULT_ZOOM);
-    },
-    [floodAlerts, flyTo, setActiveFloodId],
-  );
 
   // Tự động tìm vị trí người dùng đúng 1 lần duy nhất khi bắt đầu một lộ trình mới
   const navigatedTripIdRef = useRef(null);
@@ -245,7 +232,6 @@ export const useHomeMap = () => {
   );
   // Đi xe công cộng: lớp riêng vẽ từng chặng theo màu tuyến (MapHomePage) thay cho đường xanh của Goong
   useItineraryRoute(map, isNavigating && !routeData?.transit ? routeData?.coordinates : null);
-  useFloodMarkers(map, isNavigating ? [] : floodAlerts, selectFloodAlert);
   useUserMarker(map, isNavigating ? null : userCoordinates);
 
   // Bấm 1 địa điểm / điểm bất kỳ trên bản đồ => thẻ thông tin; bấm lại đúng chỗ đó => ẩn thẻ (bật / tắt).
@@ -361,10 +347,6 @@ export const useHomeMap = () => {
     category,
     setCategory,
     vehicleInfo: getVehicle(vehicle),
-    floodAlert: isFloodBannerVisible ? floodAlert : null,
-    floodAlertCount: floodAlerts.length,
-    focusFloodAlert: () => floodAlert && selectFloodAlert(floodAlert.id),
-    dismissFloodBanner: () => setIsFloodBannerVisible(false),
     isLocating,
     locate: locateMe,
     showLocateHint: locateHint.isVisible && Boolean(map),

@@ -9,11 +9,9 @@ export const useMapStore = create((set) => ({
   radiusKm: null,
   vehicle: DEFAULT_VEHICLE,
   selectedPlaceId: null,
-  activeFloodId: null,
   setCategory: (category) => set({ category, selectedPlaceId: null }),
   setBudgetMax: (budgetMax) => set({ budgetMax }),
   setRadiusKm: (radiusKm) => set({ radiusKm }),
   setVehicle: (vehicle) => set({ vehicle }),
   setSelectedPlaceId: (selectedPlaceId) => set({ selectedPlaceId }),
-  setActiveFloodId: (activeFloodId) => set({ activeFloodId }),
 }));

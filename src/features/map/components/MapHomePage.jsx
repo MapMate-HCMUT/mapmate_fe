@@ -19,7 +19,6 @@ import { useQuickFilters } from '../hooks/useQuickFilters';
 import { ActiveRouteBanner } from './ActiveRouteBanner';
 import { ActiveRouteSidebar } from './ActiveRouteSidebar';
 import { CategoryChips } from './CategoryChips';
-import { FloodAlertBanner } from './FloodAlertBanner';
 import { MapPointCard } from './MapPointCard';
 import { MapQuickActions } from './MapQuickActions';
 import { MapTripPanel } from './MapTripPanel';
@@ -28,7 +27,7 @@ import { PlaceDetailCard } from './PlaceDetailCard';
 import { TrendingCarousel } from './TrendingCarousel';
 import { TrendingSidebar } from './TrendingSidebar';
 
-// Trang chủ: Sidebar (desktop) + Bản đồ toàn màn hình + các lớp nổi (banner ngập, FABs, thẻ chi tiết, dẫn đường Goong).
+// Trang chủ: Sidebar (desktop) + Bản đồ toàn màn hình + các lớp nổi (FABs, thẻ chi tiết, dẫn đường Goong).
 export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
   const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
@@ -103,8 +102,6 @@ export const MapHomePage = () => {
           onCategoryChange={home.setCategory}
           onSelect={home.selectPlace}
           vehicleEmoji={vehicleEmoji}
-          floodAlertCount={home.floodAlertCount}
-          onFloodClick={home.focusFloodAlert}
         />
       )}
 
@@ -124,17 +121,6 @@ export const MapHomePage = () => {
           </div>
           <MapStatusOverlay isReady={home.isMapReady} error={home.mapError} />
           <MapProviderBadge provider={home.mapProvider} />
-
-          {/* Banner cảnh báo điểm ngập nổi trên đầu bản đồ */}
-          {!isNavigating && home.floodAlert && (
-            <div className="absolute z-20 top-3 left-12 right-14 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[440px]">
-              <FloodAlertBanner
-                alert={home.floodAlert}
-                onFocus={home.focusFloodAlert}
-                onClose={home.dismissFloodBanner}
-              />
-            </div>
-          )}
 
           {/* Banner dẫn đường lộ trình Goong nổi trên mobile (desktop đã có sidebar) */}
           {isNavigating && (

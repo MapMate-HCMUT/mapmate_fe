@@ -1,25 +1,15 @@
 import { useEffect, useState } from 'react';
-import { getFloodAlerts } from '../api/getFloodAlerts';
 import { getMapPlaces } from '../api/getMapPlaces';
 
 const RELOAD_DEBOUNCE_MS = 350;
 const CENTER_DECIMALS = 2; // ~1 km: di chuyển GPS lặt vặt không tải lại
 
-// Dữ liệu bản đồ trang chủ: địa điểm thật quanh `center` (vị trí người dùng / mặc định) theo từ khoá trên Navbar + điểm ngập.
+// Dữ liệu bản đồ trang chủ: địa điểm thật quanh `center` (vị trí người dùng / mặc định) theo từ khoá trên Navbar.
 // Mất mạng / máy chủ lỗi => onPageError (chuyển sang trang lỗi); lỗi khác => danh sách trống.
 export const useMapData = (center, query, onPageError) => {
   const [places, setPlaces] = useState([]);
-  const [floodAlerts, setFloodAlerts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const centerKey = center.map((value) => Number(value).toFixed(CENTER_DECIMALS)).join(',');
-
-  useEffect(() => {
-    let isActive = true;
-    getFloodAlerts().then((alerts) => isActive && setFloodAlerts(alerts));
-    return () => {
-      isActive = false;
-    };
-  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -37,5 +27,5 @@ export const useMapData = (center, query, onPageError) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onPageError chỉ dùng khi lỗi, không cần tải lại khi nó đổi
   }, [centerKey, query]);
 
-  return { places, floodAlerts, isLoading };
+  return { places, isLoading };
 };

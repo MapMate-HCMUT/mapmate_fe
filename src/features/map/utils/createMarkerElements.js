@@ -21,20 +21,6 @@ export const createPlaceMarkerElement = (place, isSelected) => {
   return element;
 };
 
-export const createFloodMarkerElement = (alert) => {
-  const isHigh = alert.severity === 'high';
-  const element = document.createElement('div');
-  element.className = 'flood-marker cursor-pointer select-none';
-  element.innerHTML = `
-    <div class="relative flex items-center justify-center w-7 h-7 rounded-full ${
-      isHigh ? 'bg-danger-500 ring-4 ring-danger-200' : 'bg-warning-500 ring-4 ring-warning-200'
-    } text-surface shadow-md">
-      <span class="text-xs">⚠️</span>
-    </div>
-  `;
-  return element;
-};
-
 export const createUserMarkerElement = () => {
   const wrapper = document.createElement('div');
   wrapper.className = 'relative flex items-center justify-center w-8 h-8 pointer-events-none';

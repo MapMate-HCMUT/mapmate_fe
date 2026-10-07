@@ -1,10 +1,10 @@
-import { Sparkles, Trophy, Waves } from 'lucide-react';
+import { Map, Sparkles, Trophy } from 'lucide-react';
 import { Logo } from '../../../components/Logo';
 import { BRAND } from '../../../config/app';
 
 const HIGHLIGHTS = [
   { icon: Sparkles, text: 'AI gợi ý lịch trình theo túi tiền', bg: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30' },
-  { icon: Waves, text: 'Cảnh báo ngập & né đường ngập thời gian thực', bg: 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30' },
+  { icon: Map, text: 'Chỉ đường xe máy, đi bộ, xe buýt & metro', bg: 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30' },
   { icon: Trophy, text: 'Check-in nhận XP, mở khóa huy hiệu', bg: 'bg-amber-500/20 text-amber-200 border-amber-400/30' },
 ];
 

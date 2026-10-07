@@ -11,25 +11,9 @@ export const TrendingSidebar = ({
   onCategoryChange,
   onSelect,
   vehicleEmoji,
-  floodAlertCount,
-  onFloodClick,
 }) => (
   <aside className="hidden lg:flex w-[360px] shrink-0 flex-col bg-surface border-r border-neutral-200">
     <div className="p-4 space-y-4 border-b border-neutral-100">
-      {floodAlertCount > 0 && (
-        <button
-          type="button"
-          onClick={onFloodClick}
-          className="w-full flex items-center gap-3 p-3 rounded-card bg-danger-50 border border-danger-100 text-left hover:bg-danger-100 transition"
-        >
-          <span className="text-xl" aria-hidden="true">🌊</span>
-          <span className="flex-1">
-            <span className="block text-sm font-bold text-danger-700">{floodAlertCount} điểm ngập đang hoạt động</span>
-            <span className="block text-xs text-danger-600">Bấm để xem trên bản đồ</span>
-          </span>
-          <span className="text-danger-500" aria-hidden="true">›</span>
-        </button>
-      )}
       <div>
         <h2 className="text-base font-bold tracking-tight text-neutral-900">🔥 Đang hot tại TP.HCM</h2>
         <p className="text-xs text-neutral-500 mt-0.5">Gợi ý quanh vị trí của bạn</p>
