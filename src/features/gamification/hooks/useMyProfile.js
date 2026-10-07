@@ -6,7 +6,7 @@ import { getMyProfileApi } from '../api/gamificationApi';
 export const useMyProfile = () => {
   const userId = useAuthStore((state) => state.user?.id);
   const updateUser = useAuthStore((state) => state.updateUser);
-  const { data, error, isLoading, reload } = useAsyncData(getMyProfileApi, userId);
+  const { data, error, isLoading, reload } = useAsyncData(getMyProfileApi, userId, { pageLevel: true });
 
   // Đồng bộ level/username mới nhất về thông tin đăng nhập đã lưu (Navbar dùng).
   useEffect(() => {

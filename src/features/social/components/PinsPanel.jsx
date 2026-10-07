@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bookmark } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { ChipGroup } from '../../../components/form/ChipGroup';
 import { useMyPins } from '../hooks/useSocialLists';
 import { PIN_OPTIONS } from '../utils/socialConfig';
@@ -33,7 +34,7 @@ export const PinList = ({ pins, emptyText, showPin = true }) => {
 
 export const PinsPanel = () => {
   const [status, setStatus] = useState('visited'); // tab đang xem — trạng thái hiển thị thuần UI
-  const { pins, isLoading, error } = useMyPins(status);
+  const { pins, isLoading, error, reload } = useMyPins(status);
 
   return (
     <section className="bg-surface rounded-card shadow-card p-5">
@@ -44,8 +45,8 @@ export const PinsPanel = () => {
         </h2>
         <ChipGroup size="sm" options={PIN_OPTIONS} value={status} onChange={setStatus} ariaLabel="Loại ghim" />
       </div>
-      {error && <p className="text-sm text-danger-600">{error.message}</p>}
-      {isLoading ? <div className="h-24 rounded-card bg-neutral-100 animate-pulse" /> : (
+      {error && <ErrorState compact error={error} title="Chưa tải được địa điểm đã ghim" onRetry={reload} />}
+      {isLoading ? <div className="h-24 rounded-card bg-neutral-100 animate-pulse" /> : !error && (
         <PinList pins={pins} emptyText={status === 'visited' ? 'Chưa ghim nơi nào đã đi. Bấm Ghim trên thẻ địa điểm để lưu lại.' : 'Chưa có nơi nào trong danh sách muốn đi.'} />
       )}
     </section>

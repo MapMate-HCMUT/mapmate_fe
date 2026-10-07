@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useErrorRedirect } from './useErrorRedirect';
 
 // Gọi 1 hàm async khi `key` đổi; trả về data/error/isLoading/reload. Bỏ qua kết quả cũ nếu key đã đổi.
-export const useAsyncData = (fetcher, key) => {
+// `pageLevel` = dữ liệu chính của trang: mất mạng / máy chủ lỗi => sang trang lỗi (widget phụ thì báo lỗi tại chỗ).
+export const useAsyncData = (fetcher, key, { pageLevel = false } = {}) => {
   const [state, setState] = useState({ data: null, error: null, isLoading: true });
   const [reloadCount, setReloadCount] = useState(0);
+  const redirectOnError = useErrorRedirect();
 
   useEffect(() => {
     let isActive = true;
     fetcher()
       .then((data) => isActive && setState({ data, error: null, isLoading: false }))
-      .catch((error) => isActive && setState((prev) => ({ data: prev.data, error, isLoading: false })));
+      .catch((error) => {
+        if (!isActive || (pageLevel && redirectOnError(error))) return;
+        setState((prev) => ({ data: prev.data, error, isLoading: false }));
+      });
     return () => {
       isActive = false;
     };

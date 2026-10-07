@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useAuth } from '../../../hooks/useAuth';
+import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
 import { getFeedApi, getPostApi } from '../api/socialApi';
 import { useSocialStore } from '../stores/socialStore';
 import { FEED_PAGE_SIZE, FEED_SCOPES } from '../utils/socialConfig';
@@ -24,6 +25,8 @@ export const useFeed = () => {
   const feedVersion = useSocialStore((state) => state.feedVersion);
   const [scope, setScope] = useState('public');
   const [state, setState] = useState(EMPTY);
+  const [reloadCount, setReloadCount] = useState(0);
+  const redirectOnError = useErrorRedirect();
   const [shared, setShared] = useState({ forId: null, post: null, error: null });
 
   const tag = searchParams.get('tag') ?? '';
@@ -35,11 +38,16 @@ export const useFeed = () => {
     let isActive = true;
     getFeedApi({ scope, tag: tag || undefined, limit: FEED_PAGE_SIZE })
       .then((data) => isActive && setState({ items: data.items, cursor: data.next_cursor, isLoading: false, error: null }))
-      .catch((error) => isActive && setState({ ...EMPTY, isLoading: false, error }));
+      .catch((error) => isActive && !redirectOnError(error) && setState({ ...EMPTY, isLoading: false, error }));
     return () => {
       isActive = false;
     };
-  }, [scope, tag, needsLogin, feedVersion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- redirectOnError chỉ dùng khi lỗi
+  }, [scope, tag, needsLogin, feedVersion, reloadCount]);
+  const reload = () => {
+    setState(EMPTY);
+    setReloadCount((count) => count + 1);
+  };
 
   useEffect(() => {
     if (!sharedPostId) return undefined;
@@ -70,6 +78,7 @@ export const useFeed = () => {
   };
 
   return {
+    reload,
     scope,
     changeScope: (nextScope) => {
       setState(EMPTY);

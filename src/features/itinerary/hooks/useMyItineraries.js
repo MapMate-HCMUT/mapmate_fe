@@ -7,7 +7,7 @@ export const useMyItineraries = () => {
   const version = useItineraryStore((state) => state.version);
   const bumpVersion = useItineraryStore((state) => state.bumpVersion);
   const { showToast } = useToast();
-  const { data, error, isLoading } = useAsyncData(getMyItinerariesApi, version);
+  const { data, error, isLoading, reload } = useAsyncData(getMyItinerariesApi, version, { pageLevel: true });
 
   const remove = async (itinerary) => {
     try {
@@ -19,5 +19,5 @@ export const useMyItineraries = () => {
     }
   };
 
-  return { itineraries: data?.items ?? [], error, isLoading, remove };
+  return { itineraries: data?.items ?? [], error, isLoading, remove, reload };
 };

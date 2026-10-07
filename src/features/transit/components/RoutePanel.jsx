@@ -1,3 +1,4 @@
+import { ErrorState } from '../../../components/ErrorState';
 import { ArrowLeftRight, Clock, X } from 'lucide-react';
 import { formatDistance } from '../utils/transitFormat';
 import { RouteBadge } from './RouteBadge';
@@ -18,7 +19,7 @@ export const RoutePanel = ({ detail, onClose, onSelectStop }) => {
           <X className="w-4 h-4" />
         </button>
       </div>
-      {error && <p className="px-3 text-xs text-danger-600">{error}</p>}
+      {error && <ErrorState compact error={{ message: error }} title="Chưa tải được thông tin tuyến" className="mx-3" />}
 
       {route && (
         <div className="px-3 pb-2 space-y-1.5 text-xs text-neutral-700">

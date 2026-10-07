@@ -1,30 +1,41 @@
 import { LngLatBounds } from 'maplibre-gl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
+import { MAP_DEFAULT_CENTER, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
+import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
+import { useFeatureHint } from '../../../hooks/useFeatureHint';
 import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../../explore';
 import { useActiveRouteStore } from '../../itinerary';
 import { useTransitPrefsStore } from '../../transit';
 import { fetchTripRoute, getStopCoordinates, normalizeTripVehicle } from '../api/goongDirections';
+import { findPlaceAt } from '../api/getMapPlaces';
 import { fetchTransitTripRoute } from '../api/transitTrip';
 import { useMapStore } from '../stores/mapStore';
 import { enrichAndFilterPlaces } from '../utils/enrichPlaces';
-import { pickMostSevere } from '../utils/floodSeverity';
+import { basemapPoiAt, hitsAppLayer, isSameSpot, nearestPlace } from '../utils/mapPoint';
+import { ALL_CATEGORIES } from '../utils/placeCategory';
 import { getVehicle } from '../utils/quickFilters';
 import { useMapData } from './useMapData';
 import { useMapInstance } from './useMapInstance';
-import { useFloodMarkers, useItineraryMarkers, useItineraryRoute, usePlaceMarkers, useUserMarker } from './useMapMarkers';
+import { useMapPointInfo } from './useMapPointInfo';
+import { usePoiHover } from './usePoiHover';
+import { useItineraryMarkers, useItineraryRoute, usePlaceMarkers, useUserMarker } from './useMapMarkers';
 import { getStoredUserLocation, useUserLocation } from './useUserLocation';
+
+const POINT_ZOOM_STEP = 2;
+const MAX_POINT_ZOOM = 18;
 
 // Hook điều phối toàn bộ trang chủ bản đồ: dữ liệu, bộ lọc, lựa chọn, marker, hành động & dẫn đường Goong.
 export const useHomeMap = () => {
-  const { containerRef, map, error: mapError } = useMapInstance();
+  // Lỗi làm cả trang không dùng được (bản đồ không tải, mất mạng, máy chủ lỗi) => trang lỗi riêng
+  const redirectOnError = useErrorRedirect();
+  const redirectMapError = useCallback((error) => redirectOnError(error, { force: true }), [redirectOnError]);
+  const { containerRef, map, error: mapError } = useMapInstance(redirectMapError);
   const query = useSearchStore((state) => state.query);
-  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId, activeFloodId } = useMapStore();
-  const { setCategory, setSelectedPlaceId, setActiveFloodId, setVehicle: setMapVehicle } = useMapStore();
+  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId } = useMapStore();
+  const { setCategory, setSelectedPlaceId, setVehicle: setMapVehicle } = useMapStore();
   const { showToast } = useToast();
-  const [isFloodBannerVisible, setIsFloodBannerVisible] = useState(true);
 
   // Lộ trình đang được dẫn đường từ tab Khám phá / Của tôi
   const {
@@ -46,37 +57,50 @@ export const useHomeMap = () => {
     [map],
   );
   const { coordinates: userCoordinates, isLocating, locate } = useUserLocation(flyTo);
+  // Nút "Vị trí của tôi": lần đầu vào có lời nhắc giải thích; bấm thử hoặc "Đã hiểu" là thôi hiện
+  const locateHint = useFeatureHint('locate');
+  const { dismiss: dismissLocateHint } = locateHint;
+  const locateMe = useCallback(() => {
+    dismissLocateHint();
+    locate();
+  }, [dismissLocateHint, locate]);
   // Địa điểm thật quanh vị trí người dùng (chưa có thì quanh trung tâm), tìm theo từ khoá trên Navbar ở server
-  const { places, floodAlerts, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query);
+  const { places, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query, redirectOnError);
 
   const visiblePlaces = useMemo(
     // Từ khoá đã được server lọc (khớp cả món / địa chỉ) => không lọc lại theo tên ở đây
     () => enrichAndFilterPlaces(places, { origin: userCoordinates, vehicle, category, query: '', budgetMax, radiusKm }),
     [places, userCoordinates, vehicle, category, budgetMax, radiusKm],
   );
-  const selectedPlace = visiblePlaces.find((place) => place.id === selectedPlaceId) ?? null;
-  const floodAlert = floodAlerts.find((alert) => alert.id === activeFloodId) ?? pickMostSevere(floodAlerts);
+  const { point, open: openPoint, close: closePoint } = useMapPointInfo(map, { origin: userCoordinates, vehicle });
+  // Địa điểm MapMate tìm được khi bấm 1 nhãn trên bản đồ nền (có thể không nằm trong 40 điểm đang hiện)
+  const [pickedPlace, setPickedPlace] = useState(null);
+  const pickedView = useMemo(
+    () => (pickedPlace ? enrichAndFilterPlaces([pickedPlace], { origin: userCoordinates, vehicle, category: ALL_CATEGORIES, query: '', budgetMax: null, radiusKm: null })[0] : null),
+    [pickedPlace, userCoordinates, vehicle],
+  );
+  const selectedPlace = visiblePlaces.find((place) => place.id === selectedPlaceId) ?? (pickedView?.id === selectedPlaceId ? pickedView : null);
+  const markerPlaces = useMemo(
+    () => (pickedView && pickedView.id === selectedPlaceId && !visiblePlaces.some((place) => place.id === pickedView.id) ? [...visiblePlaces, pickedView] : visiblePlaces),
+    [visiblePlaces, pickedView, selectedPlaceId],
+  );
 
+  // Bấm 1 địa điểm (ghim đỏ / danh sách) => mở thẻ; bấm lại đúng địa điểm đang mở => ẩn thẻ (bật / tắt)
   const selectPlace = useCallback(
     (placeId) => {
+      closePoint();
+      if (placeId === useMapStore.getState().selectedPlaceId) {
+        setSelectedPlaceId(null);
+        return;
+      }
       setSelectedPlaceId(placeId);
       const place = places.find((item) => item.id === placeId);
       if (place) flyTo(place.location.coordinates);
     },
-    [places, flyTo, setSelectedPlaceId],
+    [places, flyTo, setSelectedPlaceId, closePoint],
   );
 
   const clearSelection = useCallback(() => setSelectedPlaceId(null), [setSelectedPlaceId]);
-
-  const selectFloodAlert = useCallback(
-    (alertId) => {
-      setActiveFloodId(alertId);
-      setIsFloodBannerVisible(true);
-      const alert = floodAlerts.find((item) => item.id === alertId);
-      if (alert) flyTo(alert.location.coordinates, MAP_DEFAULT_ZOOM);
-    },
-    [floodAlerts, flyTo, setActiveFloodId],
-  );
 
   // Tự động tìm vị trí người dùng đúng 1 lần duy nhất khi bắt đầu một lộ trình mới
   const navigatedTripIdRef = useRef(null);
@@ -154,7 +178,7 @@ export const useHomeMap = () => {
         if (requestId === fetchRequestIdRef.current) {
           setIsLoadingRoute(false);
           setRouteError(err.message);
-          showToast(`${transitKey ? 'Lỗi tìm tuyến xe buýt / metro' : 'Lỗi tải đường đi từ Goong'}: ${err.message}`, 'warning');
+          showToast(transitKey ? `Chưa tìm được tuyến xe buýt / metro: ${err.message}` : err.message, 'warning');
         }
       });
 
@@ -196,7 +220,7 @@ export const useHomeMap = () => {
   );
 
   // Hiển thị marker: Nếu đang đi theo lộ trình thì ưu tiên hiện POI của lộ trình
-  usePlaceMarkers(map, isNavigating ? [] : visiblePlaces, selectedPlaceId, selectPlace);
+  usePlaceMarkers(map, isNavigating ? [] : markerPlaces, selectedPlaceId, selectPlace);
   useItineraryMarkers(
     map,
     isNavigating ? activeItinerary?.stops : [],
@@ -208,15 +232,57 @@ export const useHomeMap = () => {
   );
   // Đi xe công cộng: lớp riêng vẽ từng chặng theo màu tuyến (MapHomePage) thay cho đường xanh của Goong
   useItineraryRoute(map, isNavigating && !routeData?.transit ? routeData?.coordinates : null);
-  useFloodMarkers(map, isNavigating ? [] : floodAlerts, selectFloodAlert);
   useUserMarker(map, isNavigating ? null : userCoordinates);
 
-  // Bấm vào vùng trống trên bản đồ => đóng thẻ chi tiết.
+  // Bấm 1 địa điểm / điểm bất kỳ trên bản đồ => thẻ thông tin; bấm lại đúng chỗ đó => ẩn thẻ (bật / tắt).
+  // - Quán / nơi có trong dữ liệu MapMate => thẻ đầy đủ (đánh giá, giá, giờ mở cửa, thêm vào chuyến đi)
+  // - Không có => thẻ điểm: tên nhãn bản đồ / địa chỉ, đường đi từ vị trí của bạn
+  usePoiHover(map, !isNavigating);
+  const lookupIdRef = useRef(0);
+  const openedAtRef = useRef(null); // chỗ đã bấm để mở thẻ đang hiện (nhãn Goong và dữ liệu MapMate lệch nhau vài chục mét)
+  const hasOpenCard = Boolean(selectedPlaceId || point);
   useEffect(() => {
-    if (!map) return undefined;
-    map.on('click', clearSelection);
-    return () => map.off('click', clearSelection);
-  }, [map, clearSelection]);
+    if (!map || isNavigating) return undefined;
+    const closeCards = () => {
+      lookupIdRef.current += 1; // bỏ kết quả tra cứu đang chờ
+      setSelectedPlaceId(null);
+      closePoint();
+    };
+    const onClick = (event) => {
+      if (hitsAppLayer(map, event.point)) return; // trạm buýt... đã có thẻ riêng
+      const poi = basemapPoiAt(map, event.point);
+      const coordinates = poi?.coordinates ?? [event.lngLat.lng, event.lngLat.lat];
+      const openedAt = [openedAtRef.current, point?.coordinates, selectedPlace?.location.coordinates].filter(Boolean);
+      const isOpenHere = hasOpenCard && openedAt.some((spot) => isSameSpot(map, spot, coordinates));
+      // Bấm lại đúng chỗ đang mở, hoặc đang mở thẻ mà bấm ra chỗ trống => ẩn thẻ
+      if (isOpenHere || (hasOpenCard && !poi)) return closeCards();
+      openedAtRef.current = coordinates;
+      const place = nearestPlace(visiblePlaces, coordinates);
+      if (place) {
+        closePoint();
+        setSelectedPlaceId(place.id);
+        return undefined;
+      }
+      setSelectedPlaceId(null);
+      openPoint(coordinates, poi); // hiện ngay thẻ điểm, có dữ liệu MapMate thì đổi sang thẻ đầy đủ
+      const lookupId = ++lookupIdRef.current;
+      findPlaceAt(coordinates, poi?.name ?? null)
+        .then((found) => {
+          if (!found || lookupId !== lookupIdRef.current) return;
+          setPickedPlace(found);
+          closePoint();
+          setSelectedPlaceId(found.id);
+        })
+        .catch(() => {}); // tra không được thì giữ thẻ điểm
+      return undefined;
+    };
+    map.on('click', onClick);
+    return () => map.off('click', onClick);
+  }, [map, isNavigating, hasOpenCard, point, selectedPlace, visiblePlaces, openPoint, closePoint, setSelectedPlaceId]);
+  // Bắt đầu dẫn đường => bỏ ghim
+  useEffect(() => {
+    if (isNavigating) closePoint();
+  }, [isNavigating, closePoint]);
 
   // "Thêm vào lộ trình" => thêm thật vào giỏ chuyến đi DÙNG CHUNG với trang Khám phá
   const draftPlaces = useTripDraftStore((state) => state.places);
@@ -248,10 +314,24 @@ export const useHomeMap = () => {
       };
       setSelectedPlaceId(null); // đóng thẻ địa điểm để không che bản đồ khi dẫn đường
       useActiveRouteStore.getState().startTrip(singleTrip);
-      showToast(`Đang tìm đường đến ${place.name} qua Goong Maps`);
+      showToast(`Đang tìm đường đến ${place.name}…`);
     },
     [vehicle, showToast, setSelectedPlaceId],
   );
+
+  // Chấm Goong đang gộp nhiều địa điểm => "Phóng to xem quanh đây" thay cho tự kéo / chụm tay phóng to
+  const zoomToPoint = useCallback(() => {
+    if (!map || !point) return;
+    closePoint();
+    map.flyTo({ center: point.coordinates, zoom: Math.min(map.getZoom() + POINT_ZOOM_STEP, MAX_POINT_ZOOM), essential: true });
+  }, [map, point, closePoint]);
+
+  // Chỉ đường tới điểm đã ghim (không phải địa điểm trong dữ liệu MapMate)
+  const showPointDirections = useCallback(() => {
+    if (!point) return;
+    const name = point.title ?? 'Vị trí đã ghim';
+    showDirections({ id: null, name, category: 'other', address: point.address ?? '', location: { type: 'Point', coordinates: point.coordinates } });
+  }, [point, showDirections]);
 
   return {
     mapContainerRef: containerRef,
@@ -267,15 +347,17 @@ export const useHomeMap = () => {
     category,
     setCategory,
     vehicleInfo: getVehicle(vehicle),
-    floodAlert: isFloodBannerVisible ? floodAlert : null,
-    floodAlertCount: floodAlerts.length,
-    focusFloodAlert: () => floodAlert && selectFloodAlert(floodAlert.id),
-    dismissFloodBanner: () => setIsFloodBannerVisible(false),
     isLocating,
-    locate,
+    locate: locateMe,
+    showLocateHint: locateHint.isVisible && Boolean(map),
+    dismissLocateHint,
     userCoordinates,
     addToItinerary,
     showDirections,
+    mapPoint: point,
+    closeMapPoint: closePoint,
+    zoomToPoint,
+    showPointDirections,
     // Trạng thái dẫn đường lộ trình từ Khám phá / Của tôi
     activeItinerary,
     isNavigating,

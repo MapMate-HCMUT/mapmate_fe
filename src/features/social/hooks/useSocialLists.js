@@ -14,8 +14,8 @@ export const useTrendingTags = () => {
 export const useMyPins = (status) => {
   const pinsVersion = useSocialStore((state) => state.pinsVersion);
   const fetchPins = useCallback(() => getMyPinsApi(status), [status]);
-  const { data, error, isLoading } = useAsyncData(fetchPins, `${status}:${pinsVersion}`);
-  return { pins: data?.items ?? [], error, isLoading: isLoading && !data };
+  const { data, error, isLoading, reload } = useAsyncData(fetchPins, `${status}:${pinsVersion}`, { pageLevel: true });
+  return { pins: data?.items ?? [], error, isLoading: isLoading && !data, reload };
 };
 
 // Những nơi 1 người đã đi (hiện trên hồ sơ công khai).

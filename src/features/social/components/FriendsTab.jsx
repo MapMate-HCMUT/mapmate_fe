@@ -1,4 +1,5 @@
 import { UserSearch, Inbox, Send, Sparkles, Users, Search } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { LoginPrompt } from '../../../components/LoginPrompt';
 import { useAuth } from '../../../hooks/useAuth';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
@@ -20,10 +21,10 @@ const Section = ({ icon: IconComp, title, count, children, emptyText }) => (
 );
 
 const FriendsContent = () => {
-  const { friends, incoming, outgoing, suggestions, isLoading, error } = useFriends();
+  const { friends, incoming, outgoing, suggestions, isLoading, error, reload } = useFriends();
   const search = usePeopleSearch();
 
-  if (error) return <p className="bg-surface rounded-card shadow-card p-8 text-center text-sm text-danger-600">{error.message}</p>;
+  if (error) return <ErrorState error={error} title="Chưa tải được danh sách bạn bè" onRetry={reload} />;
   if (isLoading) return <div className="h-64 bg-surface rounded-card shadow-card animate-pulse" />;
 
   return (

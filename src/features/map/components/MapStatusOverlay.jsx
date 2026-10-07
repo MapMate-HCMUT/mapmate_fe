@@ -8,7 +8,7 @@ export const MapStatusOverlay = ({ isReady, error }) => {
         <div className="max-w-xs text-center bg-surface rounded-card shadow-card p-6">
           <p className="text-3xl mb-2">🗺️</p>
           <p className="text-sm font-bold text-neutral-800">Không tải được bản đồ</p>
-          <p className="text-xs text-neutral-500 mt-1">Kiểm tra kết nối mạng hoặc API key bản đồ rồi tải lại trang.</p>
+          <p className="text-xs text-neutral-500 mt-1">Dịch vụ bản đồ không phản hồi. Kiểm tra mạng rồi tải lại trang nhé.</p>
         </div>
       </div>
     );
