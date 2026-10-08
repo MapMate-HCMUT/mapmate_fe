@@ -4,16 +4,11 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
 import { getFeedApi, getPostApi } from '../api/socialApi';
 import { useSocialStore } from '../stores/socialStore';
+import { patchPost } from '../utils/patchPost';
 import { FEED_PAGE_SIZE, FEED_SCOPES } from '../utils/socialConfig';
 
 const EMPTY = { items: [], cursor: null, isLoading: true, error: null };
 
-// Áp `change` lên bài có id = targetId, dù nó đứng riêng hay nằm trong 1 bài đăng lại (original).
-const patchPost = (post, targetId, change) => {
-  if (!post) return post;
-  if (post.id === targetId) return change(post);
-  return post.original?.id === targetId ? { ...post, original: change(post.original) } : post;
-};
 
 /**
  * Bảng tin: phạm vi (cộng đồng / bạn bè / của tôi), lọc theo hashtag (?tag= trên URL), phân trang cursor,

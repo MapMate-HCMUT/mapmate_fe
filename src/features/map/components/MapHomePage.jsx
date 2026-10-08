@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { RouteSuggestionsModal, useActiveRouteStore } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
+import { usePlaceReviewActions } from '../../social';
 import {
   buildTransitRouteData,
   RoutePanel,
@@ -31,6 +32,7 @@ import { TrendingSidebar } from './TrendingSidebar';
 export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
   const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
+  const reviewActions = usePlaceReviewActions();
   const quickFilters = useQuickFilters();
   const tripPanel = useMapTripPanel(home.userCoordinates);
   // Khung nổi bên trái bản đồ (1 khung 1 lúc): trạm xe buýt | tuyến xe buýt
@@ -177,6 +179,8 @@ export const MapHomePage = () => {
                 onClose={home.clearSelection}
                 onDirections={home.showDirections}
                 onAddToItinerary={home.addToItinerary}
+                onWriteReview={reviewActions.writeReview}
+                onOpenReviews={reviewActions.openReviews}
               />
             </div>
           ) : home.mapPoint && !isNavigating ? (

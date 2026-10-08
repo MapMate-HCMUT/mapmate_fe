@@ -71,6 +71,8 @@ export const PlacesTab = () => {
           tagLabels={tab.tagLabels}
           onToggleDraft={tab.toggleDraft}
           onShare={tab.sharePlace}
+          onWriteReview={tab.reviews.writeReview}
+          onOpenReviews={tab.reviews.openReviews}
         />
         <DataAttribution items={options.attribution} />
       </div>

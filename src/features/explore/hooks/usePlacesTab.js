@@ -4,7 +4,7 @@ import { useDisclosure } from '../../../hooks/useDisclosure';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useToast } from '../../../hooks/useToast';
 import { createItineraryApi, optionToTrip, stayOverridesOf, stopsToPlaces, updateItineraryApi, useActiveRouteStore, useItineraryStore, useRouteSuggestions, useTripPreview } from '../../itinerary';
-import { useSocialStore } from '../../social';
+import { usePlaceReviewActions, useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../stores/tripDraftStore';
 import { buildTripCriteria, countActiveFilters, relaxFilters } from '../utils/filterConfig';
@@ -26,6 +26,7 @@ export const usePlacesTab = () => {
   const { showToast } = useToast();
   const requireAuth = useRequireAuth();
   const openComposer = useSocialStore((state) => state.openComposer);
+  const placeReviews = usePlaceReviewActions();
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const startTrip = useActiveRouteStore((state) => state.startTrip);
@@ -118,5 +119,6 @@ export const usePlacesTab = () => {
     isEditing: Boolean(draft.editingItineraryId),
     cancelEditing: draft.cancelEditing,
     sharePlace: requireAuth((place) => openComposer({ type: 'place', place })),
+    reviews: placeReviews, // "Viết đánh giá" / "Xem đánh giá" của cộng đồng
   };
 };

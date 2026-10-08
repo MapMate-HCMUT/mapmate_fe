@@ -4,6 +4,7 @@ import { Modal } from '../../../components/Modal';
 import { usePostComposer } from '../hooks/usePostComposer';
 import { POST_CONTENT_MAX_LENGTH, POST_TYPE_OPTIONS, POST_TYPES, VISIBILITY_OPTIONS } from '../utils/socialConfig';
 import { ComposerAttachment } from './ComposerAttachment';
+import { ComposerMediaPicker } from './ComposerMediaPicker';
 import { FriendPicker } from './FriendPicker';
 import { StarRating } from './StarRating';
 import { TagInput } from './TagInput';
@@ -58,6 +59,8 @@ export const PostComposerModal = () => {
           <p className="text-right text-[11px] text-neutral-400">{draft.content.length}/{POST_CONTENT_MAX_LENGTH}</p>
         </div>
 
+        <ComposerMediaPicker media={composer.media} />
+
         <div>
           <Label>Hashtag</Label>
           <TagInput tags={draft.tags} inputValue={draft.tagInput} onInputChange={(tagInput) => composer.update({ tagInput })} onAdd={composer.addTag} onRemove={composer.removeTag} />
@@ -69,8 +72,8 @@ export const PostComposerModal = () => {
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-100">
           <ChipGroup size="sm" options={VISIBILITY_OPTIONS} value={draft.visibility} onChange={(visibility) => composer.update({ visibility })} ariaLabel="Ai xem được" />
-          <button type="submit" disabled={composer.isSubmitting} className="px-6 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold disabled:opacity-70">
-            {composer.isSubmitting ? 'Đang đăng…' : 'Đăng bài'}
+          <button type="submit" disabled={composer.isSubmitting || composer.media.isUploading} className="px-6 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold disabled:opacity-70">
+            {composer.isSubmitting ? 'Đang đăng…' : composer.media.isUploading ? 'Đang tải ảnh…' : 'Đăng bài'}
           </button>
         </div>
       </form>
