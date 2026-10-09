@@ -1,12 +1,12 @@
 // Tải 1 file THẲNG lên Cloudinary bằng chữ ký server vừa cấp (file không đi qua server MapMate).
 // Dùng XMLHttpRequest để có % tiến độ (fetch chưa báo tiến độ tải lên).
-const UPLOAD_FIELDS = ['api_key', 'timestamp', 'signature', 'public_id', 'allowed_formats'];
+const UPLOAD_FIELDS = ['api_key', 'timestamp', 'signature', 'public_id', 'asset_folder', 'allowed_formats', 'eager', 'eager_async']; // eager*: chỉ có với video
 
 export const uploadToCloudinary = (file, signed, onProgress) =>
   new Promise((resolve, reject) => {
     const form = new FormData();
     form.append('file', file);
-    UPLOAD_FIELDS.forEach((field) => form.append(field, signed[field]));
+    UPLOAD_FIELDS.filter((field) => signed[field] != null).forEach((field) => form.append(field, signed[field]));
     const request = new XMLHttpRequest();
     request.open('POST', signed.upload_url);
     request.upload.onprogress = (event) => event.lengthComputable && onProgress(Math.round((event.loaded / event.total) * 100));
