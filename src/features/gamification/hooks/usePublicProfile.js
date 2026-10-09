@@ -8,7 +8,7 @@ export const usePublicProfile = () => {
   const { userId } = useParams();
   const myId = useAuthStore((state) => state.user?.id);
   const fetchProfile = useCallback(() => getPublicProfileApi(userId), [userId]);
-  const { data, error, isLoading, reload } = useAsyncData(fetchProfile, userId);
+  const { data, error, isLoading, reload } = useAsyncData(fetchProfile, userId, { pageLevel: true });
 
   return {
     profile: data?.profile,

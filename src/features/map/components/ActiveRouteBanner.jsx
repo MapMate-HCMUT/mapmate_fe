@@ -1,4 +1,5 @@
 import { CheckCircle2, ChevronRight, Navigation, Square } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { getVehicleLabel } from '../../itinerary';
 import { normalizeTripVehicle } from '../api/goongDirections';
 
@@ -10,6 +11,8 @@ export const ActiveRouteBanner = ({
   onSelectStop,
   onStopTrip,
   isLoadingRoute,
+  routeError = null,
+  onRetryRoute,
 }) => {
   if (!itinerary) return null;
 
@@ -68,7 +71,7 @@ export const ActiveRouteBanner = ({
             {isLoadingRoute ? 'Đang tính…' : currentLeg?.duration?.text || routeData?.totalDuration || '—'}
           </p>
           <p className="text-[11px] text-neutral-500 font-medium">
-            {isLoadingRoute ? 'chờ Goong…' : currentLeg?.distance?.text || routeData?.totalDistance || ''}
+            {isLoadingRoute ? 'đang tìm đường…' : currentLeg?.distance?.text || routeData?.totalDistance || ''}
           </p>
         </div>
       </div>
@@ -108,6 +111,7 @@ export const ActiveRouteBanner = ({
           })}
         </div>
       )}
+      {!isLoadingRoute && routeError && <ErrorState compact error={{ message: routeError }} title="Chưa tìm được đường đi" onRetry={onRetryRoute} />}
     </div>
   );
 };

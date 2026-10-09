@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { RouteSuggestionsModal, useActiveRouteStore } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
+import { usePlaceReviewActions } from '../../social';
 import {
   buildTransitRouteData,
   RoutePanel,
@@ -19,7 +20,7 @@ import { useQuickFilters } from '../hooks/useQuickFilters';
 import { ActiveRouteBanner } from './ActiveRouteBanner';
 import { ActiveRouteSidebar } from './ActiveRouteSidebar';
 import { CategoryChips } from './CategoryChips';
-import { FloodAlertBanner } from './FloodAlertBanner';
+import { MapPointCard } from './MapPointCard';
 import { MapQuickActions } from './MapQuickActions';
 import { MapTripPanel } from './MapTripPanel';
 import { MapProviderBadge, MapStatusOverlay } from './MapStatusOverlay';
@@ -27,10 +28,11 @@ import { PlaceDetailCard } from './PlaceDetailCard';
 import { TrendingCarousel } from './TrendingCarousel';
 import { TrendingSidebar } from './TrendingSidebar';
 
-// Trang chủ: Sidebar (desktop) + Bản đồ toàn màn hình + các lớp nổi (banner ngập, FABs, thẻ chi tiết, dẫn đường Goong).
+// Trang chủ: Sidebar (desktop) + Bản đồ toàn màn hình + các lớp nổi (FABs, thẻ chi tiết, dẫn đường Goong).
 export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
   const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
+  const reviewActions = usePlaceReviewActions();
   const quickFilters = useQuickFilters();
   const tripPanel = useMapTripPanel(home.userCoordinates);
   // Khung nổi bên trái bản đồ (1 khung 1 lúc): trạm xe buýt | tuyến xe buýt
@@ -55,6 +57,7 @@ export const MapHomePage = () => {
   const transitPrefs = useTransitPrefsStore((state) => state.prefs);
   const setTransitPref = useTransitPrefsStore((state) => state.setPref);
   const routeError = useActiveRouteStore((state) => state.routeError);
+  const retryRoute = useActiveRouteStore((state) => state.retryRoute);
   // Chọn phương án khác cho 1 chặng => dựng lại lộ trình (không tìm lại)
   const selectTransitOption = useCallback((legIndex, optionIndex) => {
     const { routeData, setRouteData } = useActiveRouteStore.getState();
@@ -75,6 +78,8 @@ export const MapHomePage = () => {
           onSelectStop={home.selectStop}
           onStopTrip={home.stopTrip}
           isLoadingRoute={home.isLoadingRoute}
+          routeError={home.routeData?.transit ? null : routeError}
+          onRetryRoute={retryRoute}
           onSetVehicle={home.setVehicle}
           transitPanel={
             <TransitTripPanel
@@ -99,8 +104,6 @@ export const MapHomePage = () => {
           onCategoryChange={home.setCategory}
           onSelect={home.selectPlace}
           vehicleEmoji={vehicleEmoji}
-          floodAlertCount={home.floodAlertCount}
-          onFloodClick={home.focusFloodAlert}
         />
       )}
 
@@ -121,17 +124,6 @@ export const MapHomePage = () => {
           <MapStatusOverlay isReady={home.isMapReady} error={home.mapError} />
           <MapProviderBadge provider={home.mapProvider} />
 
-          {/* Banner cảnh báo điểm ngập nổi trên đầu bản đồ */}
-          {!isNavigating && home.floodAlert && (
-            <div className="absolute z-20 top-3 left-12 right-14 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[440px]">
-              <FloodAlertBanner
-                alert={home.floodAlert}
-                onFocus={home.focusFloodAlert}
-                onClose={home.dismissFloodBanner}
-              />
-            </div>
-          )}
-
           {/* Banner dẫn đường lộ trình Goong nổi trên mobile (desktop đã có sidebar) */}
           {isNavigating && (
             <div className="lg:hidden absolute z-20 top-3 inset-x-3 sm:inset-x-auto sm:left-4 sm:right-auto sm:w-[460px]">
@@ -142,6 +134,8 @@ export const MapHomePage = () => {
                 onSelectStop={home.selectStop}
                 onStopTrip={home.stopTrip}
                 isLoadingRoute={home.isLoadingRoute}
+                routeError={isTransitMode ? null : routeError}
+                onRetryRoute={retryRoute}
               />
             </div>
           )}
@@ -173,6 +167,8 @@ export const MapHomePage = () => {
             onSelectOption={quickFilters.selectOption}
             onLocate={home.locate}
             isLocating={home.isLocating}
+            showLocateHint={home.showLocateHint && !isNavigating}
+            onDismissLocateHint={home.dismissLocateHint}
           />
 
           {home.selectedPlace && !isNavigating ? (
@@ -183,7 +179,13 @@ export const MapHomePage = () => {
                 onClose={home.clearSelection}
                 onDirections={home.showDirections}
                 onAddToItinerary={home.addToItinerary}
+                onWriteReview={reviewActions.writeReview}
+                onOpenReviews={reviewActions.openReviews}
               />
+            </div>
+          ) : home.mapPoint && !isNavigating ? (
+            <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
+              <MapPointCard point={home.mapPoint} vehicleEmoji={vehicleEmoji} onClose={home.closeMapPoint} onDirections={home.showPointDirections} onZoomIn={home.zoomToPoint} />
             </div>
           ) : !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:hidden">

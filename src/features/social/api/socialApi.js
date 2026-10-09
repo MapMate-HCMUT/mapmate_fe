@@ -30,3 +30,8 @@ export const removePinApi = (placeId) => apiClient.delete(`/pins/${placeId}`);
 
 // Tìm địa điểm theo tên (dùng khi chọn địa điểm để đăng bài)
 export const searchPlacesByNameApi = (q) => apiClient.get('/places/nearby', { params: { q, radius_km: 20, limit: 6, sort: 'popular' } });
+
+// ── Ảnh / video đính kèm bài viết (Cloudinary) ──
+export const getUploadConfigApi = () => apiClient.get('/uploads/config');
+export const getUploadSignatureApi = (resourceType) => apiClient.post('/uploads/signature', { resource_type: resourceType });
+export const getPlaceApi = (placeId) => apiClient.get(`/places/${placeId}`);

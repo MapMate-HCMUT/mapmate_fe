@@ -1,11 +1,11 @@
+import { ErrorState } from '../../../components/ErrorState';
 import { PlaceResultCard } from './PlaceResultCard';
 
 const SKELETON_ROWS = 4;
 
-export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onReset, draftIds, tagLabels, onToggleDraft, onShare }) => {
-  if (error) {
-    return <p className="bg-surface rounded-card shadow-card p-8 text-center text-sm text-danger-600">{error.message}</p>;
-  }
+export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onRetry, onReset, draftIds, tagLabels, onToggleDraft, onShare, onWriteReview, onOpenReviews }) => {
+  // Lỗi khi đã có danh sách (bấm "Xem thêm") => giữ danh sách, báo gọn bên dưới
+  if (error && places.length === 0) return <ErrorState error={error} title="Chưa tải được danh sách địa điểm" onRetry={onRetry} />;
   if (isLoading && places.length === 0) {
     return (
       <ul className="space-y-3 animate-pulse" aria-label="Đang tải địa điểm">
@@ -38,10 +38,13 @@ export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore,
             inDraft={draftIds.has(place.id)}
             onToggleDraft={onToggleDraft}
             onShare={onShare}
+            onWriteReview={onWriteReview}
+            onOpenReviews={onOpenReviews}
           />
         ))}
       </ul>
-      {hasMore && (
+      {error && <ErrorState compact error={error} title="Chưa tải thêm được" onRetry={onLoadMore} className="mt-3" />}
+      {hasMore && !error && (
         <button type="button" onClick={onLoadMore} disabled={isLoading} className="mt-3 w-full py-2.5 rounded-button bg-surface shadow-card text-sm font-semibold text-primary-700 hover:bg-primary-50 disabled:opacity-60">
           {isLoading ? 'Đang tải…' : 'Xem thêm địa điểm'}
         </button>

@@ -1,16 +1,14 @@
 import { Navigate, Route, Routes } from 'react-router';
+import { ErrorRoutePage } from '../app/ErrorRoutePage';
 import { MainLayout } from '../app/MainLayout';
-import { ComingSoonPage } from '../components/ComingSoonPage';
+import { ErrorPage } from '../components/ErrorPage';
 import { AiPlannerPage } from '../features/ai-planner';
 import { LoginPage } from '../features/auth';
 import { ExplorePage } from '../features/explore';
 import { ProfilePage, PublicProfilePage } from '../features/gamification';
 import { MapHomePage } from '../features/map';
+import { ERROR_KINDS } from '../utils/errorMessages';
 import { GuestOnlyRoute, ProtectedRoute } from './ProtectedRoute';
-
-const PLACEHOLDER_PAGES = [
-  { path: 'alerts', title: 'Cảnh báo ngập', description: 'Theo dõi điểm ngập thời gian thực và chọn tuyến đường an toàn.' },
-];
 
 export const AppRoutes = () => (
   <Routes>
@@ -23,10 +21,8 @@ export const AppRoutes = () => (
       <Route path="users/:userId" element={<PublicProfilePage />} />
       <Route path="explore" element={<ExplorePage />} />
       <Route path="ai-planner" element={<AiPlannerPage />} />
-      {PLACEHOLDER_PAGES.map((page) => (
-        <Route key={page.path} path={page.path} element={<ComingSoonPage title={page.title} description={page.description} />} />
-      ))}
-      <Route path="*" element={<ComingSoonPage title="Không tìm thấy trang" description="Đường dẫn này không tồn tại." />} />
+      <Route path="error" element={<ErrorRoutePage />} />
+      <Route path="*" element={<ErrorPage kind={ERROR_KINDS.NOT_FOUND} />} />
     </Route>
   </Routes>
 );

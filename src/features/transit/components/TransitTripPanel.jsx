@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, Footprints, MapPin, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { CONNECTOR_OPTIONS, formatDistance, formatFare, legMode, OPTION_TAGS, PRIORITY_OPTIONS } from '../utils/transitFormat';
 import { RouteBadge } from './RouteBadge';
 import { TransitLegTimeline } from './TransitLegTimeline';
@@ -150,7 +151,7 @@ export const TransitTripPanel = ({ routeData, isLoading, error, prefs, onChangeP
       <Preferences prefs={prefs} onChangePref={onChangePref} />
 
       {isLoading && <p className="flex items-center gap-1.5 text-xs text-neutral-500"><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Đang tìm tuyến xe buýt / metro…</p>}
-      {error && !isLoading && <p className="text-xs text-danger-600">{error}</p>}
+      {error && !isLoading && <ErrorState compact error={{ message: error }} title="Chưa tìm được tuyến xe buýt / metro" />}
       {!isLoading && plan && (
         <>
           {!plan.options.some((option) => option.kind === 'transit') && (

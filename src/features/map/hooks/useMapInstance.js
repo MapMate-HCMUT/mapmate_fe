@@ -9,12 +9,20 @@ import {
   transformMapRequest,
 } from '../../../config/map';
 import { applyLocalNameLabels, collapseAttribution } from '../../../lib/maplibre';
+import { ERROR_KINDS } from '../../../utils/errorMessages';
+
+const MAP_LOAD_GRACE_MS = 10000; // lỗi lẻ lúc đang tải (1 ô bản đồ, 1 font) thường tự hết — quá 10 giây vẫn chưa có bản đồ mới tính là hỏng
 
 // Khởi tạo 1 instance MapLibre gắn vào containerRef; trả về map khi style đã load xong.
-export const useMapInstance = () => {
+// Bản đồ không tải được => onFatalError (chuyển sang trang lỗi "Không tải được bản đồ").
+export const useMapInstance = (onFatalError) => {
   const containerRef = useRef(null);
   const [map, setMap] = useState(null);
   const [error, setError] = useState(null);
+  const onFatalErrorRef = useRef(onFatalError);
+  useEffect(() => {
+    onFatalErrorRef.current = onFatalError;
+  }, [onFatalError]);
 
   useEffect(() => {
     const instance = new MapLibreMap({
@@ -35,13 +43,25 @@ export const useMapInstance = () => {
     });
     // Chỉ báo "không tải được bản đồ" khi bản đồ CHƯA từng tải xong; lỗi lẻ sau đó (1 ô bản đồ, 1 lớp dữ liệu) chỉ ghi log
     let hasLoaded = false;
-    instance.once('load', () => (hasLoaded = true));
+    let fatalTimer = null;
+    instance.once('load', () => {
+      hasLoaded = true;
+      clearTimeout(fatalTimer);
+    });
     instance.on('error', (event) => {
-      if (!hasLoaded) setError(event.error?.message ?? 'Không tải được bản đồ');
-      else console.warn('[map]', event.error?.message ?? event);
+      console.warn('[map]', event.error?.message ?? event);
+      if (hasLoaded || fatalTimer) return;
+      fatalTimer = setTimeout(() => {
+        if (hasLoaded) return;
+        setError('map');
+        onFatalErrorRef.current?.({ kind: ERROR_KINDS.MAP });
+      }, MAP_LOAD_GRACE_MS);
     });
 
-    return () => instance.remove();
+    return () => {
+      clearTimeout(fatalTimer);
+      instance.remove();
+    };
   }, []);
 
   return { containerRef, map, error };

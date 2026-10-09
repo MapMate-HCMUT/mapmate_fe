@@ -1,4 +1,5 @@
-import { AlertTriangle, Lightbulb, RotateCcw } from 'lucide-react';
+import { AlertTriangle, Lightbulb } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { AiPlaceList } from './AiPlaceList';
 import { AiRouteOptions } from './AiRouteOptions';
 import { ClarifyQuestions } from './ClarifyQuestions';
@@ -51,13 +52,14 @@ const TipsBox = ({ items }) => {
 // 1 câu trả lời của AI: lời tư vấn, tiêu chí đã hiểu, lộ trình / địa điểm thật, cảnh báo, gợi ý hỏi tiếp.
 export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
   if (message.error) {
+    // Lỗi của 1 lượt chat: báo ngay trong khung chat (không rời trang => không mất cuộc trò chuyện) + nút gửi lại
     return (
-      <div className="rounded-card bg-danger-50 p-3 text-sm text-danger-600">
-        <p>{message.error}</p>
-        <button type="button" disabled={isSending} onClick={() => onFollowUp(message.retryText)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold hover:underline disabled:opacity-50">
-          <RotateCcw className="w-3.5 h-3.5" /> Gửi lại
-        </button>
-      </div>
+      <ErrorState
+        compact
+        error={{ message: message.error, kind: message.errorKind }}
+        title="MapMate AI chưa trả lời được"
+        onRetry={isSending ? null : () => onFollowUp(message.retryText)}
+      />
     );
   }
 

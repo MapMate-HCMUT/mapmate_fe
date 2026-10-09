@@ -2,7 +2,6 @@ import { Marker } from 'maplibre-gl';
 import { useEffect } from 'react';
 import { getStopCoordinates } from '../api/goongDirections';
 import {
-  createFloodMarkerElement,
   createItineraryStopMarkerElement,
   createOriginMarkerElement,
   createRouteCalloutElement,
@@ -45,17 +44,6 @@ export const usePlaceMarkers = (map, places, selectedPlaceId, onSelectPlace) => 
     });
     return () => markers.forEach((marker) => marker.remove());
   }, [map, places, selectedPlaceId, onSelectPlace]);
-};
-
-export const useFloodMarkers = (map, floodAlerts, onSelectAlert) => {
-  useEffect(() => {
-    if (!map) return undefined;
-    const markers = floodAlerts.map((alert) => {
-      const el = createFloodMarkerElement(alert);
-      return addMarker(map, el, alert.location.coordinates, () => onSelectAlert(alert.id));
-    });
-    return () => markers.forEach((marker) => marker.remove());
-  }, [map, floodAlerts, onSelectAlert]);
 };
 
 export const useUserMarker = (map, coordinates) => {

@@ -38,4 +38,6 @@ export const useActiveRouteStore = create((set) => ({
   setRouteData: (data) => set({ routeData: data, isLoadingRoute: false, routeError: null }),
   setIsLoadingRoute: (loading) => set({ isLoadingRoute: loading }),
   setRouteError: (error) => set({ routeError: error, isLoadingRoute: false }),
+  // Tìm đường lỗi => "Thử lại": đổi tham chiếu lộ trình để bản đồ tìm đường lại
+  retryRoute: () => set((state) => ({ activeItinerary: state.activeItinerary && { ...state.activeItinerary }, routeError: null, isLoadingRoute: true })),
 }));

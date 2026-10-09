@@ -20,7 +20,7 @@ export const NotificationsPanel = () => {
           </button>
         )}
       </div>
-      <NotificationList items={list.items} isLoading={list.isLoading} error={list.error} onOpen={list.openNotification} />
+      <NotificationList items={list.items} isLoading={list.isLoading} error={list.error} onOpen={list.openNotification} onRetry={list.reload} />
       {list.hasMore && !list.isLoading && (
         <button type="button" onClick={list.loadMore} className="mt-2 w-full py-2 rounded-button text-sm font-semibold text-primary-700 hover:bg-primary-50">
           Xem thêm

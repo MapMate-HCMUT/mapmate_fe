@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
 import { useSearchStore } from '../../../stores/searchStore';
 import { getNearbyPlacesApi } from '../api/placesApi';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
@@ -13,6 +14,8 @@ export const useExplorePlaces = () => {
   const origin = useExploreFilterStore((state) => state.origin);
   const keyword = useSearchStore((state) => state.query); // ô tìm kiếm trên Navbar
   const [state, setState] = useState(EMPTY);
+  const [reloadCount, setReloadCount] = useState(0);
+  const redirectOnError = useErrorRedirect();
 
   const firstPageParams = useMemo(() => buildNearbyParams(filters, origin, keyword, 1), [filters, origin, keyword]);
 
@@ -22,13 +25,15 @@ export const useExplorePlaces = () => {
       setState((prev) => ({ ...prev, isLoading: true }));
       getNearbyPlacesApi({ ...firstPageParams, auto_relax: true })
         .then((data) => isActive && setState({ items: data.items, total: data.total, totalCapped: Boolean(data.total_capped), radiusKm: data.radius_km ?? null, page: 1, hasMore: data.has_more, isLoading: false, error: null, relaxed: data.relaxed ?? null }))
-        .catch((error) => isActive && setState({ ...EMPTY, isLoading: false, error }));
+        .catch((error) => isActive && !redirectOnError(error) && setState({ ...EMPTY, isLoading: false, error }));
     }, SEARCH_DEBOUNCE_MS);
     return () => {
       isActive = false;
       clearTimeout(timer);
     };
-  }, [firstPageParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- redirectOnError chỉ dùng khi lỗi
+  }, [firstPageParams, reloadCount]);
+  const reload = () => setReloadCount((count) => count + 1);
 
   const loadMore = async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
@@ -43,5 +48,5 @@ export const useExplorePlaces = () => {
 
   // Server chỉ đếm tới 1.000 => "1.000+"
   const totalLabel = `${state.total.toLocaleString('vi-VN')}${state.totalCapped ? '+' : ''}`;
-  return { ...state, totalLabel, loadMore, keyword };
+  return { ...state, totalLabel, loadMore, reload, keyword };
 };

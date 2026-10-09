@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { isPageLevelError } from '../../../utils/errorMessages';
 import { useExploreOrigin } from '../../explore';
 import { getAiSessionApi, sendAiMessageApi } from '../api/aiApi';
 
@@ -20,11 +21,15 @@ const loadTier = (fallback) => {
 
 // Ngữ cảnh gửi kèm cho khách chưa đăng nhập (người đã đăng nhập thì server tự nhớ theo session_id).
 // pending = yêu cầu đang chờ (AI vừa hỏi lại / từ chối vì phi thực tế) => câu trả lời ngắn lượt sau được ghép vào.
+// recent_place_ids = nơi vừa gợi ý ở các lượt gần nhất => lượt sau AI đổi gió, không lặp lại (khớp giới hạn của server)
+const RECENT_PLACES_MAX = 60;
 const toContext = (data, previous) => {
   const remembered = data.understood && !data.refusal
     ? { criteria: data.understood.criteria, must_visit_ids: data.understood.must_visit.map((place) => place.id) }
     : { criteria: previous?.criteria ?? null, must_visit_ids: previous?.must_visit_ids ?? [] };
-  return { ...remembered, pending: data.pending ?? null };
+  const suggested = (data.options ?? []).flatMap((option) => option.place_ids ?? []).map(String);
+  const recent = [...new Set([...(previous?.recent_place_ids ?? []), ...suggested])].slice(-RECENT_PLACES_MAX);
+  return { ...remembered, pending: data.pending ?? null, recent_place_ids: recent };
 };
 
 // Tin nhắn AI lưu trong phiên cũ => cùng dạng với câu trả lời mới để hiển thị lại (lộ trình không lưu kèm)
@@ -54,6 +59,8 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
   const [sessionId, setSessionId] = useState(null);
   const [context, setContext] = useState(null);
   const [isSending, setIsSending] = useState(false);
+  // Mất mạng / máy chủ không phản hồi => cả trang AI hiện màn hình lỗi (như khi mất Wi‑Fi), giữ nguyên cuộc trò chuyện
+  const [pageError, setPageError] = useState(null); // { kind, retryText }
   const [tier, setTierState] = useState(() => loadTier(defaultTier));
 
   const setTier = (value) => {
@@ -83,14 +90,27 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
       setContext((prev) => toContext(data, prev));
       onSent?.();
     } catch (error) {
-      setMessages((prev) => [...prev, { id: newId(), role: 'assistant', error: error.message, retryText: text }]);
+      if (isPageLevelError(error)) {
+        setMessages((prev) => prev.slice(0, -1)); // gửi lại sẽ thêm lại đúng câu này
+        setPageError({ kind: error.kind, retryText: text });
+      } else {
+        setMessages((prev) => [...prev, { id: newId(), role: 'assistant', error: error.message, errorKind: error.kind, retryText: text }]);
+      }
     } finally {
       setIsSending(false);
     }
     return true;
   };
 
+  const retryAfterError = () => {
+    const text = pageError?.retryText;
+    setPageError(null);
+    if (text) send(text);
+  };
+  const dismissPageError = () => setPageError(null);
+
   const newChat = () => {
+    setPageError(null);
     setMessages([]);
     setSessionId(null);
     setContext(null);
@@ -110,5 +130,5 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
     setContext(null);
   };
 
-  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe };
+  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe, pageError, retryAfterError, dismissPageError };
 };

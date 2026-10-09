@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { FriendActionButton, UserPinsSection } from '../../social';
+import { FriendActionButton, UserPinsSection, UserPostsSection } from '../../social';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { AchievementGrid } from './AchievementGrid';
 import { LevelProgressCard } from './LevelProgressCard';
@@ -16,7 +16,7 @@ export const PublicProfilePage = () => {
     <section className="flex-1 overflow-y-auto bg-neutral-50">
       <div className="w-full max-w-2xl mx-auto p-4 lg:p-6 space-y-5">
         {isLoading && !profile && <ProfileSkeleton />}
-        {error && !profile && <ProfileError message={error.message} onRetry={reload} />}
+        {error && !profile && <ProfileError error={error} onRetry={reload} />}
         {profile && (
           <>
             <ProfileHeaderCard
@@ -40,6 +40,7 @@ export const PublicProfilePage = () => {
             <LevelProgressCard stats={stats} />
             <AchievementGrid achievements={achievements} />
             <UserPinsSection userId={profile.id} />
+            <UserPostsSection userId={profile.id} isMe={isMe} />
           </>
         )}
       </div>

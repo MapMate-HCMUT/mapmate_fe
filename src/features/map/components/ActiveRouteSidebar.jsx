@@ -19,6 +19,7 @@ import {
   Share2,
   X,
 } from 'lucide-react';
+import { ErrorState } from '../../../components/ErrorState';
 import { useToast } from '../../../hooks/useToast';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
 import { normalizeTripVehicle } from '../api/goongDirections';
@@ -51,6 +52,8 @@ export const ActiveRouteSidebar = ({
   onSelectStop,
   onStopTrip,
   isLoadingRoute,
+  routeError = null,
+  onRetryRoute,
   onSetVehicle,
   transitPanel = null,
 }) => {
@@ -162,6 +165,7 @@ export const ActiveRouteSidebar = ({
             </span>
           </div>
           {!isLoadingRoute && routeData?.durationNote && <p className="text-[11px] text-neutral-500">{routeData.durationNote}</p>}
+          {!isLoadingRoute && routeError && <ErrorState compact error={{ message: routeError }} title="Chưa tìm được đường đi" onRetry={onRetryRoute} />}
 
           <div className="pt-1 flex items-center justify-between">
             <button

@@ -11,6 +11,7 @@ export const useNotificationList = ({ pageSize, enabled = true, onNavigate }) =>
   const setUnreadCount = useNotificationStore((state) => state.setUnreadCount);
   const navigate = useNavigate();
   const [state, setState] = useState({ items: [], cursor: null, isLoading: true, error: null });
+  const [reloadCount, setReloadCount] = useState(0);
 
   const applyPage = useCallback(
     (page, append) => {
@@ -31,7 +32,11 @@ export const useNotificationList = ({ pageSize, enabled = true, onNavigate }) =>
     return () => {
       isActive = false;
     };
-  }, [enabled, pageSize, applyPage]);
+  }, [enabled, pageSize, applyPage, reloadCount]);
+  const reload = () => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    setReloadCount((count) => count + 1);
+  };
 
   const loadMore = async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
@@ -62,5 +67,5 @@ export const useNotificationList = ({ pageSize, enabled = true, onNavigate }) =>
     await markAllNotificationsReadApi().catch(() => {});
   };
 
-  return { ...state, hasMore: Boolean(state.cursor), loadMore, openNotification, markAllRead };
+  return { ...state, hasMore: Boolean(state.cursor), loadMore, reload, openNotification, markAllRead };
 };

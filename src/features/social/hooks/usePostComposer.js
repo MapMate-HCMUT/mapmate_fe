@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '../../../hooks/useToast';
 import { createPostApi } from '../api/socialApi';
 import { useSocialStore } from '../stores/socialStore';
 import { isValidHashtag, normalizeHashtag, POST_MAX_TAGS, POST_TYPES } from '../utils/socialConfig';
 import { useComposerSources } from './useComposerSources';
+import { useMediaAttachments } from './useMediaAttachments';
 
 const createDraft = (preset) => ({
   type: preset?.type ?? POST_TYPES.TEXT,
@@ -11,7 +12,7 @@ const createDraft = (preset) => ({
   itinerary: preset?.itinerary ?? null,
   content: '',
   rating: null,
-  visited: false,
+  visited: preset?.visited ?? false, // mở từ nút "Viết đánh giá" => mặc định đã đến
   tags: preset?.itinerary?.tags ?? [],
   tagInput: '',
   taggedIds: [],
@@ -37,6 +38,9 @@ export const usePostComposer = () => {
   }
 
   const sources = useComposerSources({ isOpen: composer.isOpen, type: draft.type });
+  const media = useMediaAttachments(composer.isOpen);
+  const { reset: resetMedia } = media;
+  useEffect(() => resetMedia(), [composer, resetMedia]); // mở khung mới => bỏ ảnh / video của lần trước
   const update = (changes) => {
     setDraft((prev) => ({ ...prev, ...changes }));
     setError('');
@@ -53,7 +57,9 @@ export const usePostComposer = () => {
   const validate = () => {
     if (draft.type === POST_TYPES.PLACE && !draft.place) return 'Hãy chọn địa điểm muốn giới thiệu';
     if (draft.type === POST_TYPES.ITINERARY && !draft.itinerary) return 'Hãy chọn lộ trình muốn chia sẻ';
-    if (draft.type === POST_TYPES.TEXT && !draft.content.trim()) return 'Hãy viết gì đó trước khi đăng';
+    if (draft.type === POST_TYPES.TEXT && !draft.content.trim() && !media.uploaded.length) return 'Hãy viết gì đó hoặc thêm ảnh trước khi đăng';
+    if (media.isUploading) return 'Đợi ảnh / video tải lên xong rồi đăng nhé';
+    if (media.hasFailed) return 'Có ảnh / video tải lên bị lỗi — bấm "Thử lại" hoặc xoá file đó';
     return '';
   };
 
@@ -75,6 +81,7 @@ export const usePostComposer = () => {
         tags: tags.slice(0, POST_MAX_TAGS),
         tagged_user_ids: draft.taggedIds,
         visibility: draft.visibility,
+        media: media.uploaded,
       });
       showToast('Đã đăng bài lên bảng tin');
       bumpFeed();
@@ -100,5 +107,6 @@ export const usePostComposer = () => {
     isSubmitting,
     submit,
     sources,
+    media,
   };
 };

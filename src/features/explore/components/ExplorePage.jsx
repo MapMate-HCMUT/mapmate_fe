@@ -1,4 +1,4 @@
-import { FeedTab, FriendsTab, PostComposerModal } from '../../social';
+import { FeedTab, FriendsTab } from '../../social';
 import { useExploreTab } from '../hooks/useExploreTab';
 import { EXPLORE_TABS } from '../utils/exploreTabs';
 import { TAB_ICONS } from '../utils/exploreIcons';
@@ -37,7 +37,6 @@ export const ExplorePage = () => {
         </div>
         <ActiveTab />
       </div>
-      <PostComposerModal />
     </section>
   );
 };

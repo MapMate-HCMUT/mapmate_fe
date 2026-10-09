@@ -65,11 +65,14 @@ export const PlacesTab = () => {
           error={places.error}
           hasMore={places.hasMore}
           onLoadMore={places.loadMore}
+          onRetry={places.reload}
           onReset={tab.resetFilters}
           draftIds={tab.draftIds}
           tagLabels={tab.tagLabels}
           onToggleDraft={tab.toggleDraft}
           onShare={tab.sharePlace}
+          onWriteReview={tab.reviews.writeReview}
+          onOpenReviews={tab.reviews.openReviews}
         />
         <DataAttribution items={options.attribution} />
       </div>
