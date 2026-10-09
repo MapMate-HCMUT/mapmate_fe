@@ -46,7 +46,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         </div>
       </dl>
 
-      {/* Đánh giá của người dùng MapMate (chữ, ảnh, video) — tách với điểm của nguồn dữ liệu */}
+      {/* Đánh giá của người dùng MapMate (chữ, ảnh, video) – tách với điểm của nguồn dữ liệu */}
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-input bg-neutral-50 px-3 py-2 text-xs">
         <span className="flex-1 min-w-0 text-neutral-600">
           {community.count > 0 ? (
@@ -61,6 +61,20 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         <button type="button" onClick={() => onWriteReview(place)} className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline">
           <PenSquare className="w-3.5 h-3.5" /> Viết đánh giá
         </button>
+      </div>
+
+      <div className="mt-2.5 pt-2 border-t border-neutral-100 flex items-center justify-between">
+        <a
+          href={`https://www.google.com/search?q=${encodeURIComponent(`${place.name} ${place.address || ''}`.trim())}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-primary-600 hover:underline transition-colors"
+          title={`Tìm "${place.name}" trên Google`}
+        >
+          <Icon name="search" className="w-3.5 h-3.5 text-neutral-400" />
+          <span>Tìm kiếm trên Google</span>
+          <span className="text-[10px] text-neutral-400">↗</span>
+        </a>
       </div>
 
       <div className="grid grid-cols-2 gap-2 mt-3">
