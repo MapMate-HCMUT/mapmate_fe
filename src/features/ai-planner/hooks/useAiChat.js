@@ -21,11 +21,15 @@ const loadTier = (fallback) => {
 
 // Ngữ cảnh gửi kèm cho khách chưa đăng nhập (người đã đăng nhập thì server tự nhớ theo session_id).
 // pending = yêu cầu đang chờ (AI vừa hỏi lại / từ chối vì phi thực tế) => câu trả lời ngắn lượt sau được ghép vào.
+// recent_place_ids = nơi vừa gợi ý ở các lượt gần nhất => lượt sau AI đổi gió, không lặp lại (khớp giới hạn của server)
+const RECENT_PLACES_MAX = 60;
 const toContext = (data, previous) => {
   const remembered = data.understood && !data.refusal
     ? { criteria: data.understood.criteria, must_visit_ids: data.understood.must_visit.map((place) => place.id) }
     : { criteria: previous?.criteria ?? null, must_visit_ids: previous?.must_visit_ids ?? [] };
-  return { ...remembered, pending: data.pending ?? null };
+  const suggested = (data.options ?? []).flatMap((option) => option.place_ids ?? []).map(String);
+  const recent = [...new Set([...(previous?.recent_place_ids ?? []), ...suggested])].slice(-RECENT_PLACES_MAX);
+  return { ...remembered, pending: data.pending ?? null, recent_place_ids: recent };
 };
 
 // Tin nhắn AI lưu trong phiên cũ => cùng dạng với câu trả lời mới để hiển thị lại (lộ trình không lưu kèm)
