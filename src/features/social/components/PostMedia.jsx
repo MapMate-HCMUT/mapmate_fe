@@ -20,6 +20,8 @@ export const PostMedia = ({ media }) => {
               controls
               playsInline
               preload="none"
+              // Bản đã nén chưa làm xong (vừa đăng, video lớn) => phát tạm bản gốc
+              onError={(event) => item.original_url && !event.currentTarget.src.startsWith(item.original_url) && (event.currentTarget.src = item.original_url)}
               className={`w-full rounded-input bg-neutral-900 ${single ? 'max-h-[480px]' : 'aspect-square object-cover col-span-2 sm:col-span-1'}`}
             />
           ) : (

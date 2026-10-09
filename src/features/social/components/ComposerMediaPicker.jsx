@@ -3,9 +3,11 @@ import { formatMegabytes } from '../utils/mediaUpload';
 
 // Chọn ảnh / video đính kèm: ô xem trước + % tải lên + xoá / thử lại. Server chưa bật Cloudinary => ẩn hẳn.
 export const ComposerMediaPicker = ({ media }) => {
-  if (!media.isEnabled) return null;
   const { config, items } = media;
-  const canAdd = items.length < config.max_items;
+  // Hạn mức tháng của MapMate sắp hết => tạm ngưng nhận ảnh / video: nói rõ lý do thay vì giấu nút
+  if (!media.isEnabled) return config.paused_reason ? <p className="text-xs text-warning-700">📷 {config.paused_reason}</p> : null;
+  const filesLeft = config.quota ? Math.max(0, config.quota.files_left - items.length) : null;
+  const canAdd = items.length < config.max_items && filesLeft !== 0;
 
   return (
     <div className="space-y-2">
@@ -54,7 +56,9 @@ export const ComposerMediaPicker = ({ media }) => {
       )}
       <p className="text-[11px] text-neutral-400">
         Tối đa {config.max_items} file · ảnh ≤ {formatMegabytes(config.image_max_bytes)} · {config.max_videos} video ≤ {config.video_max_seconds} giây, {formatMegabytes(config.video_max_bytes)}
+        {filesLeft !== null && <> · hôm nay còn {filesLeft} lượt tải ({config.quota.videos_left} video)</>}
       </p>
+      {config.video_enabled === false && config.paused_reason && <p className="text-xs text-warning-700">{config.paused_reason}</p>}
       {media.notice && <p className="text-xs text-warning-700">{media.notice}</p>}
     </div>
   );

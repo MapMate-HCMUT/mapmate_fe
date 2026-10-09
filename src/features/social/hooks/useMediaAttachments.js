@@ -38,13 +38,18 @@ export const useMediaAttachments = (isOpen) => {
       patch(item.id, { status: 'done', progress: 100, result });
     } catch (error) {
       patch(item.id, { status: 'error', error: error.message });
+      setNotice(error.message); // VD hết lượt hôm nay / MapMate tạm ngưng nhận video — báo rõ, không chỉ hiện "Thử lại"
     }
   };
 
   const addFiles = async (fileList) => {
     setNotice('');
     const current = itemsRef.current;
-    let videos = current.filter((item) => item.kind === 'video').length;
+    const currentVideos = current.filter((item) => item.kind === 'video').length;
+    let videos = currentVideos;
+    // Lượt còn lại hôm nay (server tính) trừ đi file đã chọn trong khung này
+    const filesLeft = (config.quota?.files_left ?? Infinity) - current.length;
+    const videosLeft = (config.quota?.videos_left ?? Infinity) - currentVideos;
     const accepted = [];
     for (const file of Array.from(fileList)) {
       const kind = mediaKindOf(file);
@@ -52,8 +57,14 @@ export const useMediaAttachments = (isOpen) => {
         ? `"${file.name}" không phải ảnh hoặc video`
         : current.length + accepted.length >= config.max_items
           ? `Mỗi bài tối đa ${config.max_items} ảnh / video`
-          : kind === 'video' && videos >= config.max_videos
-            ? `Mỗi bài tối đa ${config.max_videos} video`
+          : accepted.length >= filesLeft
+            ? `Hôm nay bạn đã hết lượt tải (${config.daily_files} file / ngày) — mai bạn tải tiếp nhé`
+            : kind === 'video' && !config.video_enabled
+              ? config.paused_reason ?? 'Hiện chưa nhận video'
+              : kind === 'video' && videos - currentVideos >= videosLeft
+                ? `Hôm nay bạn đã hết lượt tải video (${config.daily_videos} video / ngày) — vẫn đăng ảnh được`
+                : kind === 'video' && videos >= config.max_videos
+                  ? `Mỗi bài tối đa ${config.max_videos} video`
             : file.size > (kind === 'video' ? config.video_max_bytes : config.image_max_bytes)
               ? `"${file.name}" quá lớn (tối đa ${formatMegabytes(kind === 'video' ? config.video_max_bytes : config.image_max_bytes)})`
               : null;
