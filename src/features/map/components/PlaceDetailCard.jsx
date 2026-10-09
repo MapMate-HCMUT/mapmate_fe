@@ -44,6 +44,20 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         </div>
       </dl>
 
+      <div className="mt-2.5 pt-2 border-t border-neutral-100 flex items-center justify-between">
+        <a
+          href={`https://www.google.com/search?q=${encodeURIComponent(`${place.name} ${place.address || ''}`.trim())}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-primary-600 hover:underline transition-colors"
+          title={`Tìm "${place.name}" trên Google`}
+        >
+          <Icon name="search" className="w-3.5 h-3.5 text-neutral-400" />
+          <span>Tìm kiếm trên Google</span>
+          <span className="text-[10px] text-neutral-400">↗</span>
+        </a>
+      </div>
+
       <div className="grid grid-cols-2 gap-2 mt-4">
         <button
           type="button"

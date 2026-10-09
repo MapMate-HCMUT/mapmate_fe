@@ -10,10 +10,12 @@ import {
   CornerDownLeft,
   CornerDownRight,
   CornerUpRight,
+  ExternalLink,
   MapPin,
   MoveRight,
   Footprints,
   Navigation,
+  Search,
   Share2,
   X,
 } from 'lucide-react';
@@ -269,6 +271,26 @@ export const ActiveRouteSidebar = ({
                             · chặng tới: ~{leg.distance.text} ({leg.duration.text})
                           </span>
                         )}
+                      </div>
+
+                      {/* Đường link tìm kiếm Google nhỏ bên dưới */}
+                      <div className="mt-2 pt-1.5 border-t border-neutral-100 flex items-center text-[11px]">
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(`${name} ${address}`.trim())}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`inline-flex items-center gap-1 transition-colors ${
+                            isSelected
+                              ? 'text-blue-600 hover:text-blue-800 font-medium'
+                              : 'text-neutral-400 hover:text-blue-600'
+                          }`}
+                          title={`Tìm "${name}" trên Google`}
+                        >
+                          <Search className="w-3 h-3 shrink-0" />
+                          <span className="hover:underline">Tìm trên Google</span>
+                          <ExternalLink className="w-2.5 h-2.5 opacity-60 shrink-0" />
+                        </a>
                       </div>
                     </div>
                   </div>
