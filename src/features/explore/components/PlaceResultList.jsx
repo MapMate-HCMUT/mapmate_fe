@@ -3,7 +3,7 @@ import { PlaceResultCard } from './PlaceResultCard';
 
 const SKELETON_ROWS = 4;
 
-export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onRetry, onReset, draftIds, tagLabels, onToggleDraft, onShare }) => {
+export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onRetry, onReset, draftIds, tagLabels, onToggleDraft, onShare, onWriteReview, onOpenReviews }) => {
   // Lỗi khi đã có danh sách (bấm "Xem thêm") => giữ danh sách, báo gọn bên dưới
   if (error && places.length === 0) return <ErrorState error={error} title="Chưa tải được danh sách địa điểm" onRetry={onRetry} />;
   if (isLoading && places.length === 0) {
@@ -38,6 +38,8 @@ export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore,
             inDraft={draftIds.has(place.id)}
             onToggleDraft={onToggleDraft}
             onShare={onShare}
+            onWriteReview={onWriteReview}
+            onOpenReviews={onOpenReviews}
           />
         ))}
       </ul>

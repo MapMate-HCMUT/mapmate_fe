@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { FriendActionButton, UserPinsSection } from '../../social';
+import { FriendActionButton, UserPinsSection, UserPostsSection } from '../../social';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { AchievementGrid } from './AchievementGrid';
 import { LevelProgressCard } from './LevelProgressCard';
@@ -40,6 +40,7 @@ export const PublicProfilePage = () => {
             <LevelProgressCard stats={stats} />
             <AchievementGrid achievements={achievements} />
             <UserPinsSection userId={profile.id} />
+            <UserPostsSection userId={profile.id} isMe={isMe} />
           </>
         )}
       </div>

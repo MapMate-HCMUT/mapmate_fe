@@ -1,4 +1,4 @@
-import { Star, Flame, Clock, Phone, Plus, Check, Share2, Bike } from 'lucide-react';
+import { Star, Flame, Clock, Phone, Plus, Check, Share2, Bike, MessageSquareText, PenSquare } from 'lucide-react';
 import { formatDistance } from '../../../utils/calculateDistance';
 import { formatShortVND } from '../../../utils/formatCurrencyVND';
 import { formatDataMonth, formatPlaceAddress, formatPlaceHours, formatPlacePrice, getPlaceRating, isVerifiedPlace, PLACE_SOURCE_LABELS } from '../../../utils/formatPlace';
@@ -39,7 +39,8 @@ const SourceLine = ({ place }) => (
   </p>
 );
 
-export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onShare }) => {
+export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onShare, onWriteReview, onOpenReviews }) => {
+  const community = place.community_rating ?? { average: 0, count: 0 };
   const style = getCategoryStyle(place.category);
   const VehicleIcon = VEHICLE_ICONS[place.travel?.mode] || Bike;
 
@@ -111,6 +112,14 @@ export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onSh
           <button type="button" onClick={() => onShare(place)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-semibold text-neutral-600 hover:bg-neutral-100">
             <Share2 className="w-3.5 h-3.5" />
             Chia sẻ
+          </button>
+          <button type="button" onClick={() => onWriteReview(place)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-semibold text-neutral-600 hover:bg-neutral-100">
+            <PenSquare className="w-3.5 h-3.5" />
+            Đánh giá
+          </button>
+          <button type="button" onClick={() => onOpenReviews(place)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-semibold text-neutral-600 hover:bg-neutral-100">
+            <MessageSquareText className="w-3.5 h-3.5" />
+            {community.count > 0 ? `👥 ${community.average.toFixed(1)}★ (${community.count})` : 'Xem đánh giá'}
           </button>
         </div>
         <PlaceStatusReport place={place} />

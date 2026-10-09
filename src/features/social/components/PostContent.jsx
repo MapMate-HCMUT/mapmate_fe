@@ -4,6 +4,7 @@ import { Avatar } from '../../../components/Avatar';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 import { ItineraryActionButton, ItineraryCard } from '../../itinerary';
 import { PlaceEmbed } from './PlaceEmbed';
+import { PostMedia } from './PostMedia';
 import { StarRating } from './StarRating';
 
 // Nội dung 1 bài viết gốc: tác giả, lời viết, địa điểm / lộ trình đính kèm, hashtag, người được gắn thẻ.
@@ -35,6 +36,8 @@ export const PostContent = ({ post, onTagClick, onCloneItinerary, cloningId }) =
     </div>
 
     {post.content && <p className="text-sm text-neutral-800 whitespace-pre-line break-words">{post.content}</p>}
+
+    <PostMedia media={post.media} />
 
     {post.type === 'place' && (post.place ? <PlaceEmbed place={post.place} /> : <p className="text-xs italic text-neutral-400">Địa điểm này không còn tồn tại.</p>)}
     {post.type === 'itinerary' && (post.itinerary ? (
