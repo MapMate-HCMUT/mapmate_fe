@@ -4,6 +4,8 @@ import { PlaceListSkeleton } from './PlaceListSkeleton';
 
 // Cột trái trên desktop: lọc danh mục + danh sách địa điểm đang hot.
 export const TrendingSidebar = ({
+  featured = [],
+  onSelectFeatured,
   places,
   isLoading,
   selectedPlaceId,
@@ -29,6 +31,16 @@ export const TrendingSidebar = ({
           <p className="text-sm font-semibold text-neutral-700">Không tìm thấy địa điểm phù hợp</p>
           <p className="text-xs text-neutral-500 mt-1">Thử đổi từ khóa, danh mục hoặc nới bộ lọc ngân sách / bán kính.</p>
         </div>
+      )}
+      {featured.length > 0 && (
+        <section className="mb-2 pb-2 border-b border-neutral-100" aria-label="Nổi bật gần bạn">
+          <p className="px-2.5 pt-1 pb-1.5 text-xs font-semibold text-accent-800">✨ Nổi bật gần bạn</p>
+          <ul className="space-y-1">
+            {featured.map((place) => (
+              <PlaceListItem key={place.id} place={place} isSelected={place.id === selectedPlaceId} vehicleEmoji={vehicleEmoji} onSelect={onSelectFeatured} />
+            ))}
+          </ul>
+        </section>
       )}
       {!isLoading && places.length > 0 && (
         <>

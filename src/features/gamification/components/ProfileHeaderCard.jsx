@@ -1,8 +1,11 @@
+import { Camera } from 'lucide-react';
 import { Avatar } from '../../../components/Avatar';
 import { Icon } from '../../../components/Icon';
+import { resolveAssetUrl } from '../../../utils/resolveAssetUrl';
 import { formatNumber } from '../utils/leaderboard';
 import { PROFILE_AVATAR_OVERLAP, PROFILE_AVATAR_SIZE } from '../utils/profileConfig';
 import { formatJoinDate } from '../utils/xpActions';
+import { ProfileCover } from './ProfileCover';
 
 const STAT_ITEMS = [
   { key: 'stars', label: 'Sao', emoji: '🌟', color: 'text-accent-600' },
@@ -12,19 +15,31 @@ const STAT_ITEMS = [
 ];
 
 // Thẻ đầu trang hồ sơ. `actions` là các nút (Chỉnh sửa, Chia sẻ...) — trang công khai có thể bỏ trống.
-// Có `onAvatarClick` (hồ sơ của chính mình) => bấm vào ảnh để đổi ảnh đại diện.
-export const ProfileHeaderCard = ({ profile, stats, actions, onAvatarClick }) => {
+// Có `onAvatarClick` / `onCoverClick` (hồ sơ của chính mình) => bấm để đổi ảnh đại diện / ảnh bìa.
+export const ProfileHeaderCard = ({ profile, stats, actions, onAvatarClick, onCoverClick }) => {
   const values = { ...stats, reports: stats.flood_reports + stats.road_reports };
   const area = [profile.home_area?.city, profile.home_area?.country].filter(Boolean).join(', ');
 
   return (
     <section className="bg-surface rounded-card shadow-card overflow-hidden">
-      <div className="h-28 bg-gradient-to-r from-primary-500 to-secondary-500" />
+      <div className="relative h-32 sm:h-auto sm:aspect-[4/1]">
+        <ProfileCover src={profile.cover_url ? resolveAssetUrl(profile.cover_url) : null} />
+        {onCoverClick && (
+          <button
+            type="button"
+            onClick={onCoverClick}
+            className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-ink/55 hover:bg-ink/70 backdrop-blur-sm text-white text-xs font-semibold transition"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            {profile.cover_url ? 'Đổi ảnh bìa' : 'Thêm ảnh bìa'}
+          </button>
+        )}
+      </div>
       <div className={`px-5 pb-5 ${PROFILE_AVATAR_OVERLAP[PROFILE_AVATAR_SIZE]} text-center`}>
         {onAvatarClick ? (
           <button type="button" onClick={onAvatarClick} aria-label="Đổi ảnh đại diện" title="Đổi ảnh đại diện" className="group relative mx-auto block w-fit rounded-pill">
             <Avatar name={profile.username} src={profile.avatar_url} size={PROFILE_AVATAR_SIZE} className="border-4 border-surface shadow-card" />
-            <span className="absolute inset-1 rounded-pill bg-neutral-900/45 text-white flex flex-col items-center justify-center text-xs font-semibold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition">
+            <span className="absolute inset-1 rounded-pill bg-ink/45 text-white flex flex-col items-center justify-center text-xs font-semibold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition">
               <Icon name="edit" className="w-5 h-5 mb-0.5" />
               Đổi ảnh
             </span>

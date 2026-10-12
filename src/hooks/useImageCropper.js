@@ -7,10 +7,13 @@ const WHEEL_ZOOM_STEP = 0.0015;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 /**
- * Logic khung cắt ảnh vuông: kéo để dịch, thanh trượt / con lăn / chụm 2 ngón để zoom.
+ * Logic khung cắt ảnh: kéo để dịch, thanh trượt / con lăn / chụm 2 ngón để zoom.
+ * `viewport` = cạnh khung vuông (số, ảnh đại diện) hoặc { width, height } (khung chữ nhật, VD ảnh bìa 4:1).
  * Ảnh luôn phủ kín khung (không lộ khoảng trống). `offset` = độ lệch tâm ảnh so với tâm khung (px màn hình).
  */
-export const useImageCropper = (image, viewportSize) => {
+export const useImageCropper = (image, viewport) => {
+  const viewportWidth = typeof viewport === 'number' ? viewport : viewport.width;
+  const viewportHeight = typeof viewport === 'number' ? viewport : viewport.height;
   const [zoom, setZoomState] = useState(CROPPER_MIN_ZOOM);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const viewportRef = useRef(null);
@@ -20,7 +23,7 @@ export const useImageCropper = (image, viewportSize) => {
 
   const naturalWidth = image?.naturalWidth ?? 1;
   const naturalHeight = image?.naturalHeight ?? 1;
-  const baseScale = viewportSize / Math.min(naturalWidth, naturalHeight); // zoom 1 = vừa phủ kín khung
+  const baseScale = Math.max(viewportWidth / naturalWidth, viewportHeight / naturalHeight); // zoom 1 = vừa phủ kín khung
   const scale = baseScale * zoom;
   const displayWidth = naturalWidth * scale;
   const displayHeight = naturalHeight * scale;
@@ -28,11 +31,11 @@ export const useImageCropper = (image, viewportSize) => {
   const clampOffset = useCallback(
     (next, nextZoom) => {
       const s = baseScale * nextZoom;
-      const maxX = (naturalWidth * s - viewportSize) / 2;
-      const maxY = (naturalHeight * s - viewportSize) / 2;
+      const maxX = (naturalWidth * s - viewportWidth) / 2;
+      const maxY = (naturalHeight * s - viewportHeight) / 2;
       return { x: clamp(next.x, -maxX, maxX), y: clamp(next.y, -maxY, maxY) };
     },
-    [baseScale, naturalWidth, naturalHeight, viewportSize],
+    [baseScale, naturalWidth, naturalHeight, viewportWidth, viewportHeight],
   );
 
   const setZoom = useCallback(
@@ -104,11 +107,12 @@ export const useImageCropper = (image, viewportSize) => {
 
   // Vùng đang nằm trong khung, quy về toạ độ pixel gốc của ảnh.
   const getCropArea = useCallback(() => {
-    const size = viewportSize / scale;
-    const x = clamp(naturalWidth / 2 - offset.x / scale - size / 2, 0, naturalWidth - size);
-    const y = clamp(naturalHeight / 2 - offset.y / scale - size / 2, 0, naturalHeight - size);
-    return { x, y, size };
-  }, [viewportSize, scale, naturalWidth, naturalHeight, offset]);
+    const width = viewportWidth / scale;
+    const height = viewportHeight / scale;
+    const x = clamp(naturalWidth / 2 - offset.x / scale - width / 2, 0, naturalWidth - width);
+    const y = clamp(naturalHeight / 2 - offset.y / scale - height / 2, 0, naturalHeight - height);
+    return { x, y, width, height };
+  }, [viewportWidth, viewportHeight, scale, naturalWidth, naturalHeight, offset]);
 
   return {
     viewportRef,

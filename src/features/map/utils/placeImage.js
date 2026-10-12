@@ -171,6 +171,10 @@ export const getPlaceImageUrl = (place) => {
     return KNOWN_LOCAL_IMAGES[place.name];
   }
 
+  // Tầng 1.15: Ảnh chủ cửa hàng tự đăng (tài khoản doanh nghiệp)
+  const ownPhoto = place.gallery?.find((item) => item.type === 'image');
+  if (ownPhoto) return ownPhoto.thumb_url;
+
   // Tầng 1.2: Có image_url hợp lệ trong CSDL (cả URL online lẫn đường dẫn /places/)
   if (place.image_url && typeof place.image_url === 'string' && (place.image_url.startsWith('http') || place.image_url.startsWith('/'))) {
     return place.image_url;

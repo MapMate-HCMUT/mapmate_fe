@@ -1,21 +1,23 @@
-import { FeedTab, FriendsTab } from '../../social';
+import { Navigate } from 'react-router';
+import { FeedTab } from '../../social';
 import { useExploreTab } from '../hooks/useExploreTab';
 import { EXPLORE_TABS } from '../utils/exploreTabs';
 import { TAB_ICONS } from '../utils/exploreIcons';
 import { MineTab } from './MineTab';
 import { PlacesTab } from './PlacesTab';
 
-const TAB_CONTENT = { places: PlacesTab, feed: FeedTab, friends: FriendsTab, mine: MineTab };
+const TAB_CONTENT = { places: PlacesTab, feed: FeedTab, mine: MineTab };
 
-// Trang /explore: bộ lọc địa điểm + lên lộ trình, và mạng xã hội (bảng tin, bạn bè, sổ tay).
+// Trang /explore: tìm địa điểm + lên lộ trình, bảng tin, lộ trình đã lưu (bạn bè nằm ở trang Hồ sơ).
 export const ExplorePage = () => {
-  const { activeTab, setActiveTab } = useExploreTab();
+  const { activeTab, setActiveTab, movedTo } = useExploreTab();
   const ActiveTab = TAB_CONTENT[activeTab];
+  if (movedTo) return <Navigate to={movedTo} replace />;
 
   return (
     <section className="flex-1 overflow-y-auto bg-neutral-50">
       <div className="w-full max-w-7xl mx-auto p-4 lg:p-6 space-y-5">
-        <div role="tablist" aria-label="Khám phá" className="grid grid-cols-4 gap-1 p-1 bg-surface rounded-card shadow-card">
+        <div role="tablist" aria-label="Khám phá" className="grid grid-cols-3 gap-1 p-1 bg-surface rounded-card shadow-card">
           {EXPLORE_TABS.map((tab) => {
             const IconComp = TAB_ICONS[tab.value];
             return (

@@ -1,6 +1,7 @@
 export const PROFILE_TABS = [
   { value: 'overview', label: 'Tổng quan', emoji: '🏆' },
   { value: 'posts', label: 'Bài viết & đánh giá', emoji: '📝' },
+  { value: 'friends', label: 'Bạn bè', emoji: '👥' },
   { value: 'activity', label: 'Hoạt động', emoji: '🗓️' },
   { value: 'notifications', label: 'Thông báo', emoji: '🔔' },
   { value: 'personal', label: 'Thông tin cá nhân', emoji: '🪪' },
@@ -17,6 +18,12 @@ export const AVATAR_OUTPUT_SIZE = 256;
 export const AVATAR_CROP_VIEWPORT = 320; // px — vẫn vừa màn hình điện thoại 360px (modal mobile rộng 100%)
 export const AVATAR_INPUT_MAX_MB = 10;
 export const AVATAR_ACCEPT = 'image/jpeg,image/png,image/webp';
+
+// Ảnh bìa (dải ngang sau ảnh đại diện): cắt 4:1, xuất 1600×400 (nét trên màn hình rộng, thường 100–300KB)
+export const COVER_ASPECT = 4;
+export const COVER_OUTPUT = { width: 1600, height: 400 };
+export const COVER_CROP_MAX_WIDTH = 560; // px — khung cắt co lại trên điện thoại
+export const COVER_INPUT_MAX_MB = 15;
 
 // Avatar minh hoạ có sẵn (DiceBear — miễn phí, không cần key)
 const PRESET_SEEDS = ['Saigon', 'Hanoi', 'Pho', 'Banhmi', 'Lotus', 'Mekong', 'Dalat', 'Hue'];

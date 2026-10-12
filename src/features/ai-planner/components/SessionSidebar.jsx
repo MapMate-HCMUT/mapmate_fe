@@ -102,7 +102,7 @@ export const SessionSidebar = ({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden" role="dialog" aria-modal="true">
           <div
-            className="fixed inset-0 bg-neutral-900/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
             onClick={onClose}
             aria-hidden="true"
           />

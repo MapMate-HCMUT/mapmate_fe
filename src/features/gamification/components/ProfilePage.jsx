@@ -1,7 +1,9 @@
+import { BusinessProfileCard } from '../../business';
 import { useProfilePage } from '../hooks/useProfilePage';
 import { AccountSettingsCard } from './AccountSettingsCard';
 import { AvatarEditorModal } from './AvatarEditorModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { CoverEditorModal } from './CoverEditorModal';
 import { EditProfileModal } from './EditProfileModal';
 import { LeaderboardCard } from './LeaderboardCard';
 import { PersonalInfoModal } from './PersonalInfoModal';
@@ -13,20 +15,21 @@ import { ProfileTabs } from './ProfileTabs';
 
 export const ProfilePage = () => {
   const page = useProfilePage();
-  const { me, leaderboard, tab, editProfile, avatarEditor, personalInfo, changePassword } = page;
+  const { me, leaderboard, tab, editProfile, avatarEditor, coverEditor, personalInfo, changePassword } = page;
 
   return (
     <section className="flex-1 overflow-y-auto bg-neutral-50">
-      <div className="w-full max-w-5xl mx-auto p-4 lg:p-6">
+      <div className="w-full max-w-7xl mx-auto p-4 lg:p-6">
         {me.isLoading && !me.profile && <ProfileSkeleton />}
         {me.error && !me.profile && <ProfileError error={me.error} onRetry={me.reload} />}
         {me.profile && (
-          <div className="grid lg:grid-cols-[1fr_380px] gap-5 items-start">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-5 items-start">
             <div className="space-y-5 min-w-0">
               <ProfileHeaderCard
                 profile={me.profile}
                 stats={me.stats}
                 onAvatarClick={avatarEditor.openEditor}
+                onCoverClick={coverEditor.openEditor}
                 actions={<ProfileActions onEdit={editProfile.openEditor} onShare={page.share} />}
               />
               <ProfileTabs activeTab={tab.activeTab} onChange={tab.setActiveTab} unreadCount={page.unreadCount} />
@@ -43,6 +46,7 @@ export const ProfilePage = () => {
                 error={leaderboard.error}
                 onRetry={leaderboard.reload}
               />
+              <BusinessProfileCard role={me.profile.role} />
               <AccountSettingsCard
                 onEditProfile={editProfile.openEditor}
                 onEditAvatar={avatarEditor.openEditor}
@@ -57,6 +61,7 @@ export const ProfilePage = () => {
 
       <EditProfileModal editor={editProfile} />
       <AvatarEditorModal editor={avatarEditor} username={me.profile?.username} />
+      <CoverEditorModal editor={coverEditor} />
       <PersonalInfoModal editor={personalInfo} />
       <ChangePasswordModal
         modal={changePassword.modal}

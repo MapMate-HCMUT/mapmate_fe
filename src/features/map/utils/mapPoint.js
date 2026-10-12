@@ -4,7 +4,8 @@ import { calculateDistanceKm } from '../../../utils/calculateDistance';
 // - Trúng lớp riêng của MapMate (trạm buýt, tuyến đang vẽ...) => lớp đó tự xử lý
 // - Trúng nhãn địa điểm của bản đồ nền (Goong / OpenFreeMap đều đặt id lớp "poi...") => lấy tên nhãn
 // - Sát 1 địa điểm của MapMate => mở thẻ địa điểm đó (đủ giá, giờ, đánh giá) thay vì thẻ toạ độ
-const APP_LAYER_PREFIXES = ['transit-', 'goong-itinerary-', 'map-point-'];
+export const PLACE_PIN_LAYER = 'mapmate-places-pins'; // ghim địa điểm MapMate (usePlacePins)
+const APP_LAYER_PREFIXES = ['transit-', 'goong-itinerary-', 'map-point-', 'mapmate-'];
 const POI_LAYER_PREFIX = 'poi';
 const QUERY_PADDING_PX = 10; // ngón tay / chuột lệch vài pixel vẫn trúng chấm / nhãn
 const SAME_PLACE_KM = 0.04;
@@ -26,6 +27,13 @@ const POI_KIND_LABELS = {
 
 // Chấm / nhãn địa điểm của bản đồ nền ngay chỗ bấm (hoặc rê chuột): { name, coordinates, kindLabel, clusterCount } hoặc null.
 // Goong gộp nhiều địa điểm gần nhau vào 1 chấm (clusterCount > 1) — phải phóng to mới thấy từng nơi.
+// Ghim địa điểm MapMate tại chỗ bấm / rê chuột (ghim đang chọn được ưu tiên vì vẽ trên cùng)
+export const placePinAt = (map, point) => {
+  if (!map.getLayer(PLACE_PIN_LAYER)) return null;
+  const feature = map.queryRenderedFeatures(boxAround(point), { layers: [PLACE_PIN_LAYER] })[0];
+  return feature ? { id: feature.properties.id, name: feature.properties.name, coordinates: feature.geometry.coordinates } : null;
+};
+
 export const basemapPoiAt = (map, point) => {
   const feature = map
     .queryRenderedFeatures(boxAround(point))

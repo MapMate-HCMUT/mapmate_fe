@@ -11,7 +11,7 @@ const labelOf = (options, value) => options.find((item) => item.value === value)
 
 // Chặng đang xem: điểm đến ghi to, bấm để xem trên bản đồ; chuyến nhiều điểm thì có nút chặng trước / sau
 const LegHeader = ({ legIndex, total, fromName, toName, onSelectLeg }) => (
-  <div className="rounded-xl bg-neutral-900 p-3 text-white">
+  <div data-theme="light" className="rounded-xl bg-ink p-3 text-white">
     <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/70">
       <span>{total > 1 ? `Chặng ${legIndex + 1}/${total}` : 'Đi tới'}</span>
       {total > 1 && (
@@ -144,7 +144,7 @@ export const TransitTripPanel = ({ routeData, isLoading, error, prefs, onChangeP
   const plan = plans[legIndex];
 
   return (
-    <section className="border-b border-neutral-200 bg-white p-3 space-y-2" aria-label="Đi bằng xe buýt và metro">
+    <section className="border-b border-neutral-200 bg-surface p-3 space-y-2" aria-label="Đi bằng xe buýt và metro">
       {plan && waypoints[legIndex + 1] && (
         <LegHeader legIndex={legIndex} total={plans.length} fromName={waypoints[legIndex]?.name} toName={waypoints[legIndex + 1].name} onSelectLeg={onSelectLeg} />
       )}

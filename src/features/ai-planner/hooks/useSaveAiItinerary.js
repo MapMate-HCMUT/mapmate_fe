@@ -27,7 +27,7 @@ export const useSaveAiItinerary = (criteria) => {
       });
       setSaved((prev) => ({ ...prev, [option.key]: itinerary }));
       bumpVersion();
-      showToast('Đã lưu — xem lại ở Khám phá › Của tôi');
+      showToast('Đã lưu — xem lại ở Khám phá › Lộ trình của tôi');
     } catch (error) {
       showToast(error.message, 'danger');
     } finally {

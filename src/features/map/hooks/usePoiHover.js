@@ -1,6 +1,6 @@
 import { Popup } from 'maplibre-gl';
 import { useEffect } from 'react';
-import { basemapPoiAt } from '../utils/mapPoint';
+import { basemapPoiAt, placePinAt } from '../utils/mapPoint';
 
 const POPUP_OFFSET_PX = 12; // hiện ngay dưới chấm (phía trên hay bị các thẻ nổi đầu bản đồ che)
 
@@ -22,7 +22,8 @@ export const usePoiHover = (map, enabled) => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = null;
-        const poi = basemapPoiAt(map, event.point);
+        const pin = placePinAt(map, event.point);
+        const poi = pin ? { name: pin.name, coordinates: pin.coordinates, kindLabel: 'MapMate' } : basemapPoiAt(map, event.point);
         if (!poi) return hide();
         map.getCanvas().style.cursor = 'pointer';
         if (poi.name === currentName) return undefined;

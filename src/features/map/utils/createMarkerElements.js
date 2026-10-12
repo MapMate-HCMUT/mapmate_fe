@@ -1,26 +1,3 @@
-import { getCategory } from './placeCategory';
-
-export const createPlaceMarkerElement = (place, isSelected) => {
-  const { emoji } = getCategory(place.category);
-  const element = document.createElement('div');
-  element.className = `place-marker cursor-pointer select-none transition-transform duration-200 ${
-    isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
-  }`;
-  element.innerHTML = `
-    <div class="relative flex items-center justify-center w-9 h-9 rounded-full bg-surface shadow-marker border-2 ${
-      isSelected ? 'border-primary-600 ring-2 ring-primary-200' : 'border-neutral-200'
-    }">
-      <span class="text-base">${emoji}</span>
-      ${
-        place.is_trending
-          ? '<span class="absolute -top-1 -right-1 w-3 h-3 bg-accent-500 rounded-full border-2 border-surface"></span>'
-          : ''
-      }
-    </div>
-  `;
-  return element;
-};
-
 export const createUserMarkerElement = () => {
   const wrapper = document.createElement('div');
   wrapper.className = 'relative flex items-center justify-center w-8 h-8 pointer-events-none';
@@ -99,7 +76,7 @@ export const createItineraryStopMarkerElement = (stop, index, isLast = false, is
 export const createRouteCalloutElement = (distanceText, durationText) => {
   const el = document.createElement('div');
   el.className =
-    'route-callout-badge bg-white px-2.5 py-1 rounded-md shadow-md border border-neutral-300 text-center pointer-events-none select-none z-30';
+    'route-callout-badge bg-surface px-2.5 py-1 rounded-md shadow-md border border-neutral-300 text-center pointer-events-none select-none z-30';
   el.innerHTML = `
     <div class="text-neutral-900 text-xs font-extrabold leading-tight whitespace-nowrap">${distanceText}</div>
     <div class="text-neutral-600 text-[11px] font-medium leading-tight whitespace-nowrap mt-0.5">${durationText}</div>

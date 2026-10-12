@@ -10,6 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <title>MapMate — Bạn đồng hành trên mọi hành trình</title>
+    <!-- Đặt nền sáng/tối trước khi tải app (khớp src/stores/themeStore.js) => không nháy nền trắng -->
+    <script>
+      (function () {
+        var pref = 'system';
+        try { pref = localStorage.getItem('mapmate.theme') || 'system'; } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

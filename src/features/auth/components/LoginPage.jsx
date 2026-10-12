@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { ShieldCheck } from 'lucide-react';
 import { FormAlert } from '../../../components/form/FormAlert';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../stores/authStore';
 import { googleLoginApi } from '../api/authApi';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
+import { ACCOUNT_TYPES } from '../utils/accountTypes';
+import { AccountTypePicker } from './AccountTypePicker';
 import { AuthLayout } from './AuthLayout';
+
+const SUBTITLES = {
+  [ACCOUNT_TYPES.PERSONAL]: 'Đăng nhập nhanh bằng tài khoản Google để trải nghiệm đầy đủ tính năng 🚀',
+  [ACCOUNT_TYPES.BUSINESS]: 'Đăng nhập bằng Google, sau đó chọn vị trí cửa hàng trên bản đồ và gói phù hợp 🏪',
+};
 
 // Logo đa màu sắc chuẩn Google
 const GoogleIcon = () => (
@@ -33,6 +41,10 @@ export const LoginPage = () => {
   const setSession = useAuthStore((state) => state.setSession);
   const { showToast } = useToast();
   const { goToRedirect } = useAuthRedirect();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // ?as=business: đến từ trang "MapMate cho doanh nghiệp"
+  const [accountType, setAccountType] = useState(searchParams.get('as') === ACCOUNT_TYPES.BUSINESS ? ACCOUNT_TYPES.BUSINESS : ACCOUNT_TYPES.PERSONAL);
   const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
@@ -42,9 +54,12 @@ export const LoginPage = () => {
     (session) => {
       setSession(session, remember);
       showToast(`Chào mừng ${session.user.username} đến với MapMate!`);
-      goToRedirect();
+      // Đã là doanh nghiệp => thẳng vào trang quản lý; chọn "Chủ cửa hàng" lần đầu => bước đăng ký cửa hàng
+      if (session.user.role === 'business' && !searchParams.get('redirect')) navigate('/business', { replace: true });
+      else if (accountType === ACCOUNT_TYPES.BUSINESS) navigate('/business/register', { replace: true });
+      else goToRedirect();
     },
-    [setSession, remember, showToast, goToRedirect],
+    [setSession, remember, showToast, goToRedirect, accountType, navigate, searchParams],
   );
 
   const handleGoogleLogin = useCallback(
@@ -155,11 +170,11 @@ export const LoginPage = () => {
   return (
     <AuthLayout
       title="Đăng nhập"
-      subtitle="Đăng nhập nhanh bằng tài khoản Google để trải nghiệm đầy đủ tính năng 🚀"
+      subtitle={SUBTITLES[accountType]}
       footer={
-        <div className="space-y-2 text-xs text-neutral-500">
-          <p className="flex items-center justify-center gap-1.5 text-neutral-600">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+        <div className="space-y-2 text-xs text-white/70">
+          <p className="flex items-center justify-center gap-1.5 text-white/85">
+            <ShieldCheck className="w-4 h-4 text-emerald-300" />
             <span>Bảo mật dữ liệu cá nhân & đồng bộ lộ trình an toàn</span>
           </p>
           <p>Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ & Chính sách của MapMate.</p>
@@ -167,6 +182,7 @@ export const LoginPage = () => {
       }
     >
       <div className="space-y-5">
+        <AccountTypePicker value={accountType} onChange={setAccountType} />
         <FormAlert message={formError} />
 
         {/* Nút đăng nhập Google chính thức */}
@@ -175,7 +191,7 @@ export const LoginPage = () => {
             type="button"
             onClick={handleCustomButtonClick}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 font-bold text-sm shadow-xs transition hover:shadow-md cursor-pointer disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border border-neutral-300 bg-surface hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 font-bold text-sm shadow-xs transition hover:shadow-md cursor-pointer disabled:opacity-60"
           >
             <GoogleIcon />
             <span>{isLoading ? 'Đang kết nối Google…' : 'Tiếp tục với Google'}</span>

@@ -8,28 +8,30 @@ import { RelaxedNotice } from './RelaxedNotice';
 import { ResultToolbar } from './ResultToolbar';
 import { TripDraftPanel } from './TripDraftPanel';
 
-// Tab "Địa điểm": cột bộ lọc · kết quả · giỏ chuyến đi (desktop 3 cột, mobile xếp dọc + bộ lọc dạng hộp thoại).
+// Tab "Địa điểm": danh sách địa điểm ở giữa (chính), khung chuyến đi bên phải; bộ lọc chỉ hiện khi bấm nút "Bộ lọc".
 export const PlacesTab = () => {
   const { filterSheetRef, ...tab } = usePlacesTab();
   const { filters, options, places, draft, routes } = tab;
-  const filterPanel = (
-    <FilterPanel
-      filters={filters}
-      options={options}
-      onChange={tab.setFilter}
-      onReset={tab.resetFilters}
-      origin={tab.origin.origin}
-      isLocating={tab.origin.isLocating}
-      onLocate={tab.origin.locateMe}
-      activeCount={tab.activeFilterCount}
+  const tripPanel = (
+    <TripDraftPanel
+      places={draft.places}
+      preview={tab.preview}
+      arrange={tab.arrange}
+      tripName={draft.tripName}
+      onNameChange={draft.setTripName}
+      onSave={tab.saveDraft}
+      isSaving={tab.isSaving}
+      isEditing={tab.isEditing}
+      onCancelEdit={tab.cancelEditing}
+      onRemove={draft.removePlace}
+      onClear={draft.clearPlaces}
+      onSuggest={tab.suggestRoutes}
+      isSuggesting={routes.isSuggesting}
     />
   );
 
   return (
-    <div className="grid lg:grid-cols-[300px_1fr] xl:grid-cols-[300px_1fr_300px] gap-5 items-start">
-      {/* Cột bộ lọc cao hơn màn hình => tự cuộn riêng để luôn với tới được mọi mục */}
-      <aside className="hidden lg:block bg-surface rounded-card shadow-card p-5 lg:sticky lg:top-0 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto">{filterPanel}</aside>
-
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
       <div className="min-w-0">
         <ResultToolbar
           total={places.totalLabel}
@@ -43,22 +45,8 @@ export const PlacesTab = () => {
           onOpenFilters={tab.filterSheet.open}
         />
         {places.relaxed && !places.isLoading && <RelaxedNotice relaxed={places.relaxed} onApply={tab.applyRelaxed} />}
-        <div className="xl:hidden mb-3">
-          <TripDraftPanel
-            places={draft.places}
-            preview={tab.preview}
-            tripName={draft.tripName}
-            onNameChange={draft.setTripName}
-            onSave={tab.saveDraft}
-            isSaving={tab.isSaving}
-            isEditing={tab.isEditing}
-            onCancelEdit={tab.cancelEditing}
-            onRemove={draft.removePlace}
-            onClear={draft.clearPlaces}
-            onSuggest={tab.suggestRoutes}
-            isSuggesting={routes.isSuggesting}
-          />
-        </div>
+        {/* Mobile / tablet: khung chuyến đi nằm trên danh sách (desktop ở cột phải) */}
+        <div className="lg:hidden mb-3">{tripPanel}</div>
         <PlaceResultList
           places={places.items}
           isLoading={places.isLoading}
@@ -77,28 +65,25 @@ export const PlacesTab = () => {
         <DataAttribution items={options.attribution} />
       </div>
 
-      <aside className="hidden xl:block xl:sticky xl:top-0">
-        <TripDraftPanel
-          places={draft.places}
-          preview={tab.preview}
-          tripName={draft.tripName}
-          onNameChange={draft.setTripName}
-          onSave={tab.saveDraft}
-          isSaving={tab.isSaving}
-          isEditing={tab.isEditing}
-          onCancelEdit={tab.cancelEditing}
-          onRemove={draft.removePlace}
-          onClear={draft.clearPlaces}
-          onSuggest={tab.suggestRoutes}
-          isSuggesting={routes.isSuggesting}
-        />
-      </aside>
+      {/* Cột phải luôn thấy khi cuộn danh sách; dài hơn màn hình thì tự cuộn riêng */}
+      <aside className="hidden lg:block lg:sticky lg:top-0 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto scrollbar-none">{tripPanel}</aside>
 
-      <Modal isOpen={tab.filterSheet.isOpen} title="Bộ lọc" onClose={tab.filterSheet.close} containerRef={filterSheetRef}>
-        {filterPanel}
-        <button type="button" onClick={tab.filterSheet.close} className="mt-6 w-full py-3 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold">
-          Xem {places.totalLabel} địa điểm
-        </button>
+      <Modal isOpen={tab.filterSheet.isOpen} title="Bộ lọc" onClose={tab.filterSheet.close} containerRef={filterSheetRef} size="lg">
+        <FilterPanel
+          filters={filters}
+          options={options}
+          onChange={tab.setFilter}
+          onReset={tab.resetFilters}
+          origin={tab.origin.origin}
+          isLocating={tab.origin.isLocating}
+          onLocate={tab.origin.locateMe}
+          activeCount={tab.activeFilterCount}
+        />
+        <div className="sticky -bottom-6 sm:-bottom-7 -mx-6 sm:-mx-7 mt-6 px-6 sm:px-7 py-3 bg-surface border-t border-neutral-100">
+          <button type="button" onClick={tab.filterSheet.close} className="w-full py-3 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold">
+            Xem {places.totalLabel} địa điểm
+          </button>
+        </div>
       </Modal>
       <RouteSuggestionsModal routes={routes} onSelect={tab.selectSuggestion} onShowOnMap={tab.showOnMap} />
     </div>

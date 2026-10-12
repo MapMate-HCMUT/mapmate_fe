@@ -73,7 +73,7 @@ export const ActiveRouteSidebar = ({
   return (
     <aside className="hidden lg:flex w-[400px] shrink-0 flex-col bg-surface border-r border-neutral-200 h-full overflow-hidden shadow-lg select-none">
       {/* 1. Header chọn phương tiện di chuyển chuẩn Goong Maps */}
-      <div className="p-3 bg-white border-b border-neutral-200 space-y-3">
+      <div className="p-3 bg-surface border-b border-neutral-200 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-xl" role="radiogroup" aria-label="Phương tiện">
             {ROUTE_VEHICLES.map(({ value, label, icon: VehicleIcon }) => (
@@ -144,7 +144,7 @@ export const ActiveRouteSidebar = ({
       {currentVehicle === 'bus' && transitPanel}
 
       {/* 3. Thẻ kết quả lộ trình Goong (Route Card) */}
-      <div className={`p-3 border-b border-neutral-200 bg-white ${currentVehicle === 'bus' && transitPanel ? 'hidden' : ''}`}>
+      <div className={`p-3 border-b border-neutral-200 bg-surface ${currentVehicle === 'bus' && transitPanel ? 'hidden' : ''}`}>
         <div className="p-3.5 rounded-2xl border border-blue-200 bg-blue-50/60 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950 truncate max-w-[240px]">
@@ -196,7 +196,7 @@ export const ActiveRouteSidebar = ({
             <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400 px-1">
               Chỉ dẫn từng ngã rẽ ({routeData.steps.length} bước)
             </h4>
-            <div className="space-y-1 rounded-xl border border-neutral-200 bg-white divide-y divide-neutral-100 shadow-xs">
+            <div className="space-y-1 rounded-xl border border-neutral-200 bg-surface divide-y divide-neutral-100 shadow-xs">
               {routeData.steps.map((step, idx) => (
                 <div key={idx} className="p-2.5 flex items-start gap-2.5 text-xs">
                   {getManeuverIcon(step.maneuver)}
@@ -236,7 +236,7 @@ export const ActiveRouteSidebar = ({
                       ? 'border-blue-500 bg-blue-50/50 shadow-sm ring-1 ring-blue-500/30'
                       : isPassed
                       ? 'border-neutral-200 bg-neutral-50/70 opacity-70'
-                      : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50'
+                      : 'border-neutral-200 bg-surface hover:border-neutral-300 hover:bg-neutral-50'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">

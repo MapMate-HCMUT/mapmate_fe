@@ -1,7 +1,7 @@
 import { PROFILE_TABS } from '../utils/profileConfig';
 
 export const ProfileTabs = ({ activeTab, onChange, unreadCount }) => (
-  <div role="tablist" aria-label="Mục hồ sơ" className="flex gap-1 p-1 bg-surface rounded-card shadow-card overflow-x-auto scrollbar-none">
+  <div role="tablist" aria-label="Mục hồ sơ" className="flex gap-0.5 p-1 bg-surface rounded-card shadow-card overflow-x-auto scrollbar-none">
     {PROFILE_TABS.map((tab) => (
       <button
         key={tab.value}
@@ -9,7 +9,7 @@ export const ProfileTabs = ({ activeTab, onChange, unreadCount }) => (
         role="tab"
         aria-selected={activeTab === tab.value}
         onClick={() => onChange(tab.value)}
-        className={`relative flex-1 shrink-0 whitespace-nowrap px-3 py-2 rounded-button text-sm font-semibold transition ${
+        className={`relative flex-1 shrink-0 whitespace-nowrap px-2.5 py-2 rounded-button text-[13px] xl:text-sm font-semibold transition ${
           activeTab === tab.value ? 'bg-primary-600 text-white shadow-card' : 'text-neutral-600 hover:bg-neutral-100'
         }`}
       >

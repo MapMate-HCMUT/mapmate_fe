@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getRailLinesApi, getTransitStopsApi } from '../api/transitApi';
-import { addTransitIcons, TRANSIT_ICONS } from '../utils/transitIcons';
+import { addTransitIcons, ensureTransitIcons, TRANSIT_ICONS } from '../utils/transitIcons';
 
 const SOURCES = { lines: 'transit-lines', stops: 'transit-stops', route: 'transit-route', routeStops: 'transit-route-stops' };
 const LAYERS = {
@@ -84,6 +84,7 @@ export const useTransitLayer = (map, enabled, onSelectStop, selectedRoute) => {
     const pointer = (cursor) => () => (map.getCanvas().style.cursor = cursor);
     const onEnter = pointer('pointer');
     const onLeave = pointer('');
+    const onStyleData = () => ensureTransitIcons(map); // đổi nền sáng / tối => gắn lại icon trạm
 
     addTransitIcons(map)
       .then(async () => {
@@ -94,6 +95,7 @@ export const useTransitLayer = (map, enabled, onSelectStop, selectedRoute) => {
         map.on('mouseenter', LAYERS.stops, onEnter);
         map.on('mouseleave', LAYERS.stops, onLeave);
         map.on('moveend', loadStops);
+        map.on('styledata', onStyleData);
         const rail = await getRailLinesApi();
         if (!active || !map.getSource(SOURCES.lines)) return;
         railRef.current = {
@@ -112,6 +114,7 @@ export const useTransitLayer = (map, enabled, onSelectStop, selectedRoute) => {
       map.off('mouseenter', LAYERS.stops, onEnter);
       map.off('mouseleave', LAYERS.stops, onLeave);
       map.off('moveend', loadStops);
+      map.off('styledata', onStyleData);
       removeLayers(map);
       setState({ stopCount: 0, tooFar: false, error: null });
     };
