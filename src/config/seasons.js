@@ -153,7 +153,7 @@ export const SEASONS = [
     id: 'halloween',
     greeting: 'Happy Halloween!',
     icon: Ghost,
-    from: '10-17',
+    from: '10-13',
     to: '11-01',
     particles: [
       [Ghost, '#a855f7'], [Skull, '#94a3b8'], [MoonStar, '#f59e0b'], [CloudMoon, '#8b5cf6'],
