@@ -195,22 +195,9 @@ export const useItineraryRoute = (map, coordinates) => {
       }
     };
 
-    if (map.isStyleLoaded()) {
-      renderRoute();
-    } else {
-      map.once('styledata', renderRoute);
-    }
-
-    const onStyleData = () => {
-      if (map.isStyleLoaded()) {
-        renderRoute();
-      }
-    };
-    map.on('styledata', onStyleData);
-
-    return () => {
-      map.off('styledata', onStyleData);
-      map.off('styledata', renderRoute);
-    };
+    // `map` chỉ có sau khi bản đồ tải xong (useMapInstance) => vẽ ngay. Không chờ isStyleLoaded(): hàm này báo false
+    // mỗi khi còn ô bản đồ đang tải (VD vừa bay tới lộ trình) => trước đây đường đi không hiện tới khi đổi tab.
+    renderRoute();
+    return undefined;
   }, [map, coordinates]);
 };

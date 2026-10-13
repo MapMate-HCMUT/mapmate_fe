@@ -17,7 +17,7 @@ const desktopTabClass = ({ isActive }) =>
 // Dịp lễ (Tết, Trung thu, Giáng sinh...) => hạt trang trí rơi / bay phía sau nội dung + lời chúc cạnh logo.
 export const TopNavbar = () => {
   const navItems = useNavItems();
-  const { season, hide } = useSeason();
+  const season = useSeason();
 
   return (
     <header className="relative z-40 bg-surface border-b border-neutral-200 shadow-card">
@@ -26,7 +26,7 @@ export const TopNavbar = () => {
       <div className="relative hidden lg:grid grid-cols-[1fr_auto_1fr] items-center gap-5 h-16 px-6">
         <div className="justify-self-start flex items-center gap-3 min-w-0">
           <Logo size="md" />
-          {season && <SeasonalBadge season={season} onHide={hide} />}
+          {season && <SeasonalBadge season={season} />}
         </div>
         <nav className="flex items-center gap-1" aria-label="Điều hướng chính">
           {navItems.map((item) => (
