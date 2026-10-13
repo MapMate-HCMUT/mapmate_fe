@@ -107,9 +107,3 @@ export const VEHICLE_ICONS = {
   grab_bike: Bike,
   grab_car: Car,
 };
-
-export const TAB_ICONS = {
-  places: Compass,
-  feed: Newspaper,
-  mine: Bookmark,
-};

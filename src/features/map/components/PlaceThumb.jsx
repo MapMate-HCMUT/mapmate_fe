@@ -6,13 +6,19 @@ const SIZES = {
   sm: 'w-14 h-14',
   md: 'w-16 h-16 sm:w-20 sm:h-20',
   wide: 'w-full h-28',
+  cover: 'absolute inset-0 w-full h-full', // ảnh phủ kín khung ngoài (khung quyết định kích thước)
 };
 
 const TEXT_SIZES = {
   sm: 'text-2xl',
   md: 'text-3xl',
   wide: 'text-4xl',
+  cover: 'text-6xl',
 };
+
+// Ảnh bìa nằm sát mép thẻ => không bo góc / viền riêng
+const FRAME = { cover: '' };
+const DEFAULT_FRAME = 'rounded-button shadow-sm border border-neutral-200/60';
 
 /**
  * Component hiển thị ảnh preview địa điểm
@@ -24,11 +30,11 @@ export const PlaceThumb = ({ place, category, size = 'sm' }) => {
   const effectiveCategory = category ?? place?.category;
   const { tile, emoji } = getCategory(effectiveCategory);
 
-  const imageUrl = !hasError ? getPlaceImageUrl(place ?? (category ? { category } : null)) : null;
+  const imageUrl = !hasError ? getPlaceImageUrl(place ?? (category ? { category } : null), { large: size === 'cover' }) : null;
 
   if (imageUrl) {
     return (
-      <div className={`relative ${SIZES[size]} rounded-button overflow-hidden shrink-0 shadow-sm bg-neutral-100 border border-neutral-200/60`}>
+      <div className={`${size === 'cover' ? '' : 'relative'} ${SIZES[size]} ${FRAME[size] ?? DEFAULT_FRAME} overflow-hidden shrink-0 bg-neutral-100`}>
         <img
           src={imageUrl}
           alt={place?.name ?? 'Địa điểm'}
@@ -41,7 +47,7 @@ export const PlaceThumb = ({ place, category, size = 'sm' }) => {
   }
 
   return (
-    <div className={`${tile} ${SIZES[size]} ${TEXT_SIZES[size]} rounded-button flex items-center justify-center shrink-0 border border-black/5`} aria-hidden="true">
+    <div className={`${tile} ${SIZES[size]} ${TEXT_SIZES[size]} ${size === 'cover' ? '' : 'rounded-button border border-black/5'} flex items-center justify-center shrink-0`} aria-hidden="true">
       {emoji}
     </div>
   );

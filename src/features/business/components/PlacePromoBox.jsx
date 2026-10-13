@@ -39,7 +39,7 @@ export const PlacePromoBox = ({ place }) => {
               <span className="block mt-0.5 text-[10px] text-white/80">Đến {formatDate(promotion.ends_at)}</span>
             </p>
             {promotion.kind !== 'deal' ? (
-              <Link to={`/vouchers?event=${promotion.id}`} className="shrink-0 px-3 py-1.5 rounded-pill bg-white text-danger-600 text-xs font-bold hover:bg-white/90">
+              <Link to={`/events?event=${promotion.id}`} className="shrink-0 px-3 py-1.5 rounded-pill bg-white text-danger-600 text-xs font-bold hover:bg-white/90">
                 {KIND_ACTION[promotion.kind]}
               </Link>
             ) : promotion.code ? (

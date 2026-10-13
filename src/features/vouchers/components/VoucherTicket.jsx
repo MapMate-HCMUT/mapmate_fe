@@ -46,7 +46,7 @@ export const VoucherTicket = ({ voucher }) => {
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
           <span>{voucher.used_at ? `Đã dùng ${formatDate(voucher.used_at)}` : `Hạn dùng ${formatDate(voucher.expires_at)}`}</span>
           {isUsable && voucher.place && (
-            <Link to={`/?place=${voucher.place.id}`} className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline">
+            <Link to={`/map?place=${voucher.place.id}`} className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline">
               <Navigation className="w-3 h-3" /> Tới quán
             </Link>
           )}

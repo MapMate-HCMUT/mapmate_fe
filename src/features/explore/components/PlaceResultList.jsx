@@ -1,16 +1,25 @@
+import { useRef } from 'react';
 import { ErrorState } from '../../../components/ErrorState';
+import { Pagination } from '../../../components/Pagination';
+import { PAGE_SIZE } from '../utils/filterConfig';
 import { PlaceResultCard } from './PlaceResultCard';
 
-const SKELETON_ROWS = 4;
+const SKELETON_ROWS = 3;
 
-export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore, onRetry, onReset, draftIds, tagLabels, onToggleDraft, onShare, onWriteReview, onOpenReviews }) => {
-  // Lỗi khi đã có danh sách (bấm "Xem thêm") => giữ danh sách, báo gọn bên dưới
+// Danh sách địa điểm chia trang (PAGE_SIZE quán / trang). Đổi trang => cuộn về đầu danh sách.
+export const PlaceResultList = ({ places, isLoading, error, page, totalPages, hasMore, isOpenEnded, onPageChange, onRetry, onReset, draftIds, tagLabels, onToggleDraft, onShare, onOpenReviews }) => {
+  const topRef = useRef(null);
+  const changePage = (next) => {
+    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    onPageChange(next);
+  };
+  // Lỗi khi đổi trang => giữ danh sách đang xem, báo gọn bên dưới
   if (error && places.length === 0) return <ErrorState error={error} title="Chưa tải được danh sách địa điểm" onRetry={onRetry} />;
   if (isLoading && places.length === 0) {
     return (
-      <ul className="space-y-3 animate-pulse" aria-label="Đang tải địa điểm">
+      <ul className="space-y-4 animate-pulse" aria-label="Đang tải địa điểm">
         {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-          <li key={index} className="h-32 bg-surface rounded-card shadow-card" />
+          <li key={index} className="h-56 bg-surface rounded-card shadow-card" />
         ))}
       </ul>
     );
@@ -29,7 +38,8 @@ export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore,
   }
   return (
     <>
-      <ul className={`space-y-3 transition-opacity ${isLoading ? 'opacity-60' : ''}`}>
+      <div ref={topRef} className="scroll-mt-6" aria-hidden="true" />
+      <ul className={`space-y-4 transition-opacity ${isLoading ? 'opacity-60' : ''}`}>
         {places.map((place) => (
           <PlaceResultCard
             key={place.id}
@@ -38,16 +48,16 @@ export const PlaceResultList = ({ places, isLoading, error, hasMore, onLoadMore,
             inDraft={draftIds.has(place.id)}
             onToggleDraft={onToggleDraft}
             onShare={onShare}
-            onWriteReview={onWriteReview}
             onOpenReviews={onOpenReviews}
           />
         ))}
       </ul>
-      {error && <ErrorState compact error={error} title="Chưa tải thêm được" onRetry={onLoadMore} className="mt-3" />}
-      {hasMore && !error && (
-        <button type="button" onClick={onLoadMore} disabled={isLoading} className="mt-3 w-full py-2.5 rounded-button bg-surface shadow-card text-sm font-semibold text-primary-700 hover:bg-primary-50 disabled:opacity-60">
-          {isLoading ? 'Đang tải…' : 'Xem thêm địa điểm'}
-        </button>
+      {error && <ErrorState compact error={error} title="Chưa tải được trang này" onRetry={() => onPageChange(page)} className="mt-3" />}
+      <Pagination page={page} totalPages={totalPages} hasMore={hasMore} isOpenEnded={isOpenEnded} onChange={changePage} isLoading={isLoading} label="Trang danh sách địa điểm" />
+      {totalPages > 1 && (
+        <p className="mt-2 text-center text-xs text-neutral-500">
+          Trang {page} · {PAGE_SIZE} địa điểm mỗi trang
+        </p>
       )}
     </>
   );

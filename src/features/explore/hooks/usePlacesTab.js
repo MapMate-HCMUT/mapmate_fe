@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useDisclosure } from '../../../hooks/useDisclosure';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useToast } from '../../../hooks/useToast';
@@ -14,7 +14,6 @@ import { useFilterOptions } from './useFilterOptions';
 
 // Gom logic tab "Địa điểm": bộ lọc → kết quả → giỏ chuyến đi → gợi ý lộ trình → lưu & chỉnh sửa.
 export const usePlacesTab = () => {
-  const [, setSearchParams] = useSearchParams();
   const { filters, setFilter, resetFilters, replaceFilters } = useExploreFilterStore();
   const options = useFilterOptions();
   const places = useExplorePlaces();
@@ -107,7 +106,7 @@ export const usePlacesTab = () => {
   const showOnMap = (option) => {
     routes.modal.close();
     startTrip(optionToTrip(option, routes.criteria));
-    navigate('/');
+    navigate('/map');
   };
 
   // Lưu mới hoặc Cập nhật lộ trình đang sửa và chuyển tới tab "Lộ trình của tôi"
@@ -140,7 +139,7 @@ export const usePlacesTab = () => {
 
       bumpVersion();
       draft.clearPlaces();
-      setSearchParams({ tab: 'mine' });
+      navigate('/routes');
     } catch (error) {
       showToast(error.message, 'danger');
     } finally {

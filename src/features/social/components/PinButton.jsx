@@ -3,7 +3,11 @@ import { usePinToggle } from '../hooks/usePinToggle';
 import { getPinOption, PIN_OPTIONS } from '../utils/socialConfig';
 
 // Nút ghim địa điểm: chọn "Đã đi" / "Muốn đi" hoặc bỏ ghim.
-export const PinButton = ({ placeId, initialStatus }) => {
+// size: 'sm' (mặc định, thẻ nhỏ) | 'md' (thẻ địa điểm lớn ở Khám phá — cùng cỡ các nút bên cạnh)
+const SIZE_CLASSES = { sm: 'px-3 py-1.5 text-xs', md: 'px-3 py-2 text-sm' };
+const ICON_CLASSES = { sm: 'w-3.5 h-3.5', md: 'w-4 h-4' };
+
+export const PinButton = ({ placeId, initialStatus, size = 'sm' }) => {
   const { status, menu, menuRef, choose } = usePinToggle(placeId, initialStatus);
   const current = getPinOption(status);
   const CurrentIcon = current?.icon;
@@ -15,14 +19,14 @@ export const PinButton = ({ placeId, initialStatus }) => {
         onClick={menu.toggle}
         aria-haspopup="menu"
         aria-expanded={menu.isOpen}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-semibold transition ${
+        className={`inline-flex items-center gap-1.5 ${SIZE_CLASSES[size]} rounded-button font-semibold transition ${
           current ? 'bg-accent-100 text-accent-800 hover:bg-accent-200' : 'text-neutral-600 hover:bg-neutral-100'
         }`}
       >
         {CurrentIcon ? (
-          <CurrentIcon className="w-3.5 h-3.5 text-accent-700" />
+          <CurrentIcon className={`${ICON_CLASSES[size]} text-accent-700`} />
         ) : (
-          <Bookmark className="w-3.5 h-3.5 text-neutral-400" />
+          <Bookmark className={`${ICON_CLASSES[size]} text-neutral-400`} />
         )}
         <span>{current ? current.label : 'Ghim'}</span>
       </button>

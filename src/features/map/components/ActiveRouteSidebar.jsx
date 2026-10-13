@@ -55,6 +55,7 @@ export const ActiveRouteSidebar = ({
   routeError = null,
   onRetryRoute,
   onSetVehicle,
+  startPicker,
   transitPanel = null,
 }) => {
   const [showSteps, setShowSteps] = useState(false);
@@ -109,13 +110,8 @@ export const ActiveRouteSidebar = ({
 
         {/* 2. Hộp các điểm đi & đến theo chuỗi Goong Maps */}
         <div className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-2.5 space-y-2">
-          {/* Điểm xuất phát: Vị trí của bạn */}
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full border-[3px] border-slate-900 bg-white shrink-0 shadow-xs ml-0.5" />
-            <span className="text-xs font-semibold text-neutral-800 truncate">
-              Vị trí của bạn (Toạ độ GPS)
-            </span>
-          </div>
+          {/* Điểm xuất phát: vị trí hiện tại hoặc điểm người dùng tự chọn — bấm "Đổi" để chọn lại (tìm đường lại ngay) */}
+          {startPicker}
 
           {/* Các điểm dừng trong lộ trình */}
           {stops.map((stop, index) => {

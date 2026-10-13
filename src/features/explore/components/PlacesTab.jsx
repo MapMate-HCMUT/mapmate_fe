@@ -1,4 +1,5 @@
 import { Modal } from '../../../components/Modal';
+import { EXPLORE_GRID, EXPLORE_MAIN } from '../../../config/layout';
 import { RouteSuggestionsModal } from '../../itinerary';
 import { usePlacesTab } from '../hooks/usePlacesTab';
 import { DataAttribution } from './DataAttribution';
@@ -8,7 +9,7 @@ import { RelaxedNotice } from './RelaxedNotice';
 import { ResultToolbar } from './ResultToolbar';
 import { TripDraftPanel } from './TripDraftPanel';
 
-// Tab "Địa điểm": danh sách địa điểm ở giữa (chính), khung chuyến đi bên phải; bộ lọc chỉ hiện khi bấm nút "Bộ lọc".
+// Mục "Địa điểm": danh sách địa điểm 1 cột ở giữa (chính), khung chuyến đi bên phải; bộ lọc chỉ hiện khi bấm nút "Bộ lọc".
 export const PlacesTab = () => {
   const { filterSheetRef, ...tab } = usePlacesTab();
   const { filters, options, places, draft, routes } = tab;
@@ -31,8 +32,8 @@ export const PlacesTab = () => {
   );
 
   return (
-    <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
-      <div className="min-w-0">
+    <div className={EXPLORE_GRID}>
+      <div className={EXPLORE_MAIN}>
         <ResultToolbar
           total={places.totalLabel}
           isLoading={places.isLoading}
@@ -45,28 +46,30 @@ export const PlacesTab = () => {
           onOpenFilters={tab.filterSheet.open}
         />
         {places.relaxed && !places.isLoading && <RelaxedNotice relaxed={places.relaxed} onApply={tab.applyRelaxed} />}
-        {/* Mobile / tablet: khung chuyến đi nằm trên danh sách (desktop ở cột phải) */}
-        <div className="lg:hidden mb-3">{tripPanel}</div>
+        {/* Màn chưa đủ rộng cho cột phải: khung chuyến đi nằm trên danh sách */}
+        <div className="xl:hidden mb-3">{tripPanel}</div>
         <PlaceResultList
           places={places.items}
           isLoading={places.isLoading}
           error={places.error}
+          page={places.page}
+          totalPages={places.totalPages}
           hasMore={places.hasMore}
-          onLoadMore={places.loadMore}
+          isOpenEnded={places.totalCapped}
+          onPageChange={places.goToPage}
           onRetry={places.reload}
           onReset={tab.resetFilters}
           draftIds={tab.draftIds}
           tagLabels={tab.tagLabels}
           onToggleDraft={tab.toggleDraft}
           onShare={tab.sharePlace}
-          onWriteReview={tab.reviews.writeReview}
           onOpenReviews={tab.reviews.openReviews}
         />
         <DataAttribution items={options.attribution} />
       </div>
 
       {/* Cột phải luôn thấy khi cuộn danh sách; dài hơn màn hình thì tự cuộn riêng */}
-      <aside className="hidden lg:block lg:sticky lg:top-0 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto scrollbar-none">{tripPanel}</aside>
+      <aside className="hidden xl:block xl:sticky xl:top-6 xl:max-h-[calc(100dvh-7.5rem)] xl:overflow-y-auto scrollbar-none">{tripPanel}</aside>
 
       <Modal isOpen={tab.filterSheet.isOpen} title="Bộ lọc" onClose={tab.filterSheet.close} containerRef={filterSheetRef} size="lg">
         <FilterPanel

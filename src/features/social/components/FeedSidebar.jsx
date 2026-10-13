@@ -39,7 +39,7 @@ export const FeedSidebar = ({ activeTag, onTagClick }) => {
   const trending = useTrendingTags();
 
   return (
-    <aside className="space-y-5">
+    <aside className="hidden xl:block space-y-5 xl:sticky xl:top-6">
       <section className="bg-surface rounded-card shadow-card p-4">
         <h2 className="text-sm font-bold text-neutral-900 mb-2 flex items-center gap-1.5">
           <Flame className="w-4 h-4 text-orange-500 fill-orange-500 shrink-0" />

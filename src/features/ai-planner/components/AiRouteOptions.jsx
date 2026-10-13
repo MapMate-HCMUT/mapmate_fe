@@ -21,7 +21,7 @@ export const AiRouteOptions = ({ options, criteria }) => {
   const handleStartTrip = (option) => {
     const tripToStart = saved[option.key] || optionToTrip(option, criteria);
     startTrip(tripToStart);
-    navigate('/');
+    navigate('/map');
   };
 
   const handleEditInExplore = (option) => {
@@ -38,7 +38,7 @@ export const AiRouteOptions = ({ options, criteria }) => {
     if (effectiveCriteria) {
       applyCriteria(effectiveCriteria);
     }
-    navigate('/explore?tab=places');
+    navigate('/');
   };
 
   return (

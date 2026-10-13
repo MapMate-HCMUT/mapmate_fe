@@ -1,16 +1,17 @@
+// Thanh điều hướng chính: Bản đồ · AI Gợi ý (giữa) · Khám phá (trang chủ).
+// Khám phá gồm nhiều mục (địa điểm, bảng tin, sự kiện, lộ trình, voucher, hồ sơ) — chọn ở cột trái của trang (ExploreLayout).
+export const EXPLORE_SECTION_PATHS = ['/', '/feed', '/events', '/routes', '/vouchers', '/profile'];
+const EXPLORE_PATH_PREFIXES = ['/users/']; // hồ sơ công khai cũng nằm trong Khám phá
+
 export const NAV_ITEMS = [
-  { path: '/', label: 'Bản đồ', icon: 'map', end: true },
-  { path: '/explore', label: 'Khám phá', icon: 'search' },
+  { path: '/map', label: 'Bản đồ', icon: 'map' },
   { path: '/ai-planner', label: 'AI Gợi ý', icon: 'chat', highlight: true },
-  { path: '/vouchers', label: 'Voucher', icon: 'gift' },
-  { path: '/profile', label: 'Hồ sơ', icon: 'user' },
+  { path: '/', label: 'Khám phá', icon: 'search', isExplore: true },
 ];
 
-// Chủ doanh nghiệp có thêm tab quản lý cửa hàng (người dùng thường vào qua menu tài khoản / trang hồ sơ)
+// Chủ doanh nghiệp có thêm nút "Cửa hàng" riêng trên thanh điều hướng (vào trang quản lý)
 export const BUSINESS_NAV_ITEM = { path: '/business', label: 'Cửa hàng', icon: 'store' };
-// compact (thanh dưới trên mobile, tối đa 5 ô): chủ doanh nghiệp thay ô "Voucher" bằng "Cửa hàng"
-export const getNavItems = (role, { compact = false } = {}) => {
-  if (role !== 'business') return NAV_ITEMS;
-  const items = compact ? NAV_ITEMS.filter((item) => item.path !== '/vouchers') : NAV_ITEMS;
-  return [...items.slice(0, -1), BUSINESS_NAV_ITEM, items.at(-1)];
-};
+
+export const isExplorePath = (pathname) => EXPLORE_SECTION_PATHS.includes(pathname) || EXPLORE_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+export const isNavItemActive = (item, pathname) => (item.isExplore ? isExplorePath(pathname) : pathname.startsWith(item.path));

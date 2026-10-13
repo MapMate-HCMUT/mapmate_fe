@@ -1,4 +1,5 @@
 import { PenSquare, Send, Users, FileText } from 'lucide-react';
+import { EXPLORE_GRID, EXPLORE_MAIN } from '../../../config/layout';
 import { Avatar } from '../../../components/Avatar';
 import { ErrorState } from '../../../components/ErrorState';
 import { LoginPrompt } from '../../../components/LoginPrompt';
@@ -22,8 +23,8 @@ export const FeedTab = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
-      <div className="space-y-4 min-w-0">
+    <div className={EXPLORE_GRID}>
+      <div className={`${EXPLORE_MAIN} space-y-4`}>
         <button type="button" onClick={openComposer} className="w-full flex items-center gap-3 p-3 bg-surface rounded-card shadow-card text-left hover:shadow-card-hover transition-shadow">
           <Avatar name={user?.username ?? '?'} src={user?.avatar_url} size="md" />
           <span className="flex-1 px-4 py-2.5 rounded-pill bg-neutral-100 text-sm text-neutral-500">Chia sẻ địa điểm, lộ trình hoặc hỏi gợi ý…</span>

@@ -30,8 +30,8 @@ export const useMapTripPanel = (userCoordinates) => {
     selectSuggestion: (option) => {
       draft.setPlaces(stopsToPlaces(option.stops), option.suggested_name || option.label, { stayOverrides: stayOverridesOf(option.stops), keepOrder: true });
       routes.modal.close();
-      navigate('/explore?tab=places');
+      navigate('/');
     },
-    openExplore: () => navigate('/explore?tab=places'),
+    openExplore: () => navigate('/'),
   };
 };
