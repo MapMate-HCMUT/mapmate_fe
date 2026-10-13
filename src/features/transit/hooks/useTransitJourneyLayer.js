@@ -88,13 +88,9 @@ export const useTransitJourneyLayer = (map, transit, { fetchRoadGeometry, active
   const hasLegs = allLegs.length > 0;
   useEffect(() => {
     if (!map || !hasLegs) return undefined;
-    const add = () => !map.getSource(SOURCE) && addLayers(map);
-    if (map.isStyleLoaded()) add();
-    else map.once('load', add);
-    return () => {
-      map.off('load', add);
-      removeLayers(map);
-    };
+    // `map` chỉ có sau khi bản đồ tải xong => thêm lớp ngay (sự kiện 'load' không bao giờ lặp lại nên không chờ nó)
+    if (!map.getSource(SOURCE)) addLayers(map);
+    return () => removeLayers(map);
   }, [map, hasLegs]);
 
   useEffect(() => {

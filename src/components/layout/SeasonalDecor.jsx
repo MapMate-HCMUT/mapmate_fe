@@ -1,6 +1,4 @@
-import { X } from 'lucide-react';
-
-const PARTICLE_COUNT = { fall: 16, rise: 12, float: 5, sway: 7, twinkle: 12 };
+const PARTICLE_COUNT = { fall: 16, rise: 12, float: 8, sway: 8, twinkle: 16 };
 const DESKTOP_ONLY_FROM = 8; // điện thoại chỉ hiện 8 hạt đầu cho đỡ rối
 
 // Số "ngẫu nhiên" cố định theo vị trí => mỗi lần vẽ lại hạt không nhảy chỗ
@@ -29,32 +27,34 @@ const particleStyle = (motion, index, count) => {
   }
 };
 
+// 1 hạt = icon lucide tô màu riêng (nét đậm + nền nhạt cùng màu cho dễ thấy trên cả nền sáng lẫn tối)
+const ParticleIcon = ({ particle: [Icon, color], size }) => <Icon size={size} color={color} fill={color} fillOpacity={0.18} strokeWidth={2} />;
+
 /** Lớp trang trí nằm SAU nội dung thanh điều hướng (không chặn bấm): hạt rơi / bay + dải màu mép dưới */
 export const SeasonalParticles = ({ season }) => {
   const count = PARTICLE_COUNT[season.motion] ?? PARTICLE_COUNT.fall;
   return (
     <div className="seasonal-decor absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {Array.from({ length: count }, (_, index) => (
-        <span
-          key={`${season.id}-${index}`}
-          className={`absolute select-none leading-none opacity-80 ${index >= DESKTOP_ONLY_FROM ? 'hidden lg:block' : ''}`}
-          style={particleStyle(season.motion, index, count)}
-        >
-          {season.particles[index % season.particles.length]}
-        </span>
-      ))}
+      {Array.from({ length: count }, (_, index) => {
+        const style = particleStyle(season.motion, index, count);
+        return (
+          <span key={`${season.id}-${index}`} className={`absolute select-none leading-none opacity-80 ${index >= DESKTOP_ONLY_FROM ? 'hidden lg:block' : ''}`} style={style}>
+            <ParticleIcon particle={season.particles[index % season.particles.length]} size={style.fontSize} />
+          </span>
+        );
+      })}
       <div className={`absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r ${season.bar}`} />
     </div>
   );
 };
 
-/** Lời chúc nhỏ cạnh logo (desktop) + nút tắt hiệu ứng của dịp này */
-export const SeasonalBadge = ({ season, onHide }) => (
-  <span title={season.greeting} className="hidden xl:inline-flex min-w-0 items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-pill bg-surface/85 backdrop-blur-sm border border-neutral-200 text-xs font-semibold text-neutral-700 shadow-card">
-    <span aria-hidden="true">{season.emoji}</span>
+// Icon cạnh lời chúc lấy màu của chính icon đó trong danh sách hạt (không có thì màu hạt đầu tiên)
+const badgeColor = (season) => (season.particles.find(([Icon]) => Icon === season.icon) ?? season.particles[0])[1];
+
+/** Lời chúc nhỏ cạnh logo (desktop) — người dùng không tắt được hiệu ứng (dev: ?season=off) */
+export const SeasonalBadge = ({ season }) => (
+  <span title={season.greeting} className="hidden xl:inline-flex min-w-0 items-center gap-1.5 px-2.5 py-1 rounded-pill bg-surface/85 backdrop-blur-sm border border-neutral-200 text-xs font-semibold text-neutral-700 shadow-card">
+    <season.icon className="w-3.5 h-3.5" color={badgeColor(season)} aria-hidden="true" />
     <span className="truncate max-w-52">{season.greeting}</span>
-    <button type="button" onClick={onHide} aria-label="Tắt hiệu ứng dịp lễ" title="Tắt hiệu ứng dịp lễ" className="p-0.5 rounded-pill text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700">
-      <X className="w-3.5 h-3.5" />
-    </button>
   </span>
 );
