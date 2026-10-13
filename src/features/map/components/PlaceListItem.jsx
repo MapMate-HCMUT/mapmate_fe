@@ -1,4 +1,6 @@
 import { Flame } from 'lucide-react';
+import { PartnerBadge } from '../../business/components/PartnerBadge';
+import { PromoChip } from '../../business/components/PromoChip';
 import { getCategory } from '../utils/placeCategory';
 import { PlaceRating, PlaceTravelInfo } from './PlaceMeta';
 import { PlaceThumb } from './PlaceThumb';
@@ -25,6 +27,8 @@ export const PlaceListItem = ({ place, isSelected, vehicleEmoji, onSelect }) => 
           <div className="flex items-center gap-2">
             <PlaceRating rating={place.rating} />
             <span className={`${soft} px-2 py-0.5 rounded-pill text-[11px] font-medium`}>{label}</span>
+            <PartnerBadge business={place.business} />
+            <PromoChip promotion={place.promotion} />
           </div>
           <PlaceTravelInfo place={place} vehicleEmoji={vehicleEmoji} />
         </div>

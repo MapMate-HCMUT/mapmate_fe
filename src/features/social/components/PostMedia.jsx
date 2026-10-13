@@ -22,7 +22,7 @@ export const PostMedia = ({ media }) => {
               preload="none"
               // Bản đã nén chưa làm xong (vừa đăng, video lớn) => phát tạm bản gốc
               onError={(event) => item.original_url && !event.currentTarget.src.startsWith(item.original_url) && (event.currentTarget.src = item.original_url)}
-              className={`w-full rounded-input bg-neutral-900 ${single ? 'max-h-[480px]' : 'aspect-square object-cover col-span-2 sm:col-span-1'}`}
+              className={`w-full rounded-input bg-ink ${single ? 'max-h-[480px]' : 'aspect-square object-cover col-span-2 sm:col-span-1'}`}
             />
           ) : (
             <button key={item.url} type="button" onClick={() => setOpenIndex(images.indexOf(item))} className="block w-full overflow-hidden rounded-input bg-neutral-100" aria-label={`Xem ảnh ${index + 1}`}>
@@ -33,7 +33,7 @@ export const PostMedia = ({ media }) => {
       </div>
 
       {openIndex !== null && images[openIndex] && (
-        <div className="fixed inset-0 z-[80] bg-neutral-950/90 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Xem ảnh" onClick={() => setOpenIndex(null)}>
+        <div className="fixed inset-0 z-[80] bg-ink/90 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Xem ảnh" onClick={() => setOpenIndex(null)}>
           <img src={images[openIndex].url} alt="" className="max-w-full max-h-full object-contain rounded-input" onClick={(event) => event.stopPropagation()} />
           <button type="button" onClick={() => setOpenIndex(null)} aria-label="Đóng" className="absolute top-4 right-4 p-2 rounded-pill bg-white/15 text-white hover:bg-white/25">
             <X className="w-5 h-5" />

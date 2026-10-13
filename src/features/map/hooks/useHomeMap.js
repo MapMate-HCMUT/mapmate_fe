@@ -9,7 +9,9 @@ import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../../explore';
 import { useActiveRouteStore } from '../../itinerary';
 import { useTransitPrefsStore } from '../../transit';
 import { fetchTripRoute, getStopCoordinates, normalizeTripVehicle } from '../api/goongDirections';
-import { findPlaceAt } from '../api/getMapPlaces';
+import { useSearchParams } from 'react-router';
+import { useFeaturedPlaces } from '../../business/hooks/useFeaturedPlaces';
+import { findPlaceAt, getMapPlaceById, toMapPlace } from '../api/getMapPlaces';
 import { fetchTransitTripRoute } from '../api/transitTrip';
 import { useMapStore } from '../stores/mapStore';
 import { enrichAndFilterPlaces } from '../utils/enrichPlaces';
@@ -20,7 +22,8 @@ import { useMapData } from './useMapData';
 import { useMapInstance } from './useMapInstance';
 import { useMapPointInfo } from './useMapPointInfo';
 import { usePoiHover } from './usePoiHover';
-import { useItineraryMarkers, useItineraryRoute, usePlaceMarkers, useUserMarker } from './useMapMarkers';
+import { useItineraryMarkers, useItineraryRoute, useUserMarker } from './useMapMarkers';
+import { usePlacePins } from './usePlacePins';
 import { getStoredUserLocation, useUserLocation } from './useUserLocation';
 
 const POINT_ZOOM_STEP = 2;
@@ -101,6 +104,42 @@ export const useHomeMap = () => {
   );
 
   const clearSelection = useCallback(() => setSelectedPlaceId(null), [setSelectedPlaceId]);
+
+  // Mở thẻ 1 địa điểm không nằm trong 40 điểm đang hiện (mục "Nổi bật gần bạn", link /?place=<id>)
+  const openPlace = useCallback(
+    (mapPlace) => {
+      closePoint();
+      setPickedPlace(mapPlace);
+      setSelectedPlaceId(mapPlace.id);
+      flyTo(mapPlace.location.coordinates);
+    },
+    [closePoint, setSelectedPlaceId, flyTo],
+  );
+
+  // Cửa hàng gói "Nổi bật" quanh người dùng — có nhãn "Tài trợ"
+  const featured = useFeaturedPlaces(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER);
+  const featuredPlaces = useMemo(
+    () => enrichAndFilterPlaces(featured.map(toMapPlace), { origin: userCoordinates, vehicle, category: ALL_CATEGORIES, query: '', budgetMax: null, radiusKm: null }),
+    [featured, userCoordinates, vehicle],
+  );
+  const openFeatured = useCallback((placeId) => {
+    const place = featuredPlaces.find((item) => item.id === placeId);
+    if (place) openPlace(place);
+  }, [featuredPlaces, openPlace]);
+
+  // /?place=<id>: mở sẵn thẻ địa điểm đó (chủ quán bấm "Xem trên bản đồ"), xong thì bỏ tham số khỏi URL
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedPlaceId = searchParams.get('place');
+  useEffect(() => {
+    if (!map || !linkedPlaceId) return;
+    getMapPlaceById(linkedPlaceId)
+      .then(openPlace)
+      .catch(() => showToast('Không mở được địa điểm này', 'warning'))
+      .finally(() => setSearchParams((params) => {
+        params.delete('place');
+        return params;
+      }, { replace: true }));
+  }, [map, linkedPlaceId, openPlace, setSearchParams, showToast]);
 
   // Tự động tìm vị trí người dùng đúng 1 lần duy nhất khi bắt đầu một lộ trình mới
   const navigatedTripIdRef = useRef(null);
@@ -220,7 +259,7 @@ export const useHomeMap = () => {
   );
 
   // Hiển thị marker: Nếu đang đi theo lộ trình thì ưu tiên hiện POI của lộ trình
-  usePlaceMarkers(map, isNavigating ? [] : markerPlaces, selectedPlaceId, selectPlace);
+  usePlacePins(map, isNavigating ? [] : markerPlaces, selectedPlaceId, selectPlace);
   useItineraryMarkers(
     map,
     isNavigating ? activeItinerary?.stops : [],
@@ -341,6 +380,8 @@ export const useHomeMap = () => {
     mapProvider: MAP_PROVIDER,
     isLoading,
     places: visiblePlaces,
+    featuredPlaces,
+    openFeatured,
     selectedPlace,
     selectPlace,
     clearSelection,

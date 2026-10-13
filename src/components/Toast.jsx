@@ -1,7 +1,7 @@
 import { Icon } from './Icon';
 
 const TONE_CLASSES = {
-  success: 'bg-neutral-900 text-white',
+  success: 'bg-ink text-white',
   info: 'bg-info-600 text-white',
   warning: 'bg-warning-600 text-white',
   danger: 'bg-danger-600 text-white',

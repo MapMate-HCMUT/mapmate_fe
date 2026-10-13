@@ -36,6 +36,15 @@ const loadSvg = (svg) =>
     image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   });
 
+const loadedIcons = new Map(); // tên -> ảnh đã tải (dùng lại khi đổi kiểu bản đồ sáng / tối)
+
+// Gắn lại các icon đã tải (đồng bộ) — đổi kiểu bản đồ có thể làm mất ảnh đã thêm vào style cũ
+export const ensureTransitIcons = (map) => {
+  loadedIcons.forEach((image, name) => {
+    if (!map.hasImage(name)) map.addImage(name, image, { pixelRatio: PIXEL_RATIO });
+  });
+};
+
 export const addTransitIcons = async (map) => {
   const icons = [
     [TRANSIT_ICONS.busStop, busStop('#0284c7')],
@@ -44,8 +53,8 @@ export const addTransitIcons = async (map) => {
   ];
   await Promise.all(
     icons.map(async ([name, svg]) => {
-      const image = await loadSvg(svg);
-      if (!map.hasImage(name)) map.addImage(name, image, { pixelRatio: PIXEL_RATIO });
+      if (!loadedIcons.has(name)) loadedIcons.set(name, await loadSvg(svg));
     }),
   );
+  ensureTransitIcons(map);
 };

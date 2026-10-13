@@ -14,10 +14,34 @@ export const MAP_PROVIDERS = {
 
 export const MAP_PROVIDER = GOONG_MAPTILES_KEY ? MAP_PROVIDERS.GOONG : MAP_PROVIDERS.OPEN_FREE_MAP;
 
-export const MAP_STYLE_URL =
-  MAP_PROVIDER === MAP_PROVIDERS.GOONG
-    ? `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`
-    : 'https://tiles.openfreemap.org/styles/liberty';
+// Kiểu bản đồ gốc (nền sáng). Nền tối = cùng kiểu này, app tự tô lại màu (src/lib/mapTheme.js) => đổi nền tức thì.
+const MAP_STYLE_URLS = {
+  [MAP_PROVIDERS.GOONG]: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`,
+  [MAP_PROVIDERS.OPEN_FREE_MAP]: 'https://tiles.openfreemap.org/styles/liberty',
+};
+export const MAP_STYLE_URL = MAP_STYLE_URLS[MAP_PROVIDER];
+
+// Tải kiểu bản đồ 1 lần cho cả phiên (trang chủ, trang đăng nhập, chọn vị trí cửa hàng dùng chung); lỗi thì lần sau tải lại
+let baseStylePromise = null;
+export const loadBaseMapStyle = () => {
+  baseStylePromise ??= fetch(MAP_STYLE_URL)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Không tải được kiểu bản đồ (${response.status})`);
+      return response.json();
+    })
+    .catch((error) => {
+      baseStylePromise = null;
+      throw error;
+    });
+  return baseStylePromise;
+};
+
+// Tuỳ chọn MapLibre giúp bản đồ mượt hơn: màn hình siêu nét vẽ tối đa 2x, nhãn hiện nhanh, không tải lại tile hết hạn khi đang xem
+export const MAP_PERFORMANCE_OPTIONS = {
+  pixelRatio: Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1, 2),
+  fadeDuration: 120,
+  refreshExpiredTiles: false,
+};
 
 // Goong yêu cầu api_key trên mọi request tile/sprite/glyph — tự động gắn vào.
 export const transformMapRequest = (url) => {

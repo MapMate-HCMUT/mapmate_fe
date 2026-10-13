@@ -31,7 +31,7 @@ export const RoutePanel = ({ detail, onClose, onSelectStop }) => {
           {route.variants.length > 1 && (
             <div className="flex gap-1" role="tablist" aria-label="Chiều đi">
               {route.variants.map((item) => (
-                <button key={item.var_id} type="button" role="tab" aria-selected={item.var_id === variant?.var_id} onClick={() => setVarId(item.var_id)} className={`flex-1 inline-flex items-center justify-center gap-1 rounded-input px-2 py-1 text-[11px] font-semibold ${item.var_id === variant?.var_id ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}`}>
+                <button key={item.var_id} type="button" role="tab" aria-selected={item.var_id === variant?.var_id} onClick={() => setVarId(item.var_id)} className={`flex-1 inline-flex items-center justify-center gap-1 rounded-input px-2 py-1 text-[11px] font-semibold ${item.var_id === variant?.var_id ? 'bg-ink text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}`}>
                   <ArrowLeftRight className="w-3 h-3" /> {item.headsign}
                 </button>
               ))}

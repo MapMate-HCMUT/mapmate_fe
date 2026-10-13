@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useDisclosure } from '../../../hooks/useDisclosure';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useToast } from '../../../hooks/useToast';
-import { createItineraryApi, optionToTrip, stayOverridesOf, stopsToPlaces, updateItineraryApi, useActiveRouteStore, useItineraryStore, useRouteSuggestions, useTripPreview } from '../../itinerary';
+import { createItineraryApi, optionToTrip, STAY_LIMITS, stayOverridesOf, stopsToPlaces, updateItineraryApi, useActiveRouteStore, useItineraryStore, useRouteSuggestions, useTripPreview } from '../../itinerary';
 import { usePlaceReviewActions, useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../stores/tripDraftStore';
@@ -35,10 +35,57 @@ export const usePlacesTab = () => {
   // Tiêu chí chuyến đi = bộ lọc hiện tại; dùng cho cả xem trước và gợi ý lộ trình.
   const criteria = useMemo(() => buildTripCriteria(filters, origin.origin), [filters, origin.origin]);
   const placeIds = useMemo(() => draft.places.map((place) => place.id), [draft.places]);
-  // Giỏ nạp từ 1 phương án gợi ý => "Dự kiến" giữ đúng thứ tự + thời gian ở lại đã chọn / đã chỉnh ±15′
-  const plan = useMemo(() => (draft.keepOrder ? { keepOrder: true, stayOverrides: draft.stayOverrides } : null), [draft.keepOrder, draft.stayOverrides]);
+  // Giỏ nạp từ 1 phương án gợi ý / người dùng tự chỉnh => "Dự kiến" giữ đúng thứ tự (nếu đã khoá) + thời gian ở lại đã chỉnh ±15′
+  const plan = useMemo(
+    () => (draft.keepOrder || Object.keys(draft.stayOverrides).length ? { keepOrder: draft.keepOrder, stayOverrides: draft.stayOverrides } : null),
+    [draft.keepOrder, draft.stayOverrides],
+  );
   const preview = useTripPreview(criteria, placeIds, plan);
   const tagLabels = useMemo(() => Object.fromEntries(options.tags.map((tag) => [tag.value, tag.label])), [options.tags]);
+
+  // Thứ tự đang thấy ở "Dự kiến" (server tự sắp cho thuận đường, hoặc đúng thứ tự người dùng đã chỉnh tay).
+  // Lúc đang tính lại: điểm vừa thêm nối vào cuối, điểm vừa bỏ thì không hiện.
+  const orderedPlaces = useMemo(() => {
+    const byId = new Map(draft.places.map((place) => [String(place.id), place]));
+    const ordered = preview.placeIds.map((id) => byId.get(id)).filter(Boolean);
+    const seen = new Set(ordered.map((place) => String(place.id)));
+    return [...ordered, ...draft.places.filter((place) => !seen.has(String(place.id)))];
+  }, [draft.places, preview.placeIds]);
+  const stopInfo = useMemo(() => new Map(preview.stops.map((stop) => [String(stop.place?.id), stop])), [preview.stops]);
+  const tripStops = orderedPlaces.map((place) => {
+    const stop = stopInfo.get(String(place.id));
+    return {
+      place,
+      arrival_time: stop?.arrival_time ?? null,
+      stay_minutes: stop?.stay_minutes ?? null,
+      stay_range: stop?.stay_range ?? null,
+      closed_on_arrival: stop?.open_on_arrival === false,
+    };
+  });
+
+  // Chỉnh tay (đổi thứ tự / thời gian ở lại) => khoá đúng thứ tự đang thấy để server không sắp lại
+  const arrangeWith = (places, stayOverrides) => draft.setPlaces(places, undefined, { stayOverrides, keepOrder: true });
+  const arrange = {
+    stops: tripStops,
+    isManualOrder: draft.keepOrder,
+    startTime: filters.startTime,
+    setStartTime: (time) => setFilter('startTime', time),
+    move: (from, to) => {
+      if (to < 0 || to >= orderedPlaces.length || from === to) return;
+      const next = [...orderedPlaces];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      arrangeWith(next, draft.stayOverrides);
+    },
+    adjustStay: (placeId, delta) => {
+      const current = stopInfo.get(String(placeId))?.stay_minutes;
+      if (current == null) return;
+      const minutes = Math.min(STAY_LIMITS.max, Math.max(STAY_LIMITS.min, current + delta));
+      arrangeWith(orderedPlaces, { ...draft.stayOverrides, [String(placeId)]: minutes });
+    },
+    // Bỏ thứ tự tự chỉnh => MapMate sắp lại cho thuận đường + hợp giờ ăn (giữ thời gian ở lại đã chỉnh)
+    autoArrange: () => draft.setPlaces(draft.places, undefined, { stayOverrides: draft.stayOverrides, keepOrder: false }),
+  };
 
   const toggleDraft = (place) => {
     if (draftIds.has(place.id)) return draft.removePlace(place.id);
@@ -63,7 +110,7 @@ export const usePlacesTab = () => {
     navigate('/');
   };
 
-  // Lưu mới hoặc Cập nhật lộ trình đang sửa và chuyển tới tab "Của tôi"
+  // Lưu mới hoặc Cập nhật lộ trình đang sửa và chuyển tới tab "Lộ trình của tôi"
   const saveDraft = requireAuth(async () => {
     if (draft.places.length === 0) {
       return showToast('Hãy thêm ít nhất 1 địa điểm vào chuyến đi', 'warning');
@@ -73,7 +120,7 @@ export const usePlacesTab = () => {
     try {
       const payload = {
         name,
-        place_ids: draft.places.map((place) => place.id),
+        place_ids: orderedPlaces.map((place) => place.id), // đúng thứ tự đang thấy ở "Dự kiến"
         vehicle: criteria.vehicle,
         transport_modes: criteria.transport_modes,
         people: criteria.people,
@@ -88,7 +135,7 @@ export const usePlacesTab = () => {
         showToast('Đã cập nhật lộ trình!');
       } else {
         await createItineraryApi(payload);
-        showToast('Đã lưu lộ trình — xem lại ở tab "Của tôi"');
+        showToast('Đã lưu lộ trình — xem lại ở tab "Lộ trình của tôi"');
       }
 
       bumpVersion();
@@ -107,7 +154,7 @@ export const usePlacesTab = () => {
     // Bỏ hẳn các bộ lọc server đã tạm nới (bảng bộ lọc khớp với kết quả đang thấy)
     applyRelaxed: () => places.relaxed && replaceFilters(relaxFilters(filters, places.relaxed)),
     activeFilterCount: countActiveFilters(filters),
-    origin, places, draft, draftIds, tagLabels, toggleDraft, preview,
+    origin, places, draft, draftIds, tagLabels, toggleDraft, preview, arrange,
     filterSheet, filterSheetRef,
     routes,
     // Bộ lọc hiện tại + các điểm đã chọn => tối đa 3 lộ trình

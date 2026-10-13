@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUpDown, ChevronDown, Check } from 'lucide-react';
-import { Icon } from '../../../components/Icon';
+import { ArrowUpDown, ChevronDown, Check, SlidersHorizontal } from 'lucide-react';
+import { SearchBar } from '../../../components/SearchBar';
+import { useSearchStore } from '../../../stores/searchStore';
 
+// Đầu danh sách địa điểm: ô tìm kiếm · nút Bộ lọc (mở hộp thoại) · sắp xếp, dòng dưới là số kết quả.
 export const ResultToolbar = ({ total, isLoading, keyword, searchRadiusKm, sort, sortOptions, onSortChange, activeCount, onOpenFilters }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { query, setQuery, clearQuery } = useSearchStore();
 
   const currentOption = sortOptions.find((opt) => opt.value === sort) ?? sortOptions[0];
 
@@ -19,30 +22,31 @@ export const ResultToolbar = ({ total, isLoading, keyword, searchRadiusKm, sort,
   }, []);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-      <p className="flex-1 min-w-40 text-sm text-neutral-600">
-        {isLoading ? 'Đang tìm…' : <><b className="text-neutral-900">{total}</b> địa điểm phù hợp</>}
-        {keyword && <> cho “<b className="text-neutral-900">{keyword}</b>”</>}
-        {keyword && searchRadiusKm && <span className="text-neutral-400"> · tìm trong {searchRadiusKm} km</span>}
-      </p>
+    <div className="mb-3 space-y-2.5">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+        <div className="w-full sm:flex-1 min-w-0">
+          <SearchBar value={query} onChange={setQuery} onClear={clearQuery} placeholder="Tìm quán, món ăn, địa điểm…" variant="floating" />
+        </div>
 
-      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onOpenFilters}
-          className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-button bg-surface shadow-card text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition"
+          aria-haspopup="dialog"
+          className={`shrink-0 inline-flex items-center gap-1.5 h-10.5 px-3.5 rounded-pill border text-sm font-semibold transition ${
+            activeCount > 0 ? 'border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100' : 'border-neutral-200 bg-surface text-neutral-700 hover:bg-neutral-50 shadow-card'
+          }`}
         >
-          <Icon name="search" className="w-4 h-4" />
-          Bộ lọc{activeCount > 0 && <span className="px-1.5 rounded-pill bg-primary-600 text-white text-[11px]">{activeCount}</span>}
+          <SlidersHorizontal className="w-4 h-4" />
+          Bộ lọc
+          {activeCount > 0 && <span className="min-w-5 px-1.5 rounded-pill bg-primary-600 text-white text-[11px] leading-5 text-center">{activeCount}</span>}
         </button>
 
-        {/* Menu sắp xếp được thiết kế lại đẹp mắt, hiện đại */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-expanded={isOpen}
-            className="inline-flex items-center gap-2 py-1.5 px-3 bg-surface hover:bg-neutral-50 border border-neutral-200/90 rounded-lg shadow-xs text-xs sm:text-sm font-semibold text-neutral-700 transition"
+            className="inline-flex items-center gap-2 h-10.5 px-3.5 bg-surface hover:bg-neutral-50 border border-neutral-200 rounded-pill shadow-card text-sm font-semibold text-neutral-700 transition"
           >
             <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400" />
             <span>{currentOption?.label}</span>
@@ -79,6 +83,12 @@ export const ResultToolbar = ({ total, isLoading, keyword, searchRadiusKm, sort,
           )}
         </div>
       </div>
+
+      <p className="text-sm text-neutral-600">
+        {isLoading ? 'Đang tìm…' : <><b className="text-neutral-900">{total}</b> địa điểm phù hợp</>}
+        {keyword && <> cho “<b className="text-neutral-900">{keyword}</b>”</>}
+        {keyword && searchRadiusKm && <span className="text-neutral-400"> · tìm trong {searchRadiusKm} km</span>}
+      </p>
     </div>
   );
 };

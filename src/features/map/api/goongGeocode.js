@@ -24,3 +24,12 @@ export const reverseGeocode = async ([lng, lat]) => {
   cache.set(key, info);
   return info;
 };
+
+// Địa chỉ -> toạ độ (Goong Geocoding), giới hạn quanh TP.HCM. Dùng ở ô tìm địa chỉ khi chủ quán chọn vị trí cửa hàng.
+export const geocodeAddress = async (address) => {
+  const response = await axios.get('https://rsapi.goong.io/geocode', { params: { address: `${address}, Hồ Chí Minh`, api_key: GOONG_API_KEY }, timeout: 8000 });
+  const [result] = response.data?.results ?? [];
+  if (!result?.geometry?.location) return null;
+  const { lat, lng } = result.geometry.location;
+  return { coordinates: [lng, lat], address: toAddress(result), district: result.compound?.district ?? null };
+};

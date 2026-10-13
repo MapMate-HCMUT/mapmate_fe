@@ -10,7 +10,7 @@ const LOOKUP_RADIUS_KM = 1;
 const LOOKUP_LIMIT = 3;
 
 // Bản đồ dùng GeoJSON location.coordinates [lng, lat]
-const toMapPlace = (place) => ({ ...place, location: { type: 'Point', coordinates: [place.coordinates.lng, place.coordinates.lat] } });
+export const toMapPlace = (place) => ({ ...place, location: { type: 'Point', coordinates: [place.coordinates.lng, place.coordinates.lat] } });
 const plain = (text) => text.normalize('NFKD').replace(/\p{M}/gu, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const sameName = (a, b) => plain(a).includes(plain(b)) || plain(b).includes(plain(a));
 
@@ -31,3 +31,6 @@ export const findPlaceAt = async ([lng, lat], name = null) => {
   const match = data.items.find((place) => (name ? place.distance_km <= SAME_NAMED_PLACE_KM && sameName(place.name, name) : place.distance_km <= SAME_SPOT_KM));
   return match ? toMapPlace(match) : null;
 };
+
+// 1 địa điểm theo id (link "Xem trên bản đồ" từ trang quản lý cửa hàng: /?place=<id>)
+export const getMapPlaceById = async (placeId) => toMapPlace(await apiClient.get(`/places/${placeId}`));

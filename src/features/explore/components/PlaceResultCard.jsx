@@ -3,6 +3,9 @@ import { formatDistance } from '../../../utils/calculateDistance';
 import { formatShortVND } from '../../../utils/formatCurrencyVND';
 import { formatDataMonth, formatPlaceAddress, formatPlaceHours, formatPlacePrice, getPlaceRating, isVerifiedPlace, PLACE_SOURCE_LABELS } from '../../../utils/formatPlace';
 import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
+import { formatPhoneDisplay } from '../../../utils/phone';
+import { PartnerBadge } from '../../business/components/PartnerBadge';
+import { PromoChip } from '../../business/components/PromoChip';
 import { PinButton } from '../../social';
 import { PlaceThumb } from '../../map/components/PlaceThumb';
 import { TAG_ICONS, VEHICLE_ICONS } from '../utils/exploreIcons';
@@ -32,7 +35,7 @@ const SourceLine = ({ place }) => (
     </span>
     {place.contact?.phone && (
       <a href={`tel:${place.contact.phone}`} className={`${linkClass} inline-flex items-center gap-1`}>
-        <Phone className="w-3 h-3 text-neutral-400" /> {place.contact.phone}
+        <Phone className="w-3 h-3 text-neutral-400" /> {formatPhoneDisplay(place.contact.phone)}
       </a>
     )}
     {place.contact?.facebook && <a href={place.contact.facebook} target="_blank" rel="noreferrer" className={linkClass}>Facebook</a>}
@@ -59,6 +62,13 @@ export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onSh
           </h3>
           <span className={`${style.badge} shrink-0 px-2 py-0.5 rounded-pill text-[11px] font-semibold`}>{style.label}</span>
         </div>
+        {(place.business || place.promotion) && (
+          <p className="mt-1 flex flex-wrap items-center gap-1.5">
+            <PartnerBadge business={place.business} />
+            <PromoChip promotion={place.promotion} />
+            {place.notice && <span className="text-[11px] text-warning-700 truncate">📢 {place.notice.text}</span>}
+          </p>
+        )}
         <p className="mt-0.5 text-xs text-neutral-500 truncate" title={formatPlaceAddress(place)}>{formatPlaceAddress(place)}</p>
 
         <p className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-neutral-600">
@@ -94,7 +104,15 @@ export const PlaceResultCard = ({ place, tagLabels, inDraft, onToggleDraft, onSh
           </p>
         )}
 
-        {!isVerifiedPlace(place) && <SourceLine place={place} />}
+        {!isVerifiedPlace(place) && !place.business && <SourceLine place={place} />}
+        {place.business && (
+          <p className="mt-1.5 text-[11px] text-neutral-400">
+            Thông tin do chủ cửa hàng cập nhật{place.data_updated_at && <> · {formatDataMonth(place.data_updated_at)}</>}
+            {place.contact?.phone && (
+              <> · <a href={`tel:${place.contact.phone}`} className={linkClass}>{formatPhoneDisplay(place.contact.phone)}</a></>
+            )}
+          </p>
+        )}
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button

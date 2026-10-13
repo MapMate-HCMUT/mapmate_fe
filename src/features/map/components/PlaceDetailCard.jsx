@@ -1,6 +1,11 @@
-import { MessageSquareText, PenSquare } from 'lucide-react';
+import { useEffect } from 'react';
+import { MessageSquareText, PenSquare, Phone } from 'lucide-react';
 import { Icon } from '../../../components/Icon';
-import { formatPlaceHours } from '../../../utils/formatPlace';
+import { trackPlaceEventApi } from '../../business/api/businessApi';
+import { PartnerBadge } from '../../business/components/PartnerBadge';
+import { PlacePromoBox } from '../../business/components/PlacePromoBox';
+import { formatPhoneDisplay } from '../../../utils/phone';
+import { PlaceHours } from './PlaceHours';
 import { getCategory } from '../utils/placeCategory';
 import { PlaceRating, PlaceTravelInfo } from './PlaceMeta';
 import { PlaceThumb } from './PlaceThumb';
@@ -9,6 +14,17 @@ import { PlaceThumb } from './PlaceThumb';
 export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, onAddToItinerary, onWriteReview, onOpenReviews }) => {
   const { label, soft } = getCategory(place.category);
   const community = place.community_rating ?? { average: 0, count: 0 };
+  const isBusiness = Boolean(place.business);
+
+  // Cửa hàng doanh nghiệp: đếm lượt xem cho chủ quán (server tự bỏ lượt trùng trong ngày + lượt chủ quán tự xem)
+  useEffect(() => {
+    if (isBusiness) trackPlaceEventApi(place.id, 'view');
+  }, [isBusiness, place.id]);
+
+  const handleDirections = () => {
+    if (isBusiness) trackPlaceEventApi(place.id, 'directions');
+    onDirections(place);
+  };
 
   return (
     <article className="bg-surface rounded-t-card lg:rounded-card shadow-modal p-4 animate-[sheet-up_220ms_ease-out]">
@@ -30,6 +46,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <PlaceRating rating={place.rating} reviewCount={place.review_count} />
             <span className={`${soft} px-2 py-0.5 rounded-pill text-[11px] font-medium`}>{label}</span>
+            <PartnerBadge business={place.business} />
           </div>
           <PlaceTravelInfo place={place} vehicleEmoji={vehicleEmoji} />
         </div>
@@ -40,11 +57,33 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
           <dt><Icon name="pin" className="w-4 h-4 text-neutral-400" /></dt>
           <dd className="flex-1 min-w-0 [overflow-wrap:anywhere]">{place.address}</dd>
         </div>
-        <div className="flex gap-2">
-          <dt><Icon name="clock" className="w-4 h-4 text-neutral-400" /></dt>
-          <dd className="flex-1 min-w-0">Giờ mở cửa: {formatPlaceHours(place)}</dd>
-        </div>
+        <PlaceHours place={place} />
+        {place.business && place.contact?.phone && (
+          <div className="flex gap-2">
+            <dt><Phone className="w-4 h-4 text-neutral-400" aria-hidden="true" /></dt>
+            <dd className="flex-1 min-w-0">
+              <a href={`tel:${place.contact.phone}`} className="font-semibold text-primary-700 hover:underline tabular-nums">{formatPhoneDisplay(place.contact.phone)}</a>
+            </dd>
+          </div>
+        )}
       </dl>
+
+      <PlacePromoBox place={place} />
+
+      {/* Giới thiệu + ảnh / video do chủ cửa hàng đăng */}
+      {place.description && <p className="mt-3 text-xs text-neutral-700 whitespace-pre-line line-clamp-4">{place.description}</p>}
+      {place.gallery?.length > 0 && (
+        <ul className="mt-3 flex gap-1.5 overflow-x-auto scrollbar-none" aria-label="Ảnh / video của cửa hàng">
+          {place.gallery.map((item) => (
+            <li key={item.public_id ?? item.url} className="shrink-0">
+              <a href={item.url} target="_blank" rel="noopener noreferrer" className="relative block w-20 h-20 rounded-input overflow-hidden bg-neutral-100 hover:opacity-90">
+                <img src={item.type === 'video' ? item.poster_url : item.thumb_url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                {item.type === 'video' && <span className="absolute inset-0 flex items-center justify-center text-white text-lg drop-shadow" aria-label="Video">▶</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* Đánh giá của người dùng MapMate (chữ, ảnh, video) – tách với điểm của nguồn dữ liệu */}
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-input bg-neutral-50 px-3 py-2 text-xs">
@@ -80,7 +119,7 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
       <div className="grid grid-cols-2 gap-2 mt-3">
         <button
           type="button"
-          onClick={() => onDirections(place)}
+          onClick={handleDirections}
           className="flex items-center justify-center gap-1.5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-button text-sm font-semibold transition"
         >
           <Icon name="navigate" className="w-4 h-4" />

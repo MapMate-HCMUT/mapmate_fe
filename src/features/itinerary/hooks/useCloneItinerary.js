@@ -19,7 +19,7 @@ export const useCloneItinerary = () => {
     try {
       await cloneItineraryApi(itineraryId);
       bumpVersion();
-      showToast('Đã lưu lộ trình về tab "Của tôi"');
+      showToast('Đã lưu lộ trình về tab "Lộ trình của tôi"');
     } catch (error) {
       showToast(error.message, 'danger');
     } finally {

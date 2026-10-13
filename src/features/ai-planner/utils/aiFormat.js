@@ -1,6 +1,3 @@
-import { getVehicleLabel } from '../../itinerary';
-import { getCategoryStyle } from '../../../utils/placeCategoryStyle';
-
 const THOUSAND = 1000;
 const formatK = (amount) => `${Math.round(amount / THOUSAND).toLocaleString('vi-VN')}k`;
 
@@ -17,23 +14,6 @@ export const INTENT_LABELS = {
   ask_info: 'Hỏi thông tin',
   smalltalk: 'Trò chuyện',
   out_of_scope: 'Ngoài phạm vi',
-};
-
-// Tiêu chí AI hiểu được -> các "chip" ngắn gọn để người dùng kiểm tra nhanh: "📍 Trung tâm Quận 1 · 2 người · 500k/người..."
-export const describeCriteria = (criteria) => {
-  const chips = [
-    { key: 'origin', label: `📍 ${criteria.origin?.label ?? 'Điểm xuất phát'} · ${criteria.radius_km} km` },
-    { key: 'people', label: `👥 ${criteria.people} người` },
-    { key: 'budget', label: criteria.trip_budget == null ? '💰 Không giới hạn' : `💰 ${formatK(criteria.trip_budget)}/người` },
-    { key: 'time', label: `🕒 ${criteria.start_time} · ${criteria.duration_hours} giờ` },
-    { key: 'vehicle', label: `${getVehicleLabel(criteria.vehicle).emoji} ${getVehicleLabel(criteria.vehicle).label}` },
-  ];
-  if (criteria.price_max) chips.push({ key: 'price', label: `≤ ${formatK(criteria.price_max)}/điểm` });
-  if (criteria.min_rating) chips.push({ key: 'rating', label: `★ ${criteria.min_rating}+` });
-  if (criteria.open_only) chips.push({ key: 'open', label: 'Đang mở cửa' });
-  criteria.categories?.forEach((category) => chips.push({ key: `c-${category}`, label: getCategoryStyle(category).label, tone: 'category' }));
-  criteria.tags?.forEach((tag) => chips.push({ key: `t-${tag}`, label: TAG_LABELS[tag] ?? tag, tone: 'tag' }));
-  return chips;
 };
 
 export const TRACE_STATUS = {

@@ -1,4 +1,5 @@
 import { formatPriceRange } from './formatCurrencyVND';
+import { formatRanges } from './weeklyHours';
 
 // Hiển thị địa điểm — dữ liệu mở (OpenStreetMap / Overture) thường chưa có đánh giá, giá chỉ là ước tính, có thể chưa rõ giờ.
 export const PLACE_SOURCE_LABELS = {
@@ -6,6 +7,7 @@ export const PLACE_SOURCE_LABELS = {
   overture: 'Overture Maps',
   osm: 'OpenStreetMap',
   community: 'Cộng đồng',
+  business: 'Chủ cửa hàng',
 };
 
 export const isVerifiedPlace = (place) => !place.source || place.source === 'mapmate';
@@ -26,7 +28,9 @@ export const formatDataMonth = (date) => {
 export const formatPlaceAddress = (place) => [place.address, place.district].filter(Boolean).join(', ');
 
 // "08:00 – 21:00" · "Mở cả ngày" · "Chưa rõ giờ"
+// Cửa hàng có lịch theo ngày => giờ của HÔM NAY ("Hôm nay 07:00–11:00, 17:00–22:00" / "Hôm nay nghỉ")
 export const formatPlaceHours = (place) => {
   if (place.hours_known === false) return 'Chưa rõ giờ';
+  if (place.weekly_hours) return place.closed_today ? 'Hôm nay nghỉ' : `Hôm nay ${formatRanges(place.today_hours)}`;
   return place.opening_hours?.open ? `${place.opening_hours.open} – ${place.opening_hours.close}` : 'Mở cả ngày';
 };

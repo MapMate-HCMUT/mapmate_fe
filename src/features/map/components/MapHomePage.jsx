@@ -1,4 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
+import { SearchBar } from '../../../components/SearchBar';
+import { useSearchStore } from '../../../stores/searchStore';
 import { RouteSuggestionsModal, useActiveRouteStore } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
 import { usePlaceReviewActions } from '../../social';
@@ -67,6 +69,7 @@ export const MapHomePage = () => {
     setRouteData(buildTransitRouteData(routeData.transit.plans, selected, routeData.waypoints));
   }, []);
   const vehicleEmoji = home.vehicleInfo.emoji;
+  const { query, setQuery, clearQuery } = useSearchStore();
 
   return (
     <div className="flex-1 min-h-0 flex">
@@ -97,6 +100,8 @@ export const MapHomePage = () => {
         />
       ) : (
         <TrendingSidebar
+          featured={home.featuredPlaces}
+          onSelectFeatured={home.openFeatured}
           places={home.places}
           isLoading={home.isLoading}
           selectedPlaceId={home.selectedPlace?.id}
@@ -116,12 +121,19 @@ export const MapHomePage = () => {
           />
         )}
 
-        <div className="relative flex-1 min-h-0 overflow-hidden">
+        <div className="home-map relative flex-1 min-h-0 overflow-hidden">
           {/* MapLibre ép .maplibregl-map thành position: relative => cần lớp bọc absolute bên ngoài */}
           <div className="absolute inset-0">
             <div ref={mapContainerRef} className="w-full h-full" aria-label="Bản đồ TP.HCM" />
           </div>
           <MapStatusOverlay isReady={home.isMapReady} error={home.mapError} />
+
+          {/* Ô tìm kiếm nằm ngay trên bản đồ (không còn trên Navbar); đang dẫn đường thì ẩn cho thoáng */}
+          {!isNavigating && (
+            <div className="absolute z-20 top-3 left-3 right-14 sm:right-auto sm:w-96">
+              <SearchBar value={query} onChange={setQuery} onClear={clearQuery} variant="floating" />
+            </div>
+          )}
           <MapProviderBadge provider={home.mapProvider} />
 
           {/* Banner dẫn đường lộ trình Goong nổi trên mobile (desktop đã có sidebar) */}
@@ -142,19 +154,19 @@ export const MapHomePage = () => {
 
           {/* Giỏ chuyến đi (chung với Khám phá): gợi ý lộ trình rồi hiện thẳng lên bản đồ */}
           {!isNavigating && (
-            <div className="absolute z-20 top-20 left-3 w-64 lg:top-auto lg:bottom-4 lg:left-4 lg:w-72">
+            <div className="absolute z-20 top-28 left-3 w-64 lg:top-auto lg:bottom-4 lg:left-4 lg:w-72">
               <MapTripPanel panel={tripPanel} maxPlaces={TRIP_DRAFT_MAX_PLACES} />
             </div>
           )}
 
           {isTransitMode && !isNavigating && (
-            <div className="absolute z-20 top-3 right-14">
+            <div className="absolute z-20 top-16 right-14 sm:top-3">
               <TransitLegend stopCount={transitLayer.stopCount} tooFar={transitLayer.tooFar} />
             </div>
           )}
           {/* Khung trạm / tuyến chỉ có ý nghĩa khi đang chọn Buýt & Metro */}
           {overlay && isTransitMode && (
-            <div className="absolute z-30 inset-x-0 bottom-0 lg:inset-x-auto lg:left-4 lg:top-4 lg:bottom-auto lg:w-80">
+            <div className="absolute z-30 inset-x-0 bottom-0 lg:inset-x-auto lg:left-4 lg:top-16 lg:bottom-auto lg:w-80">
               {overlay.type === 'stop' && <StopPanel key={overlay.id} stopId={overlay.id} onClose={() => setOverlay(null)} onOpenRoute={openRoute} />}
               {overlay.type === 'route' && <RoutePanel detail={routeDetail} onClose={() => setOverlay(null)} onSelectStop={openStop} />}
             </div>
@@ -164,6 +176,7 @@ export const MapHomePage = () => {
             filters={quickFilters.filters}
             openKey={quickFilters.openKey}
             onToggle={quickFilters.toggleMenu}
+            onClose={quickFilters.closeMenu}
             onSelectOption={quickFilters.selectOption}
             onLocate={home.locate}
             isLocating={home.isLocating}
@@ -189,7 +202,7 @@ export const MapHomePage = () => {
             </div>
           ) : !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:hidden">
-              <TrendingCarousel places={home.places} vehicleEmoji={vehicleEmoji} onSelect={home.selectPlace} />
+              <TrendingCarousel places={home.places} featured={home.featuredPlaces} onSelectFeatured={home.openFeatured} vehicleEmoji={vehicleEmoji} onSelect={home.selectPlace} />
             </div>
           ) : null}
         </div>

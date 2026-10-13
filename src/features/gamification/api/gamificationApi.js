@@ -25,5 +25,11 @@ export const uploadAvatarApi = (imageDataUrl) => apiClient.put('/users/me/avatar
 // DELETE /api/users/me/avatar -> { profile }
 export const deleteAvatarApi = () => apiClient.delete('/users/me/avatar');
 
+// PUT /api/users/me/cover { image: dataURL } -> { profile } — ảnh bìa hồ sơ (đã cắt 4:1)
+export const uploadCoverApi = (imageDataUrl) => apiClient.put('/users/me/cover', { image: imageDataUrl });
+
+// DELETE /api/users/me/cover -> { profile } — quay về dải màu mặc định
+export const deleteCoverApi = () => apiClient.delete('/users/me/cover');
+
 // GET /api/users/me/area-from-location?lat=&lng= -> { street, district, city, country } (không số nhà)
 export const getAreaFromLocationApi = ({ lat, lng }) => apiClient.get('/users/me/area-from-location', { params: { lat, lng } });

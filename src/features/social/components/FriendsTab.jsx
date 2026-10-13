@@ -28,7 +28,7 @@ const FriendsContent = () => {
   if (isLoading) return <div className="h-64 bg-surface rounded-card shadow-card animate-pulse" />;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 items-start">
+    <div className="grid md:grid-cols-2 gap-5 items-start">
       <div className="space-y-5">
         <section className="bg-surface rounded-card shadow-card p-5">
           <h2 className="text-base font-bold text-neutral-900 mb-3 flex items-center gap-2">

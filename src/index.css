@@ -131,6 +131,338 @@
   --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 }
 
+/* ── NỀN LUÔN TỐI (tooltip, toast, menu quản lý, lớp phủ ảnh) — giữ nguyên ở cả 2 chế độ ── */
+@theme {
+  --color-ink: #0b1120;
+}
+
+/* ── CHẾ ĐỘ TỐI ──
+   Bật bằng data-theme="dark" trên <html> (themeStore). Chỉ đổi giá trị biến màu => mọi class Tailwind tự đổi theo:
+   - neutral đảo chiều (chữ đậm thành sáng, nền nhạt thành tối)
+   - các thang màu: 50–300 thành sắc tối pha màu (nền nhãn, viền), 700–950 thành sắc sáng (chữ), 400–600 giữ nguyên (nút) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-neutral-50: #0b1120;
+  --color-neutral-100: #1c2638;
+  --color-neutral-200: #283447;
+  --color-neutral-300: #3a475c;
+  --color-neutral-400: #6b7a90;
+  --color-neutral-500: #8f9cb0;
+  --color-neutral-600: #aab5c5;
+  --color-neutral-700: #c4cdd9;
+  --color-neutral-800: #dde3eb;
+  --color-neutral-900: #eef2f6;
+  --color-neutral-950: #f8fafc;
+  --color-surface: #121a2b;
+  --color-surface-hover: #172033;
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.07), 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-modal: 0 0 0 1px rgb(255 255 255 / 0.08), 0 25px 50px -12px rgb(0 0 0 / 0.7);
+  --color-primary-50: color-mix(in oklab, #10b981 13%, #121a2b);
+  --color-primary-100: color-mix(in oklab, #10b981 22%, #121a2b);
+  --color-primary-200: color-mix(in oklab, #10b981 34%, #121a2b);
+  --color-primary-300: color-mix(in oklab, #10b981 52%, #121a2b);
+  --color-primary-700: #6ee7b7;
+  --color-primary-800: #a7f3d0;
+  --color-primary-900: #d1fae5;
+  --color-primary-950: #ecfdf5;
+  --color-secondary-50: color-mix(in oklab, #14b8a6 13%, #121a2b);
+  --color-secondary-100: color-mix(in oklab, #14b8a6 22%, #121a2b);
+  --color-secondary-200: color-mix(in oklab, #14b8a6 34%, #121a2b);
+  --color-secondary-300: color-mix(in oklab, #14b8a6 52%, #121a2b);
+  --color-secondary-700: #5eead4;
+  --color-secondary-800: #99f6e4;
+  --color-secondary-900: #ccfbf1;
+  --color-secondary-950: #f0fdfa;
+  --color-accent-50: color-mix(in oklab, #f59e0b 13%, #121a2b);
+  --color-accent-100: color-mix(in oklab, #f59e0b 22%, #121a2b);
+  --color-accent-200: color-mix(in oklab, #f59e0b 34%, #121a2b);
+  --color-accent-300: color-mix(in oklab, #f59e0b 52%, #121a2b);
+  --color-accent-700: #fcd34d;
+  --color-accent-800: #fde68a;
+  --color-accent-900: #fef3c7;
+  --color-accent-950: #fffbeb;
+  --color-danger-50: color-mix(in oklab, #ef4444 13%, #121a2b);
+  --color-danger-100: color-mix(in oklab, #ef4444 22%, #121a2b);
+  --color-danger-200: color-mix(in oklab, #ef4444 34%, #121a2b);
+  --color-danger-300: color-mix(in oklab, #ef4444 52%, #121a2b);
+  --color-danger-700: #fca5a5;
+  --color-danger-800: #fecaca;
+  --color-danger-900: #fee2e2;
+  --color-danger-950: #fef2f2;
+  --color-warning-50: color-mix(in oklab, #f97316 13%, #121a2b);
+  --color-warning-100: color-mix(in oklab, #f97316 22%, #121a2b);
+  --color-warning-200: color-mix(in oklab, #f97316 34%, #121a2b);
+  --color-warning-300: color-mix(in oklab, #f97316 52%, #121a2b);
+  --color-warning-700: #fdba74;
+  --color-warning-800: #fed7aa;
+  --color-warning-900: #ffedd5;
+  --color-warning-950: #fff7ed;
+  --color-success-50: color-mix(in oklab, #22c55e 13%, #121a2b);
+  --color-success-100: color-mix(in oklab, #22c55e 22%, #121a2b);
+  --color-success-200: color-mix(in oklab, #22c55e 34%, #121a2b);
+  --color-success-300: color-mix(in oklab, #22c55e 52%, #121a2b);
+  --color-success-700: #86efac;
+  --color-success-800: #bbf7d0;
+  --color-success-900: #dcfce7;
+  --color-success-950: #f0fdf4;
+  --color-info-50: color-mix(in oklab, #0ea5e9 13%, #121a2b);
+  --color-info-100: color-mix(in oklab, #0ea5e9 22%, #121a2b);
+  --color-info-200: color-mix(in oklab, #0ea5e9 34%, #121a2b);
+  --color-info-300: color-mix(in oklab, #0ea5e9 52%, #121a2b);
+  --color-info-700: #7dd3fc;
+  --color-info-800: #bae6fd;
+  --color-info-900: #e0f2fe;
+  --color-info-950: #f0f9ff;
+  --color-amber-50: color-mix(in oklab, oklch(76.9% 0.188 70.08) 13%, #121a2b);
+  --color-amber-100: color-mix(in oklab, oklch(76.9% 0.188 70.08) 22%, #121a2b);
+  --color-amber-200: color-mix(in oklab, oklch(76.9% 0.188 70.08) 34%, #121a2b);
+  --color-amber-300: color-mix(in oklab, oklch(76.9% 0.188 70.08) 52%, #121a2b);
+  --color-amber-700: oklch(87.9% 0.169 91.605);
+  --color-amber-800: oklch(92.4% 0.12 95.746);
+  --color-amber-900: oklch(96.2% 0.059 95.617);
+  --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-emerald-50: color-mix(in oklab, oklch(69.6% 0.17 162.48) 13%, #121a2b);
+  --color-emerald-100: color-mix(in oklab, oklch(69.6% 0.17 162.48) 22%, #121a2b);
+  --color-emerald-200: color-mix(in oklab, oklch(69.6% 0.17 162.48) 34%, #121a2b);
+  --color-emerald-300: color-mix(in oklab, oklch(69.6% 0.17 162.48) 52%, #121a2b);
+  --color-emerald-700: oklch(84.5% 0.143 164.978);
+  --color-emerald-800: oklch(90.5% 0.093 164.15);
+  --color-emerald-900: oklch(95% 0.052 163.051);
+  --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-blue-50: color-mix(in oklab, oklch(62.3% 0.214 259.815) 13%, #121a2b);
+  --color-blue-100: color-mix(in oklab, oklch(62.3% 0.214 259.815) 22%, #121a2b);
+  --color-blue-200: color-mix(in oklab, oklch(62.3% 0.214 259.815) 34%, #121a2b);
+  --color-blue-300: color-mix(in oklab, oklch(62.3% 0.214 259.815) 52%, #121a2b);
+  --color-blue-700: oklch(80.9% 0.105 251.813);
+  --color-blue-800: oklch(88.2% 0.059 254.128);
+  --color-blue-900: oklch(93.2% 0.032 255.585);
+  --color-blue-950: oklch(97% 0.014 254.604);
+  --color-orange-50: color-mix(in oklab, oklch(70.5% 0.213 47.604) 13%, #121a2b);
+  --color-orange-100: color-mix(in oklab, oklch(70.5% 0.213 47.604) 22%, #121a2b);
+  --color-orange-200: color-mix(in oklab, oklch(70.5% 0.213 47.604) 34%, #121a2b);
+  --color-orange-300: color-mix(in oklab, oklch(70.5% 0.213 47.604) 52%, #121a2b);
+  --color-orange-700: oklch(83.7% 0.128 66.29);
+  --color-orange-800: oklch(90.1% 0.076 70.697);
+  --color-orange-900: oklch(95.4% 0.038 75.164);
+  --color-orange-950: oklch(98% 0.016 73.684);
+  --color-rose-50: color-mix(in oklab, oklch(64.5% 0.246 16.439) 13%, #121a2b);
+  --color-rose-100: color-mix(in oklab, oklch(64.5% 0.246 16.439) 22%, #121a2b);
+  --color-rose-200: color-mix(in oklab, oklch(64.5% 0.246 16.439) 34%, #121a2b);
+  --color-rose-300: color-mix(in oklab, oklch(64.5% 0.246 16.439) 52%, #121a2b);
+  --color-rose-700: oklch(81% 0.117 11.638);
+  --color-rose-800: oklch(89.2% 0.058 10.001);
+  --color-rose-900: oklch(94.1% 0.03 12.58);
+  --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-violet-50: color-mix(in oklab, oklch(60.6% 0.25 292.717) 13%, #121a2b);
+  --color-violet-100: color-mix(in oklab, oklch(60.6% 0.25 292.717) 22%, #121a2b);
+  --color-violet-200: color-mix(in oklab, oklch(60.6% 0.25 292.717) 34%, #121a2b);
+  --color-violet-300: color-mix(in oklab, oklch(60.6% 0.25 292.717) 52%, #121a2b);
+  --color-violet-700: oklch(81.1% 0.111 293.571);
+  --color-violet-800: oklch(89.4% 0.057 293.283);
+  --color-violet-900: oklch(94.3% 0.029 294.588);
+  --color-violet-950: oklch(96.9% 0.016 293.756);
+  --color-teal-50: color-mix(in oklab, oklch(70.4% 0.14 182.503) 13%, #121a2b);
+  --color-teal-100: color-mix(in oklab, oklch(70.4% 0.14 182.503) 22%, #121a2b);
+  --color-teal-200: color-mix(in oklab, oklch(70.4% 0.14 182.503) 34%, #121a2b);
+  --color-teal-300: color-mix(in oklab, oklch(70.4% 0.14 182.503) 52%, #121a2b);
+  --color-teal-700: oklch(85.5% 0.138 181.071);
+  --color-teal-800: oklch(91% 0.096 180.426);
+  --color-teal-900: oklch(95.3% 0.051 180.801);
+  --color-teal-950: oklch(98.4% 0.014 180.72);
+  --color-cyan-50: color-mix(in oklab, oklch(71.5% 0.143 215.221) 13%, #121a2b);
+  --color-cyan-100: color-mix(in oklab, oklch(71.5% 0.143 215.221) 22%, #121a2b);
+  --color-cyan-200: color-mix(in oklab, oklch(71.5% 0.143 215.221) 34%, #121a2b);
+  --color-cyan-300: color-mix(in oklab, oklch(71.5% 0.143 215.221) 52%, #121a2b);
+  --color-cyan-700: oklch(86.5% 0.127 207.078);
+  --color-cyan-800: oklch(91.7% 0.08 205.041);
+  --color-cyan-900: oklch(95.6% 0.045 203.388);
+  --color-cyan-950: oklch(98.4% 0.019 200.873);
+  --color-pink-50: color-mix(in oklab, oklch(65.6% 0.241 354.308) 13%, #121a2b);
+  --color-pink-100: color-mix(in oklab, oklch(65.6% 0.241 354.308) 22%, #121a2b);
+  --color-pink-200: color-mix(in oklab, oklch(65.6% 0.241 354.308) 34%, #121a2b);
+  --color-pink-300: color-mix(in oklab, oklch(65.6% 0.241 354.308) 52%, #121a2b);
+  --color-pink-700: oklch(82.3% 0.12 346.018);
+  --color-pink-800: oklch(89.9% 0.061 343.231);
+  --color-pink-900: oklch(94.8% 0.028 342.258);
+  --color-pink-950: oklch(97.1% 0.014 343.198);
+  --color-sky-50: color-mix(in oklab, oklch(68.5% 0.169 237.323) 13%, #121a2b);
+  --color-sky-100: color-mix(in oklab, oklch(68.5% 0.169 237.323) 22%, #121a2b);
+  --color-sky-200: color-mix(in oklab, oklch(68.5% 0.169 237.323) 34%, #121a2b);
+  --color-sky-300: color-mix(in oklab, oklch(68.5% 0.169 237.323) 52%, #121a2b);
+  --color-sky-700: oklch(82.8% 0.111 230.318);
+  --color-sky-800: oklch(90.1% 0.058 230.902);
+  --color-sky-900: oklch(95.1% 0.026 236.824);
+  --color-sky-950: oklch(97.7% 0.013 236.62);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+/* Vùng luôn sáng / luôn theo thiết kế gốc dù app đang tối (data-theme="light" trên 1 phần tử): menu tối trang quản lý,
+   chú thích nổi trên bản đồ, cột giới thiệu trang đăng nhập... — các phần này đã tự có nền tối riêng */
+[data-theme="light"]:not(:root) {
+  color-scheme: light;
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+  --color-primary-950: #022c22;
+  --color-secondary-50: #f0fdfa;
+  --color-secondary-100: #ccfbf1;
+  --color-secondary-200: #99f6e4;
+  --color-secondary-300: #5eead4;
+  --color-secondary-700: #0f766e;
+  --color-secondary-800: #115e59;
+  --color-secondary-900: #134e4a;
+  --color-secondary-950: #042f2e;
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+  --color-accent-950: #451a03;
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-700: #b91c1c;
+  --color-danger-800: #991b1b;
+  --color-danger-900: #7f1d1d;
+  --color-danger-950: #450a0a;
+  --color-warning-50: #fff7ed;
+  --color-warning-100: #ffedd5;
+  --color-warning-200: #fed7aa;
+  --color-warning-300: #fdba74;
+  --color-warning-700: #c2410c;
+  --color-warning-800: #9a3412;
+  --color-warning-900: #7c2d12;
+  --color-warning-950: #431407;
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+  --color-success-950: #052e16;
+  --color-info-50: #f0f9ff;
+  --color-info-100: #e0f2fe;
+  --color-info-200: #bae6fd;
+  --color-info-300: #7dd3fc;
+  --color-info-700: #0369a1;
+  --color-info-800: #075985;
+  --color-info-900: #0c4a6e;
+  --color-info-950: #082f49;
+  --color-amber-50: oklch(98.7% 0.022 95.277);
+  --color-amber-100: oklch(96.2% 0.059 95.617);
+  --color-amber-200: oklch(92.4% 0.12 95.746);
+  --color-amber-300: oklch(87.9% 0.169 91.605);
+  --color-amber-700: oklch(55.5% 0.163 48.998);
+  --color-amber-800: oklch(47.3% 0.137 46.201);
+  --color-amber-900: oklch(41.4% 0.112 45.904);
+  --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-emerald-50: oklch(97.9% 0.021 166.113);
+  --color-emerald-100: oklch(95% 0.052 163.051);
+  --color-emerald-200: oklch(90.5% 0.093 164.15);
+  --color-emerald-300: oklch(84.5% 0.143 164.978);
+  --color-emerald-700: oklch(50.8% 0.118 165.612);
+  --color-emerald-800: oklch(43.2% 0.095 166.913);
+  --color-emerald-900: oklch(37.8% 0.077 168.94);
+  --color-emerald-950: oklch(26.2% 0.051 172.552);
+  --color-blue-50: oklch(97% 0.014 254.604);
+  --color-blue-100: oklch(93.2% 0.032 255.585);
+  --color-blue-200: oklch(88.2% 0.059 254.128);
+  --color-blue-300: oklch(80.9% 0.105 251.813);
+  --color-blue-700: oklch(48.8% 0.243 264.376);
+  --color-blue-800: oklch(42.4% 0.199 265.638);
+  --color-blue-900: oklch(37.9% 0.146 265.522);
+  --color-blue-950: oklch(28.2% 0.091 267.935);
+  --color-orange-50: oklch(98% 0.016 73.684);
+  --color-orange-100: oklch(95.4% 0.038 75.164);
+  --color-orange-200: oklch(90.1% 0.076 70.697);
+  --color-orange-300: oklch(83.7% 0.128 66.29);
+  --color-orange-700: oklch(55.3% 0.195 38.402);
+  --color-orange-800: oklch(47% 0.157 37.304);
+  --color-orange-900: oklch(40.8% 0.123 38.172);
+  --color-orange-950: oklch(26.6% 0.079 36.259);
+  --color-rose-50: oklch(96.9% 0.015 12.422);
+  --color-rose-100: oklch(94.1% 0.03 12.58);
+  --color-rose-200: oklch(89.2% 0.058 10.001);
+  --color-rose-300: oklch(81% 0.117 11.638);
+  --color-rose-700: oklch(51.4% 0.222 16.935);
+  --color-rose-800: oklch(45.5% 0.188 13.697);
+  --color-rose-900: oklch(41% 0.159 10.272);
+  --color-rose-950: oklch(27.1% 0.105 12.094);
+  --color-violet-50: oklch(96.9% 0.016 293.756);
+  --color-violet-100: oklch(94.3% 0.029 294.588);
+  --color-violet-200: oklch(89.4% 0.057 293.283);
+  --color-violet-300: oklch(81.1% 0.111 293.571);
+  --color-violet-700: oklch(49.1% 0.27 292.581);
+  --color-violet-800: oklch(43.2% 0.232 292.759);
+  --color-violet-900: oklch(38% 0.189 293.745);
+  --color-violet-950: oklch(28.3% 0.141 291.089);
+  --color-teal-50: oklch(98.4% 0.014 180.72);
+  --color-teal-100: oklch(95.3% 0.051 180.801);
+  --color-teal-200: oklch(91% 0.096 180.426);
+  --color-teal-300: oklch(85.5% 0.138 181.071);
+  --color-teal-700: oklch(51.1% 0.096 186.391);
+  --color-teal-800: oklch(43.7% 0.078 188.216);
+  --color-teal-900: oklch(38.6% 0.063 188.416);
+  --color-teal-950: oklch(27.7% 0.046 192.524);
+  --color-cyan-50: oklch(98.4% 0.019 200.873);
+  --color-cyan-100: oklch(95.6% 0.045 203.388);
+  --color-cyan-200: oklch(91.7% 0.08 205.041);
+  --color-cyan-300: oklch(86.5% 0.127 207.078);
+  --color-cyan-700: oklch(52% 0.105 223.128);
+  --color-cyan-800: oklch(45% 0.085 224.283);
+  --color-cyan-900: oklch(39.8% 0.07 227.392);
+  --color-cyan-950: oklch(30.2% 0.056 229.695);
+  --color-pink-50: oklch(97.1% 0.014 343.198);
+  --color-pink-100: oklch(94.8% 0.028 342.258);
+  --color-pink-200: oklch(89.9% 0.061 343.231);
+  --color-pink-300: oklch(82.3% 0.12 346.018);
+  --color-pink-700: oklch(52.5% 0.223 3.958);
+  --color-pink-800: oklch(45.9% 0.187 3.815);
+  --color-pink-900: oklch(40.8% 0.153 2.432);
+  --color-pink-950: oklch(28.4% 0.109 3.907);
+  --color-sky-50: oklch(97.7% 0.013 236.62);
+  --color-sky-100: oklch(95.1% 0.026 236.824);
+  --color-sky-200: oklch(90.1% 0.058 230.902);
+  --color-sky-300: oklch(82.8% 0.111 230.318);
+  --color-sky-700: oklch(50% 0.134 242.749);
+  --color-sky-800: oklch(44.3% 0.11 240.79);
+  --color-sky-900: oklch(39.1% 0.09 240.876);
+  --color-sky-950: oklch(29.3% 0.066 243.157);
+}
+/* Nút đặc màu dùng sắc 700 khi rê chuột: ở chế độ tối sắc 700 đã thành màu chữ sáng => giữ nền đậm */
+:root[data-theme="dark"] .hover\:bg-primary-700:hover {
+  background-color: #047857;
+}
+:root[data-theme="dark"] .hover\:bg-emerald-700:hover {
+  background-color: #047857;
+}
+
 /* ── BASE LAYER ── */
 @layer base {
   body {
@@ -158,11 +490,80 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── HIỆU ỨNG DỊP LỄ trên thanh điều hướng (SeasonalDecor) — hạt nằm sau nội dung, không chặn bấm ── */
+@keyframes season-fall {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.85; }
+  90% { opacity: 0.85; }
+  to { transform: translate3d(18px, 104px, 0) rotate(200deg); opacity: 0; }
+}
+@keyframes season-rise {
+  from { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0; }
+  15% { opacity: 0.85; }
+  to { transform: translate3d(-10px, -96px, 0) scale(1.1); opacity: 0; }
+}
+@keyframes season-float {
+  from { transform: translate3d(-8vw, 0, 0); }
+  25% { transform: translate3d(22vw, -6px, 0); }
+  50% { transform: translate3d(52vw, 4px, 0); }
+  75% { transform: translate3d(80vw, -5px, 0); }
+  to { transform: translate3d(108vw, 0, 0); }
+}
+@keyframes season-sway {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(9deg); }
+}
+@keyframes season-twinkle {
+  0%, 100% { transform: scale(0.75); opacity: 0.35; }
+  50% { transform: scale(1.1); opacity: 0.95; }
+}
+.seasonal-decor > span {
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-decor > span {
+    animation: none !important;
+    opacity: 0.6;
+  }
+}
+
 /* Control của MapLibre theo phong cách MapMate */
 .maplibregl-ctrl-group {
   border-radius: var(--radius-button) !important;
   box-shadow: var(--shadow-card-hover) !important;
   overflow: hidden;
+}
+
+/* Trang chủ: ô tìm kiếm nổi ở góc trên bên trái bản đồ => đẩy nút bản quyền bản đồ xuống dưới ô tìm kiếm */
+.home-map .maplibregl-ctrl-top-left {
+  top: 3.25rem;
+}
+
+/* Nút phóng to / thu nhỏ & ghi nguồn của MapLibre theo nền tối */
+:root[data-theme="dark"] .maplibregl-ctrl-group,
+:root[data-theme="dark"] .maplibregl-ctrl-attrib {
+  background-color: var(--color-surface);
+  color: var(--color-neutral-700);
+}
+:root[data-theme="dark"] .maplibregl-ctrl-group button + button {
+  border-top-color: var(--color-neutral-200);
+}
+:root[data-theme="dark"] .maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+:root[data-theme="dark"] .maplibregl-ctrl-attrib a {
+  color: var(--color-neutral-700);
+}
+:root[data-theme="dark"] .maplibregl-popup-content {
+  background-color: var(--color-surface);
+  color: var(--color-neutral-800);
+}
+:root[data-theme="dark"] .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--color-surface);
+}
+:root[data-theme="dark"] .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--color-surface);
 }
 
 /* Tên địa điểm khi rê chuột lên chấm của bản đồ nền (usePoiHover) */

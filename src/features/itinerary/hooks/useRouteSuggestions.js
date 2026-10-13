@@ -68,7 +68,7 @@ export const useRouteSuggestions = () => {
       });
       setState((prev) => ({ ...prev, saved: { ...prev.saved, [selected.key]: itinerary } }));
       bumpVersion();
-      showToast('Đã lưu lộ trình — xem lại ở tab "Của tôi"');
+      showToast('Đã lưu lộ trình — xem lại ở tab "Lộ trình của tôi"');
     } catch (error) {
       showToast(error.message, 'danger');
     } finally {

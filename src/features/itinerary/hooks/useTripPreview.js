@@ -10,7 +10,7 @@ const PREVIEW_DEBOUNCE_MS = 400;
 // `plan` { keepOrder, stayOverrides }: giỏ nạp từ 1 phương án gợi ý => giữ đúng thứ tự + thời gian ở lại đã chọn.
 export const useTripPreview = (criteria, placeIds, plan = null) => {
   const requestKey = placeIds.length ? JSON.stringify([criteria, placeIds, plan]) : '';
-  const [result, setResult] = useState({ forKey: '', summary: null });
+  const [result, setResult] = useState({ forKey: '', summary: null, stops: [], placeIds: [] });
 
   useEffect(() => {
     if (!requestKey) return undefined;
@@ -18,8 +18,8 @@ export const useTripPreview = (criteria, placeIds, plan = null) => {
     const timer = setTimeout(() => {
       const [nextCriteria, nextPlaceIds, nextPlan] = JSON.parse(requestKey);
       previewItineraryApi(nextCriteria, nextPlaceIds, nextPlan ?? {})
-        .then((plan) => isActive && setResult({ forKey: requestKey, summary: plan.summary }))
-        .catch(() => isActive && setResult({ forKey: requestKey, summary: null }));
+        .then((plan) => isActive && setResult({ forKey: requestKey, summary: plan.summary, stops: plan.stops ?? [], placeIds: (plan.place_ids ?? []).map(String) }))
+        .catch(() => isActive && setResult({ forKey: requestKey, summary: null, stops: [], placeIds: [] }));
     }, PREVIEW_DEBOUNCE_MS);
     return () => {
       isActive = false;
@@ -28,5 +28,11 @@ export const useTripPreview = (criteria, placeIds, plan = null) => {
   }, [requestKey]);
 
   // Giữ số liệu cũ (hiện mờ) trong lúc tính lại để giao diện không nhấp nháy.
-  return { summary: requestKey ? result.summary : null, isUpdating: Boolean(requestKey) && result.forKey !== requestKey };
+  // stops / placeIds: lịch trình dự kiến theo đúng thứ tự server sắp (giờ đến, thời gian ở lại từng điểm)
+  return {
+    summary: requestKey ? result.summary : null,
+    stops: requestKey ? result.stops : [],
+    placeIds: requestKey ? result.placeIds : [],
+    isUpdating: Boolean(requestKey) && result.forKey !== requestKey,
+  };
 };

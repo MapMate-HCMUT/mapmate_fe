@@ -99,7 +99,7 @@ export const AiRouteOptions = ({ options, criteria }) => {
           className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-button bg-primary-600 hover:bg-primary-700 disabled:bg-primary-100 disabled:text-primary-700 text-white text-sm font-semibold transition"
         >
           {saved[selected.key] ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-          {saved[selected.key] ? 'Đã lưu vào "Của tôi"' : savingKey === selected.key ? 'Đang lưu…' : 'Lưu lộ trình này'}
+          {saved[selected.key] ? 'Đã lưu vào "Lộ trình của tôi"' : savingKey === selected.key ? 'Đang lưu…' : 'Lưu lộ trình này'}
         </button>
         <button
           type="button"

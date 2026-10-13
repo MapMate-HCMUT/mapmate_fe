@@ -1,6 +1,7 @@
 import { useUnreadCount } from '../../notifications';
 import { useAvatarEditor } from './useAvatarEditor';
 import { useChangePassword } from './useChangePassword';
+import { useCoverEditor } from './useCoverEditor';
 import { useEditProfile } from './useEditProfile';
 import { useLeaderboard } from './useLeaderboard';
 import { useLogout } from './useLogout';
@@ -27,6 +28,7 @@ export const useProfilePage = () => {
     history: useXpHistory(me.profile?.id),
     editProfile: useEditProfile(me.profile, refreshAll),
     avatarEditor: useAvatarEditor(me.profile, refreshAll),
+    coverEditor: useCoverEditor(me.profile, me.reload),
     personalInfo: usePersonalInfo(me.profile, me.reload),
     changePassword: useChangePassword(),
     share: useShareProfile(me.profile ?? {}),

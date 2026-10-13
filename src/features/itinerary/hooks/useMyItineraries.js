@@ -1,6 +1,6 @@
 import { useAsyncData } from '../../../hooks/useAsyncData';
 import { useToast } from '../../../hooks/useToast';
-import { deleteItineraryApi, getMyItinerariesApi } from '../api/itineraryApi';
+import { deleteItineraryApi, getMyItinerariesApi, updateItineraryApi } from '../api/itineraryApi';
 import { useItineraryStore } from '../stores/itineraryStore';
 
 export const useMyItineraries = () => {
@@ -19,5 +19,18 @@ export const useMyItineraries = () => {
     }
   };
 
-  return { itineraries: data?.items ?? [], error, isLoading, remove, reload };
+  // Đổi tên (chỉ gửi name => server không tính lại lộ trình). Trả về true khi thành công.
+  const rename = async (itinerary, name) => {
+    try {
+      await updateItineraryApi(itinerary.id, { name });
+      showToast(`Đã đổi tên thành "${name}"`);
+      bumpVersion();
+      return true;
+    } catch (renameError) {
+      showToast(renameError.message, 'danger');
+      return false;
+    }
+  };
+
+  return { itineraries: data?.items ?? [], error, isLoading, remove, rename, reload };
 };

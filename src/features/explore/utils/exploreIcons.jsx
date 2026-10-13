@@ -111,6 +111,5 @@ export const VEHICLE_ICONS = {
 export const TAB_ICONS = {
   places: Compass,
   feed: Newspaper,
-  friends: Users,
   mine: Bookmark,
 };

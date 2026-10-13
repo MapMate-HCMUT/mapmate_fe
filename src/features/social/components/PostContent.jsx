@@ -39,6 +39,13 @@ export const PostContent = ({ post, onTagClick, onCloneItinerary, cloningId }) =
 
     <PostMedia media={post.media} />
 
+    {post.owner_reply && (
+      <div className="rounded-input bg-secondary-50 border-l-4 border-secondary-500 px-3 py-2">
+        <p className="text-xs font-bold text-secondary-800">🏪 Phản hồi từ {post.owner_reply.business_name ?? 'chủ quán'}</p>
+        <p className="mt-0.5 text-sm text-neutral-700 whitespace-pre-line break-words">{post.owner_reply.text}</p>
+      </div>
+    )}
+
     {post.type === 'place' && (post.place ? <PlaceEmbed place={post.place} /> : <p className="text-xs italic text-neutral-400">Địa điểm này không còn tồn tại.</p>)}
     {post.type === 'itinerary' && (post.itinerary ? (
       <ItineraryCard

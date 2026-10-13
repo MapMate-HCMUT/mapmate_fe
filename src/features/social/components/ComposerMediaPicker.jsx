@@ -24,14 +24,14 @@ export const ComposerMediaPicker = ({ media }) => {
                 <img src={item.previewUrl} alt="" className="w-full h-full object-cover" />
               )}
               {item.status === 'uploading' && (
-                <div className="absolute inset-0 bg-neutral-900/45 flex items-center justify-center text-xs font-bold text-white">{item.progress}%</div>
+                <div className="absolute inset-0 bg-ink/45 flex items-center justify-center text-xs font-bold text-white">{item.progress}%</div>
               )}
               {item.status === 'error' && (
                 <button type="button" onClick={() => media.retry(item.id)} title={item.error} className="absolute inset-0 bg-danger-600/70 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-white">
                   <RotateCw className="w-4 h-4" /> Thử lại
                 </button>
               )}
-              <button type="button" onClick={() => media.remove(item.id)} aria-label="Bỏ file này" className="absolute top-1 right-1 p-1 rounded-pill bg-neutral-900/60 text-white hover:bg-neutral-900/80">
+              <button type="button" onClick={() => media.remove(item.id)} aria-label="Bỏ file này" className="absolute top-1 right-1 p-1 rounded-pill bg-ink/60 text-white hover:bg-ink/80">
                 <X className="w-3.5 h-3.5" />
               </button>
             </li>

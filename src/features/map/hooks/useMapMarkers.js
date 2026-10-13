@@ -18,34 +18,6 @@ const addMarker = (map, element, coordinates, onClick, options = {}) => {
   return new Marker({ element, ...options }).setLngLat(coordinates).addTo(map);
 };
 
-// Hiển thị marker các địa điểm: Dùng marker ghim mặc định chuẩn Goong / MapLibre (không dùng icon emoji bong bóng tròn)
-export const usePlaceMarkers = (map, places, selectedPlaceId, onSelectPlace) => {
-  useEffect(() => {
-    if (!map) return undefined;
-    const markers = places.map((place) => {
-      const isSelected = place.id === selectedPlaceId;
-      const marker = new Marker({
-        color: isSelected ? '#2563eb' : '#ea4335',
-        scale: isSelected ? 1.15 : 0.85,
-      })
-        .setLngLat(place.location.coordinates)
-        .addTo(map);
-
-      const el = marker.getElement();
-      el.style.cursor = 'pointer';
-      el.title = place.name;
-      if (onSelectPlace) {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          onSelectPlace(place.id);
-        });
-      }
-      return marker;
-    });
-    return () => markers.forEach((marker) => marker.remove());
-  }, [map, places, selectedPlaceId, onSelectPlace]);
-};
-
 export const useUserMarker = (map, coordinates) => {
   useEffect(() => {
     if (!map || !coordinates) return undefined;

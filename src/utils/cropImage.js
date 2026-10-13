@@ -14,16 +14,16 @@ export const loadImageFile = (file) =>
   });
 
 /**
- * Cắt vùng vuông { x, y, size } (toạ độ pixel gốc của ảnh) rồi thu về outputSize×outputSize px.
- * Xuất WEBP (hoặc JPEG nếu trình duyệt không hỗ trợ) — thường chỉ 15–40KB.
+ * Cắt vùng { x, y, width, height } (toạ độ pixel gốc của ảnh) rồi thu về kích thước `output`
+ * (số = vuông output×output, hoặc { width, height }). Xuất WEBP (hoặc JPEG nếu trình duyệt không hỗ trợ).
  */
-export const cropImageToDataUrl = (image, { x, y, size }, outputSize) => {
+export const cropImageToDataUrl = (image, { x, y, width, height }, output) => {
   const canvas = document.createElement('canvas');
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  canvas.width = typeof output === 'number' ? output : output.width;
+  canvas.height = typeof output === 'number' ? output : output.height;
   const context = canvas.getContext('2d');
   context.imageSmoothingQuality = 'high';
-  context.drawImage(image, x, y, size, size, 0, 0, outputSize, outputSize);
+  context.drawImage(image, x, y, width, height, 0, 0, canvas.width, canvas.height);
 
   const webp = canvas.toDataURL('image/webp', OUTPUT_QUALITY);
   return webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', OUTPUT_QUALITY);

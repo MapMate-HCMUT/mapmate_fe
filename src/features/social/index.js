@@ -10,3 +10,6 @@ export { UserPinsSection } from './components/UserPinsSection';
 export { UserPostsSection } from './components/UserPostsSection';
 export { usePlaceReviewActions } from './hooks/usePlaceReviews';
 export { useSocialStore } from './stores/socialStore';
+export { PostMedia } from './components/PostMedia';
+export { formatMegabytes, mediaKindOf, readVideoDuration, uploadToCloudinary } from './utils/mediaUpload';
+export { getUploadConfigApi } from './api/socialApi';

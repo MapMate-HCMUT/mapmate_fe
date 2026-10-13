@@ -6,7 +6,6 @@ import { ClarifyQuestions } from './ClarifyQuestions';
 import { PipelineTrace } from './PipelineTrace';
 import { PlaceAnswerCard } from './PlaceAnswerCard';
 import { RefusalCard } from './RefusalCard';
-import { UnderstoodCard } from './UnderstoodCard';
 import { WeatherChip } from './WeatherChip';
 
 const WarningsBox = ({ items }) => {
@@ -74,7 +73,6 @@ export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
       )}
       {data.place_answer && <PlaceAnswerCard answer={data.place_answer} />}
       {data.weather && <WeatherChip weather={data.weather} />}
-      {data.understood && !data.refusal && <UnderstoodCard understood={data.understood} />}
       {data.options?.length > 0 && <AiRouteOptions options={data.options} criteria={data.understood.criteria} />}
       {data.places?.length > 0 && <AiPlaceList places={data.places} />}
       <WarningsBox items={data.warnings} />
