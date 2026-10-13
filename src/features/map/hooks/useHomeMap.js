@@ -22,7 +22,8 @@ import { useMapData } from './useMapData';
 import { useMapInstance } from './useMapInstance';
 import { useMapPointInfo } from './useMapPointInfo';
 import { usePoiHover } from './usePoiHover';
-import { useItineraryMarkers, useItineraryRoute, useUserMarker } from './useMapMarkers';
+import { useItineraryMarkers, useItineraryRoute, useStartPointMarker, useUserMarker } from './useMapMarkers';
+import { useStartPointPicking } from './useStartPointPicking';
 import { usePlacePins } from './usePlacePins';
 import { getStoredUserLocation, useUserLocation } from './useUserLocation';
 
@@ -36,7 +37,7 @@ export const useHomeMap = () => {
   const redirectMapError = useCallback((error) => redirectOnError(error, { force: true }), [redirectOnError]);
   const { containerRef, map, error: mapError } = useMapInstance(redirectMapError);
   const query = useSearchStore((state) => state.query);
-  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId } = useMapStore();
+  const { category, budgetMax, radiusKm, vehicle, selectedPlaceId, startPoint, isPickingStart } = useMapStore();
   const { setCategory, setSelectedPlaceId, setVehicle: setMapVehicle } = useMapStore();
   const { showToast } = useToast();
 
@@ -187,8 +188,9 @@ export const useHomeMap = () => {
 
     const requestId = ++fetchRequestIdRef.current;
 
-    // Điểm xuất phát ưu tiên: vị trí GPS đã lưu / hiện tại -> điểm xuất phát của lộ trình -> mặc định Q.1
+    // Điểm xuất phát ưu tiên: điểm người dùng tự chọn -> vị trí GPS đã lưu / hiện tại -> điểm xuất phát của lộ trình -> mặc định Q.1
     const effectiveOrigin =
+      startPoint?.coordinates ||
       userCoordinates ||
       getStoredUserLocation() ||
       (activeItinerary.criteria?.origin
@@ -225,6 +227,7 @@ export const useHomeMap = () => {
   }, [
     isNavigating,
     activeItinerary,
+    startPoint,
     userCoordinates,
     vehicle,
     places,
@@ -265,13 +268,16 @@ export const useHomeMap = () => {
     isNavigating ? activeItinerary?.stops : [],
     activeStopIndex,
     selectStop,
-    isNavigating ? userCoordinates : null,
+    isNavigating ? startPoint?.coordinates ?? userCoordinates : null,
     isNavigating ? routeData : null,
     places,
+    startPoint?.label ?? 'Vị trí của bạn',
   );
   // Đi xe công cộng: lớp riêng vẽ từng chặng theo màu tuyến (MapHomePage) thay cho đường xanh của Goong
   useItineraryRoute(map, isNavigating && !routeData?.transit ? routeData?.coordinates : null);
   useUserMarker(map, isNavigating ? null : userCoordinates);
+  useStartPointMarker(map, isNavigating ? null : startPoint);
+  useStartPointPicking(map);
 
   // Bấm 1 địa điểm / điểm bất kỳ trên bản đồ => thẻ thông tin; bấm lại đúng chỗ đó => ẩn thẻ (bật / tắt).
   // - Quán / nơi có trong dữ liệu MapMate => thẻ đầy đủ (đánh giá, giá, giờ mở cửa, thêm vào chuyến đi)
@@ -288,6 +294,7 @@ export const useHomeMap = () => {
       closePoint();
     };
     const onClick = (event) => {
+      if (useMapStore.getState().isPickingStart) return; // đang chọn điểm xuất phát => chạm này không mở thẻ
       if (hitsAppLayer(map, event.point)) return; // trạm buýt... đã có thẻ riêng
       const poi = basemapPoiAt(map, event.point);
       const coordinates = poi?.coordinates ?? [event.lngLat.lng, event.lngLat.lat];
@@ -393,6 +400,10 @@ export const useHomeMap = () => {
     showLocateHint: locateHint.isVisible && Boolean(map),
     dismissLocateHint,
     userCoordinates,
+    // Chọn điểm xuất phát khi chỉ đường (vị trí hiện tại / chạm bản đồ / tìm địa chỉ)
+    startPoint,
+    isPickingStart,
+    cancelPickingStart: () => useMapStore.getState().setPickingStart(false),
     addToItinerary,
     showDirections,
     mapPoint: point,

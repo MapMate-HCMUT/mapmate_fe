@@ -63,6 +63,6 @@ export const usePostList = (params, { enabled = true } = {}) => {
     actions: usePostActions({ updatePost, removePosts, prependPost }),
     share: useShareToFriends(),
     clone: useCloneItinerary(),
-    openTag: (tag) => navigate(`/explore?tab=feed&tag=${encodeURIComponent(tag)}`), // bấm hashtag => xem trên bảng tin
+    openTag: (tag) => navigate(`/feed?tag=${encodeURIComponent(tag)}`), // bấm hashtag => xem trên bảng tin
   };
 };

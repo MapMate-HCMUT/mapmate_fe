@@ -34,7 +34,7 @@ export const useShareToFriends = () => {
   });
 
   const copyLink = async (targetPost) => {
-    const url = `${window.location.origin}/explore?tab=feed&post=${targetPost.id}`;
+    const url = `${window.location.origin}/feed?post=${targetPost.id}`;
     try {
       await navigator.clipboard.writeText(url);
       showToast('Đã copy link bài viết');

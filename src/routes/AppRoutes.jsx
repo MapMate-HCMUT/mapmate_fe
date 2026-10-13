@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router';
+import { Navigate, Route, Routes, useSearchParams } from 'react-router';
 import { ErrorRoutePage } from '../app/ErrorRoutePage';
 import { MainLayout } from '../app/MainLayout';
 import { ErrorPage } from '../components/ErrorPage';
@@ -19,12 +19,25 @@ import {
   BusinessStoresPage,
   OnboardingLayout,
 } from '../features/business';
-import { ExplorePage } from '../features/explore';
+import { ExploreLayout, LegacyExploreRedirect, MineTab, PlacesTab } from '../features/explore';
 import { ProfilePage, PublicProfilePage } from '../features/gamification';
 import { MapHomePage } from '../features/map';
+import { FeedTab } from '../features/social';
 import { VouchersPage } from '../features/vouchers';
 import { ERROR_KINDS } from '../utils/errorMessages';
 import { GuestOnlyRoute, ProtectedRoute } from './ProtectedRoute';
+
+// /vouchers?event=... (link cũ từ thẻ quán) => mục Sự kiện; còn lại là ví voucher
+const WalletRoute = () => {
+  const [searchParams] = useSearchParams();
+  return searchParams.get('event') ? <Navigate to={`/events?${searchParams}`} replace /> : <VouchersPage view="wallet" />;
+};
+
+// Trang chủ là Khám phá; link cũ mở 1 quán trên bản đồ (/?place=..., VD thông báo khuyến mãi) => /map?place=...
+const HomeRoute = () => {
+  const [searchParams] = useSearchParams();
+  return searchParams.get('place') ? <Navigate to={`/map?${searchParams}`} replace /> : <PlacesTab />;
+};
 
 export const AppRoutes = () => (
   <Routes>
@@ -49,13 +62,20 @@ export const AppRoutes = () => (
     </Route>
 
     <Route element={<MainLayout />}>
-      <Route index element={<MapHomePage />} />
-      <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-      <Route path="users/:userId" element={<PublicProfilePage />} />
-      <Route path="explore" element={<ExplorePage />} />
+      {/* Trang chủ = Khám phá: cột trái chọn mục (địa điểm, bảng tin, sự kiện, lộ trình, voucher, hồ sơ) */}
+      <Route element={<ExploreLayout />}>
+        <Route index element={<HomeRoute />} />
+        <Route path="feed" element={<FeedTab />} />
+        <Route path="events" element={<VouchersPage view="events" />} />
+        <Route path="routes" element={<MineTab />} />
+        <Route path="vouchers" element={<WalletRoute />} />
+        <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="users/:userId" element={<PublicProfilePage />} />
+      </Route>
+      <Route path="map" element={<MapHomePage />} />
+      <Route path="explore" element={<LegacyExploreRedirect />} />
       <Route path="ai-planner" element={<AiPlannerPage />} />
       <Route path="for-business" element={<BusinessLandingPage />} />
-      <Route path="vouchers" element={<VouchersPage />} />
       <Route path="error" element={<ErrorRoutePage />} />
       <Route path="*" element={<ErrorPage kind={ERROR_KINDS.NOT_FOUND} />} />
     </Route>

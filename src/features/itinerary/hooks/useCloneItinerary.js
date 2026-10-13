@@ -14,7 +14,7 @@ export const useCloneItinerary = () => {
   const [cloningId, setCloningId] = useState(null);
 
   const clone = async (itineraryId) => {
-    if (!isAuthenticated) return navigate(`/login?redirect=${encodeURIComponent('/explore?tab=feed')}`);
+    if (!isAuthenticated) return navigate(`/login?redirect=${encodeURIComponent('/feed')}`);
     setCloningId(itineraryId);
     try {
       await cloneItineraryApi(itineraryId);

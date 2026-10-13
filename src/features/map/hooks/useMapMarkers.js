@@ -18,6 +18,15 @@ const addMarker = (map, element, coordinates, onClick, options = {}) => {
   return new Marker({ element, ...options }).setLngLat(coordinates).addTo(map);
 };
 
+// Điểm xuất phát người dùng tự chọn (chưa dẫn đường): vòng tròn đen tâm trắng như điểm xuất phát của lộ trình
+export const useStartPointMarker = (map, startPoint) => {
+  useEffect(() => {
+    if (!map || !startPoint) return undefined;
+    const marker = addMarker(map, createOriginMarkerElement(`Xuất phát: ${startPoint.label}`), startPoint.coordinates, null, { anchor: 'center' });
+    return () => marker.remove();
+  }, [map, startPoint]);
+};
+
 export const useUserMarker = (map, coordinates) => {
   useEffect(() => {
     if (!map || !coordinates) return undefined;
@@ -31,7 +40,7 @@ export const useUserMarker = (map, coordinates) => {
 // 2. Điểm trung gian: Số thứ tự 1, 2...
 // 3. Điểm đích đến cuối: Ghim đỏ
 // 4. Badge nổi trên đường: Quãng đường & Thời gian
-export const useItineraryMarkers = (map, stops, activeStopIndex, onSelectStop, userCoordinates, routeData, places = []) => {
+export const useItineraryMarkers = (map, stops, activeStopIndex, onSelectStop, userCoordinates, routeData, places = [], originLabel = 'Vị trí của bạn') => {
   useEffect(() => {
     if (!map || !stops?.length) return undefined;
     const markers = [];
@@ -39,7 +48,7 @@ export const useItineraryMarkers = (map, stops, activeStopIndex, onSelectStop, u
     // 1. Điểm xuất phát (Origin)
     const originCoords = userCoordinates || (stops[0] ? getStopCoordinates(stops[0], places) : null);
     if (originCoords) {
-      const originEl = createOriginMarkerElement('Vị trí của bạn');
+      const originEl = createOriginMarkerElement(originLabel);
       const originMarker = addMarker(map, originEl, originCoords, null, { anchor: 'center' });
       markers.push(originMarker);
     }
@@ -88,7 +97,7 @@ export const useItineraryMarkers = (map, stops, activeStopIndex, onSelectStop, u
     }
 
     return () => markers.forEach((marker) => marker.remove());
-  }, [map, stops, activeStopIndex, onSelectStop, userCoordinates, routeData, places]);
+  }, [map, stops, activeStopIndex, onSelectStop, userCoordinates, routeData, places, originLabel]);
 };
 
 // Vẽ đường polyline từ Goong Directions API lên bản đồ chuẩn xanh Goong Maps (#2563eb / #1d4ed8)

@@ -1,10 +1,10 @@
 export const PROFILE_TABS = [
   { value: 'overview', label: 'Tổng quan', emoji: '🏆' },
-  { value: 'posts', label: 'Bài viết & đánh giá', emoji: '📝' },
+  { value: 'posts', label: 'Bài viết', emoji: '📝' },
   { value: 'friends', label: 'Bạn bè', emoji: '👥' },
   { value: 'activity', label: 'Hoạt động', emoji: '🗓️' },
   { value: 'notifications', label: 'Thông báo', emoji: '🔔' },
-  { value: 'personal', label: 'Thông tin cá nhân', emoji: '🪪' },
+  { value: 'personal', label: 'Cá nhân', emoji: '🪪' },
 ];
 export const DEFAULT_PROFILE_TAB = 'overview';
 

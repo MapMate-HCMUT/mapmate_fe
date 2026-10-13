@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useMapStore } from '../stores/mapStore';
 import { PLACE_PIN_LAYER, placePinAt } from '../utils/mapPoint';
 
 const PLACE_PIN_SOURCE = 'mapmate-places';
@@ -87,6 +88,7 @@ export const usePlacePins = (map, places, selectedPlaceId, onSelectPlace) => {
 
     // Bấm trúng ghim (lệch vài pixel vẫn tính) => mở thẻ địa điểm; bấm chỗ khác do trang chủ xử lý
     const onClick = (event) => {
+      if (useMapStore.getState().isPickingStart) return; // đang chọn điểm xuất phát
       const pin = placePinAt(map, event.point);
       if (pin) onSelectRef.current?.(pin.id);
     };

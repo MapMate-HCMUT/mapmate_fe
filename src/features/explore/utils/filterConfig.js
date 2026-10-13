@@ -2,7 +2,7 @@
 export const PRICE_MIN = 0;
 export const PRICE_MAX = 2000000; // kéo hết sang phải = "2.000k+" (không giới hạn)
 export const PRICE_STEP = 10000;
-export const PAGE_SIZE = 12;
+export const PAGE_SIZE = 6; // mỗi trang danh sách địa điểm (Khám phá) hiện 6 quán
 export const SEARCH_DEBOUNCE_MS = 350;
 export const DEFAULT_ORIGIN = { lat: 10.7769, lng: 106.7009, label: 'Trung tâm Quận 1', isDefault: true };
 

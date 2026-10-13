@@ -1,5 +1,6 @@
 import { Popup } from 'maplibre-gl';
 import { useEffect } from 'react';
+import { useMapStore } from '../stores/mapStore';
 import { basemapPoiAt, placePinAt } from '../utils/mapPoint';
 
 const POPUP_OFFSET_PX = 12; // hiện ngay dưới chấm (phía trên hay bị các thẻ nổi đầu bản đồ che)
@@ -22,6 +23,7 @@ export const usePoiHover = (map, enabled) => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = null;
+        if (useMapStore.getState().isPickingStart) return hide(); // đang chọn điểm xuất phát: không gợi ý "bấm để xem"
         const pin = placePinAt(map, event.point);
         const poi = pin ? { name: pin.name, coordinates: pin.coordinates, kindLabel: 'MapMate' } : basemapPoiAt(map, event.point);
         if (!poi) return hide();

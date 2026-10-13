@@ -1,6 +1,7 @@
 import { Bookmark } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import { LoginPrompt } from '../../../components/LoginPrompt';
+import { EXPLORE_GRID, EXPLORE_MAIN } from '../../../config/layout';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
 import { MyItinerariesPanel, stayOverridesOf, useActiveRouteStore } from '../../itinerary';
@@ -8,10 +9,9 @@ import { PinsPanel, useSocialStore } from '../../social';
 import { useExploreFilterStore } from '../stores/exploreFilterStore';
 import { useTripDraftStore } from '../stores/tripDraftStore';
 
-// Tab "Lộ trình của tôi": lộ trình đã lưu (dạng thư mục) + địa điểm đã ghim ở cột bên.
+// Mục "Lộ trình của tôi" (/routes): lộ trình đã lưu (dạng thư mục) + địa điểm đã ghim ở cột bên.
 export const MineTab = () => {
   const navigate = useNavigate();
-  const [, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const startEditing = useTripDraftStore((state) => state.startEditing);
@@ -22,7 +22,7 @@ export const MineTab = () => {
   const handleStartItinerary = (itinerary) => {
     startTrip(itinerary);
     showToast(`Bắt đầu chuyến đi “${itinerary.name}”`);
-    navigate('/'); // Chuyển sang tab Bản đồ
+    navigate('/map'); // Chuyển sang tab Bản đồ
   };
 
   const handleEditItinerary = (itinerary) => {
@@ -54,7 +54,7 @@ export const MineTab = () => {
     if (criteria) {
       applyCriteria(criteria);
     }
-    setSearchParams({}); // Chuyển về tab mặc định: Địa điểm ('places')
+    navigate('/'); // Về mục Địa điểm để sửa
     showToast(`Đang chỉnh sửa “${itinerary.name}”`);
   };
 
@@ -62,12 +62,14 @@ export const MineTab = () => {
     return <LoginPrompt icon={<Bookmark className="w-10 h-10 text-primary-600" />} title="Lộ trình của bạn" description="Đăng nhập để lưu lại các lộ trình và ghim những nơi đã đi, muốn đi." />;
   }
   return (
-    <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
-      <MyItinerariesPanel
-        onShare={(itinerary) => openComposer({ type: 'itinerary', itinerary })}
-        onEdit={handleEditItinerary}
-        onStart={handleStartItinerary}
-      />
+    <div className={EXPLORE_GRID}>
+      <div className={EXPLORE_MAIN}>
+        <MyItinerariesPanel
+          onShare={(itinerary) => openComposer({ type: 'itinerary', itinerary })}
+          onEdit={handleEditItinerary}
+          onStart={handleStartItinerary}
+        />
+      </div>
       <PinsPanel />
     </div>
   );

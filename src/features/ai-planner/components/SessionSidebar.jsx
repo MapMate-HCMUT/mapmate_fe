@@ -1,8 +1,9 @@
 import { Link } from 'react-router';
-import { MessageSquarePlus, PanelLeftClose, Trash2 } from 'lucide-react';
+import { MessageSquarePlus, Trash2 } from 'lucide-react';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 // Lịch sử trò chuyện: thanh bên bật ra / gập vào trên Desktop, dạng drawer trượt trên Mobile.
+// Mở / đóng bằng nút trên thanh đầu trang chat (điện thoại: bấm vùng tối bên ngoài cũng đóng).
 export const SessionSidebar = ({
   isOpen,
   onClose,
@@ -27,15 +28,6 @@ export const SessionSidebar = ({
         >
           <MessageSquarePlus className="w-4 h-4 shrink-0" />
           <span>Cuộc trò chuyện mới</span>
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          title="Đóng thanh bên"
-          aria-label="Đóng thanh bên"
-          className="p-2 rounded-button text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition"
-        >
-          <PanelLeftClose className="w-4 h-4" />
         </button>
       </div>
 

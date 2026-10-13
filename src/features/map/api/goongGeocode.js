@@ -25,6 +25,20 @@ export const reverseGeocode = async ([lng, lat]) => {
   return info;
 };
 
+// Tìm địa chỉ / tên địa điểm -> tối đa `limit` kết quả (chọn điểm xuất phát khi chỉ đường). Gọi khi bấm Tìm, không gọi theo từng phím.
+export const searchAddresses = async (query, limit = 5) => {
+  const response = await axios.get('https://rsapi.goong.io/geocode', { params: { address: `${query}, Hồ Chí Minh`, api_key: GOONG_API_KEY }, timeout: 8000 });
+  return (response.data?.results ?? [])
+    .filter((result) => result.geometry?.location)
+    .slice(0, limit)
+    .map((result) => ({
+      id: result.place_id ?? `${result.geometry.location.lat},${result.geometry.location.lng}`,
+      name: result.name || result.formatted_address,
+      address: toAddress(result),
+      coordinates: [result.geometry.location.lng, result.geometry.location.lat],
+    }));
+};
+
 // Địa chỉ -> toạ độ (Goong Geocoding), giới hạn quanh TP.HCM. Dùng ở ô tìm địa chỉ khi chủ quán chọn vị trí cửa hàng.
 export const geocodeAddress = async (address) => {
   const response = await axios.get('https://rsapi.goong.io/geocode', { params: { address: `${address}, Hồ Chí Minh`, api_key: GOONG_API_KEY }, timeout: 8000 });

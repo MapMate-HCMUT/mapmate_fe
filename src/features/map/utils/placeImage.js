@@ -163,7 +163,8 @@ const pickFromList = (list, seed) => {
  * @param {Object} place - Đối tượng địa điểm
  * @returns {string} URL ảnh chụp thật chất lượng cao
  */
-export const getPlaceImageUrl = (place) => {
+// `large`: ảnh bìa lớn (thẻ địa điểm dạng dọc) => ảnh chủ quán đăng dùng bản gốc thay vì bản thu nhỏ
+export const getPlaceImageUrl = (place, { large = false } = {}) => {
   if (!place) return null;
 
   // Tầng 1.1: Trùng tên trong bảng địa điểm nổi tiếng đã tải ảnh độ nét cao về máy
@@ -173,7 +174,7 @@ export const getPlaceImageUrl = (place) => {
 
   // Tầng 1.15: Ảnh chủ cửa hàng tự đăng (tài khoản doanh nghiệp)
   const ownPhoto = place.gallery?.find((item) => item.type === 'image');
-  if (ownPhoto) return ownPhoto.thumb_url;
+  if (ownPhoto) return (large && ownPhoto.url) || ownPhoto.thumb_url;
 
   // Tầng 1.2: Có image_url hợp lệ trong CSDL (cả URL online lẫn đường dẫn /places/)
   if (place.image_url && typeof place.image_url === 'string' && (place.image_url.startsWith('http') || place.image_url.startsWith('/'))) {

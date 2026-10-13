@@ -27,6 +27,7 @@ import { MapQuickActions } from './MapQuickActions';
 import { MapTripPanel } from './MapTripPanel';
 import { MapProviderBadge, MapStatusOverlay } from './MapStatusOverlay';
 import { PlaceDetailCard } from './PlaceDetailCard';
+import { StartPointPicker } from './StartPointPicker';
 import { TrendingCarousel } from './TrendingCarousel';
 import { TrendingSidebar } from './TrendingSidebar';
 
@@ -70,6 +71,8 @@ export const MapHomePage = () => {
   }, []);
   const vehicleEmoji = home.vehicleInfo.emoji;
   const { query, setQuery, clearQuery } = useSearchStore();
+  // "Xuất phát từ ..." dùng chung cho thẻ địa điểm, thẻ điểm ghim và cột dẫn đường
+  const startPicker = <StartPointPicker hasCurrentLocation={Boolean(home.userCoordinates)} onUseCurrentLocation={home.locate} />;
 
   return (
     <div className="flex-1 min-h-0 flex">
@@ -84,6 +87,7 @@ export const MapHomePage = () => {
           routeError={home.routeData?.transit ? null : routeError}
           onRetryRoute={retryRoute}
           onSetVehicle={home.setVehicle}
+          startPicker={startPicker}
           transitPanel={
             <TransitTripPanel
               routeData={home.routeData}
@@ -113,25 +117,26 @@ export const MapHomePage = () => {
       )}
 
       <section className="flex-1 min-w-0 flex flex-col">
+        {/* Điện thoại: ô tìm kiếm + danh mục nằm trên bản đồ (desktop nằm trong cột danh sách bên trái) */}
         {!isNavigating && (
-          <CategoryChips
-            value={home.category}
-            onChange={home.setCategory}
-            className="lg:hidden px-4 py-2 bg-surface border-b border-neutral-100"
-          />
+          <div className="lg:hidden px-4 pt-2.5 pb-2 space-y-2 bg-surface border-b border-neutral-100">
+            <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
+            <CategoryChips value={home.category} onChange={home.setCategory} />
+          </div>
         )}
 
-        <div className="home-map relative flex-1 min-h-0 overflow-hidden">
+        <div className="relative flex-1 min-h-0 overflow-hidden">
           {/* MapLibre ép .maplibregl-map thành position: relative => cần lớp bọc absolute bên ngoài */}
           <div className="absolute inset-0">
             <div ref={mapContainerRef} className="w-full h-full" aria-label="Bản đồ TP.HCM" />
           </div>
           <MapStatusOverlay isReady={home.isMapReady} error={home.mapError} />
 
-          {/* Ô tìm kiếm nằm ngay trên bản đồ (không còn trên Navbar); đang dẫn đường thì ẩn cho thoáng */}
-          {!isNavigating && (
-            <div className="absolute z-20 top-3 left-3 right-14 sm:right-auto sm:w-96">
-              <SearchBar value={query} onChange={setQuery} onClear={clearQuery} variant="floating" />
+          {/* Đang chọn điểm xuất phát: nhắc chạm bản đồ (Esc / Huỷ để thôi) */}
+          {home.isPickingStart && (
+            <div role="status" className="absolute z-30 top-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] sm:w-auto flex items-center gap-3 pl-4 pr-2 py-2 rounded-pill bg-ink text-white text-sm font-semibold shadow-modal">
+              <span className="flex-1">📍 Chạm vào bản đồ để chọn điểm xuất phát</span>
+              <button type="button" onClick={home.cancelPickingStart} className="px-3 py-1 rounded-pill bg-white/15 hover:bg-white/25 text-xs">Huỷ</button>
             </div>
           )}
           <MapProviderBadge provider={home.mapProvider} />
@@ -154,19 +159,19 @@ export const MapHomePage = () => {
 
           {/* Giỏ chuyến đi (chung với Khám phá): gợi ý lộ trình rồi hiện thẳng lên bản đồ */}
           {!isNavigating && (
-            <div className="absolute z-20 top-28 left-3 w-64 lg:top-auto lg:bottom-4 lg:left-4 lg:w-72">
+            <div className="absolute z-20 top-3 left-3 w-64 lg:top-auto lg:bottom-4 lg:left-4 lg:w-72">
               <MapTripPanel panel={tripPanel} maxPlaces={TRIP_DRAFT_MAX_PLACES} />
             </div>
           )}
 
           {isTransitMode && !isNavigating && (
-            <div className="absolute z-20 top-16 right-14 sm:top-3">
+            <div className="absolute z-20 top-3 right-14">
               <TransitLegend stopCount={transitLayer.stopCount} tooFar={transitLayer.tooFar} />
             </div>
           )}
           {/* Khung trạm / tuyến chỉ có ý nghĩa khi đang chọn Buýt & Metro */}
           {overlay && isTransitMode && (
-            <div className="absolute z-30 inset-x-0 bottom-0 lg:inset-x-auto lg:left-4 lg:top-16 lg:bottom-auto lg:w-80">
+            <div className="absolute z-30 inset-x-0 bottom-0 lg:inset-x-auto lg:left-4 lg:top-4 lg:bottom-auto lg:w-80">
               {overlay.type === 'stop' && <StopPanel key={overlay.id} stopId={overlay.id} onClose={() => setOverlay(null)} onOpenRoute={openRoute} />}
               {overlay.type === 'route' && <RoutePanel detail={routeDetail} onClose={() => setOverlay(null)} onSelectStop={openStop} />}
             </div>
@@ -194,11 +199,12 @@ export const MapHomePage = () => {
                 onAddToItinerary={home.addToItinerary}
                 onWriteReview={reviewActions.writeReview}
                 onOpenReviews={reviewActions.openReviews}
+                startPicker={startPicker}
               />
             </div>
           ) : home.mapPoint && !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
-              <MapPointCard point={home.mapPoint} vehicleEmoji={vehicleEmoji} onClose={home.closeMapPoint} onDirections={home.showPointDirections} onZoomIn={home.zoomToPoint} />
+              <MapPointCard point={home.mapPoint} vehicleEmoji={vehicleEmoji} onClose={home.closeMapPoint} onDirections={home.showPointDirections} onZoomIn={home.zoomToPoint} startPicker={startPicker} />
             </div>
           ) : !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:hidden">

@@ -1,3 +1,4 @@
+import { EXPLORE_GRID, EXPLORE_MAIN } from '../../../config/layout';
 import { BusinessProfileCard } from '../../business';
 import { useProfilePage } from '../hooks/useProfilePage';
 import { AccountSettingsCard } from './AccountSettingsCard';
@@ -18,13 +19,14 @@ export const ProfilePage = () => {
   const { me, leaderboard, tab, editProfile, avatarEditor, coverEditor, personalInfo, changePassword } = page;
 
   return (
-    <section className="flex-1 overflow-y-auto bg-neutral-50">
-      <div className="w-full max-w-7xl mx-auto p-4 lg:p-6">
+    // Nằm trong trang Khám phá (ExploreLayout lo cuộn + lề) — mục "Hồ sơ" ở cột trái
+    <>
+      <div>
         {me.isLoading && !me.profile && <ProfileSkeleton />}
         {me.error && !me.profile && <ProfileError error={me.error} onRetry={me.reload} />}
         {me.profile && (
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-5 items-start">
-            <div className="space-y-5 min-w-0">
+          <div className={EXPLORE_GRID}>
+            <div className={`${EXPLORE_MAIN} space-y-5`}>
               <ProfileHeaderCard
                 profile={me.profile}
                 stats={me.stats}
@@ -35,7 +37,7 @@ export const ProfilePage = () => {
               <ProfileTabs activeTab={tab.activeTab} onChange={tab.setActiveTab} unreadCount={page.unreadCount} />
               <ProfileTabContent activeTab={tab.activeTab} me={me} history={page.history} onEditPersonalInfo={personalInfo.openEditor} />
             </div>
-            <div className="space-y-5 lg:sticky lg:top-0">
+            <div className="space-y-5 xl:sticky xl:top-6">
               <LeaderboardCard
                 period={leaderboard.period}
                 onPeriodChange={leaderboard.setPeriod}
@@ -71,6 +73,6 @@ export const ProfilePage = () => {
         onChange={changePassword.handleChange}
         onSubmit={changePassword.handleSubmit}
       />
-    </section>
+    </>
   );
 };

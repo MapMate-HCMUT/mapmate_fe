@@ -11,7 +11,8 @@ import { PlaceRating, PlaceTravelInfo } from './PlaceMeta';
 import { PlaceThumb } from './PlaceThumb';
 
 // Thẻ chi tiết địa điểm: Bottom Sheet trên mobile, thẻ nổi góc phải trên desktop.
-export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, onAddToItinerary, onWriteReview, onOpenReviews }) => {
+// `startPicker`: ô "Xuất phát từ ..." (vị trí hiện tại / chạm bản đồ / tìm địa chỉ) đặt ngay trên nút Chỉ đường
+export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, onAddToItinerary, onWriteReview, onOpenReviews, startPicker }) => {
   const { label, soft } = getCategory(place.category);
   const community = place.community_rating ?? { average: 0, count: 0 };
   const isBusiness = Boolean(place.business);
@@ -116,7 +117,9 @@ export const PlaceDetailCard = ({ place, vehicleEmoji, onClose, onDirections, on
         </a>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mt-3">
+      {startPicker && <div className="mt-3">{startPicker}</div>}
+
+      <div className="grid grid-cols-2 gap-2 mt-2">
         <button
           type="button"
           onClick={handleDirections}

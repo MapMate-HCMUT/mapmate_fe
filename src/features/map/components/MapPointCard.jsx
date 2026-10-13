@@ -6,7 +6,7 @@ const Skeleton = ({ className }) => <span className={`block rounded-pill bg-neut
 
 // Thẻ "điểm đã ghim" khi bấm 1 chỗ bất kỳ trên bản đồ: tên, địa chỉ, đường đi từ vị trí của bạn + nút chỉ đường.
 // Bottom Sheet trên mobile, thẻ nổi góc phải trên desktop (giống thẻ địa điểm).
-export const MapPointCard = ({ point, vehicleEmoji, onClose, onDirections, onZoomIn }) => (
+export const MapPointCard = ({ point, vehicleEmoji, onClose, onDirections, onZoomIn, startPicker }) => (
   <article className="bg-surface rounded-t-card lg:rounded-card shadow-modal p-4 animate-[sheet-up_220ms_ease-out]" aria-live="polite">
     <div className="w-10 h-1 bg-neutral-300 rounded-pill mx-auto mb-3 lg:hidden" aria-hidden="true" />
     <div className="flex items-start gap-3">
@@ -61,10 +61,12 @@ export const MapPointCard = ({ point, vehicleEmoji, onClose, onDirections, onZoo
       </button>
     )}
 
+    {startPicker && <div className="mt-3">{startPicker}</div>}
+
     <button
       type="button"
       onClick={onDirections}
-      className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-button text-sm font-semibold transition"
+      className="mt-2 w-full flex items-center justify-center gap-1.5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-button text-sm font-semibold transition"
     >
       <Icon name="navigate" className="w-4 h-4" />
       Chỉ đường tới đây
