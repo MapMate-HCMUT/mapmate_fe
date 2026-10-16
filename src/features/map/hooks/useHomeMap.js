@@ -2,7 +2,6 @@ import { LngLatBounds } from 'maplibre-gl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MAP_DEFAULT_CENTER, MAP_FOCUS_ZOOM, MAP_PROVIDER } from '../../../config/map';
 import { useErrorRedirect } from '../../../hooks/useErrorRedirect';
-import { useFeatureHint } from '../../../hooks/useFeatureHint';
 import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
 import { TRIP_DRAFT_MAX_PLACES, useTripDraftStore } from '../../explore';
@@ -61,13 +60,6 @@ export const useHomeMap = () => {
     [map],
   );
   const { coordinates: userCoordinates, isLocating, locate } = useUserLocation(flyTo);
-  // Nút "Vị trí của tôi": lần đầu vào có lời nhắc giải thích; bấm thử hoặc "Đã hiểu" là thôi hiện
-  const locateHint = useFeatureHint('locate');
-  const { dismiss: dismissLocateHint } = locateHint;
-  const locateMe = useCallback(() => {
-    dismissLocateHint();
-    locate();
-  }, [dismissLocateHint, locate]);
   // Địa điểm thật quanh vị trí người dùng (chưa có thì quanh trung tâm), tìm theo từ khoá trên Navbar ở server
   const { places, isLoading } = useMapData(userCoordinates || getStoredUserLocation() || MAP_DEFAULT_CENTER, query, redirectOnError);
 
@@ -396,9 +388,7 @@ export const useHomeMap = () => {
     setCategory,
     vehicleInfo: getVehicle(vehicle),
     isLocating,
-    locate: locateMe,
-    showLocateHint: locateHint.isVisible && Boolean(map),
-    dismissLocateHint,
+    locate,
     userCoordinates,
     // Chọn điểm xuất phát khi chỉ đường (vị trí hiện tại / chạm bản đồ / tìm địa chỉ)
     startPoint,

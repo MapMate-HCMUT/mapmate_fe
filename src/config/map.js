@@ -4,8 +4,7 @@
 // Cả hai đều là vector tiles chuẩn Mapbox Style Spec nên MapLibre GL hiển thị được mà không phải sửa code.
 
 const GOONG_MAPTILES_KEY = import.meta.env.VITE_GOONG_MAPTILES_KEY;
-export const GOONG_API_KEY =
-  import.meta.env.VITE_GOONG_API_KEY || 'zCwHXMPzZXp3WGi4d17LBpjSOipKcUdV5jjCsDpC';
+// Key Goong REST (tìm địa chỉ, chỉ đường) chỉ nằm ở backend — trình duyệt gọi qua /api/geo (features/map/api/goong*.js)
 
 export const MAP_PROVIDERS = {
   GOONG: 'goong',

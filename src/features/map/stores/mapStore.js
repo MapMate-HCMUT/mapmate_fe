@@ -9,6 +9,8 @@ export const useMapStore = create((set) => ({
   radiusKm: null,
   vehicle: DEFAULT_VEHICLE,
   selectedPlaceId: null,
+  sidebarTab: 'places', // cột trái bản đồ: 'places' (địa điểm) | 'routes' (lộ trình đã lưu)
+  setSidebarTab: (sidebarTab) => set({ sidebarTab }),
   // Điểm xuất phát khi chỉ đường: null = vị trí hiện tại (GPS); hoặc { coordinates: [lng, lat], label } người dùng tự chọn
   startPoint: null,
   isPickingStart: false, // đang chờ người dùng chạm bản đồ để chọn điểm xuất phát

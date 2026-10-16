@@ -45,6 +45,13 @@ export const useAuthStore = create((set, get) => ({
     writeSession({ token, user }, remember);
     set({ user });
   },
+  // Token mới cho thiết bị này (VD sau khi đổi mật khẩu — server đã thu hồi token cũ), giữ nguyên lựa chọn "ghi nhớ"
+  replaceToken: (token) => {
+    const { user } = get();
+    const remember = Boolean(window.localStorage.getItem(AUTH_STORAGE_KEY));
+    writeSession({ token, user }, remember);
+    set({ token });
+  },
   clearSession: () => {
     writeSession(null);
     set({ token: null, user: null });

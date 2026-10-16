@@ -72,16 +72,22 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
     }
   };
 
-  const send = async (rawText) => {
+  // fresh = mở cuộc trò chuyện mới với câu này (VD bấm "Lên lộ trình Halloween cùng AI" trên thanh điều hướng)
+  const send = async (rawText, { fresh = false } = {}) => {
     const text = rawText.trim();
     if (!text || isSending) return false;
-    setMessages((prev) => [...prev, { id: newId(), role: 'user', text }]);
+    if (fresh) {
+      setPageError(null);
+      setSessionId(null);
+      setContext(null);
+    }
+    setMessages((prev) => [...(fresh ? [] : prev), { id: newId(), role: 'user', text }]);
     setIsSending(true);
     try {
       const data = await sendAiMessageApi({
         message: text,
-        session_id: isAuthenticated ? sessionId : null,
-        context: isAuthenticated ? null : context,
+        session_id: isAuthenticated && !fresh ? sessionId : null,
+        context: isAuthenticated || fresh ? null : context,
         origin: origin.isDefault ? null : { lat: origin.lat, lng: origin.lng, label: origin.label },
         model: tier,
       });

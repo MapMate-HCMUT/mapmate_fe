@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { GOONG_API_KEY, MAP_DEFAULT_CENTER } from '../../../config/map';
+import { MAP_DEFAULT_CENTER } from '../../../config/map';
+import { apiClient } from '../../../lib/apiClient';
 import { toFriendlyError } from '../../../utils/errorMessages';
 
 // Giải mã chuỗi polyline chuẩn Google / Goong thành mảng [lng, lat] cho MapLibre
@@ -181,9 +181,9 @@ const requestLegDirections = async (originCoord, destCoord, goongVehicle) => {
   const [origLng, origLat] = originCoord;
   const [destLng, destLat] = destCoord;
 
-  const url = `https://rsapi.goong.io/Direction?origin=${origLat},${origLng}&destination=${destLat},${destLng}&vehicle=${goongVehicle}&api_key=${GOONG_API_KEY}`;
-  const response = await axios.get(url, { timeout: 12000 });
-  const route = response.data?.routes?.[0];
+  // Qua backend (/api/geo/direction) — key Goong không nằm trong trình duyệt
+  const data = await apiClient.get('/geo/direction', { params: { origin_lat: origLat, origin_lng: origLng, dest_lat: destLat, dest_lng: destLng, vehicle: goongVehicle } });
+  const route = data?.routes?.[0];
   if (!route) throw new Error(NO_ROUTE_MESSAGE);
 
   const leg = route.legs?.[0];

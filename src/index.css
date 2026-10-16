@@ -496,19 +496,20 @@
   from { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
   10% { opacity: 0.85; }
   90% { opacity: 0.85; }
-  to { transform: translate3d(18px, 104px, 0) rotate(200deg); opacity: 0; }
+  to { transform: translate3d(0, 104px, 0) rotate(200deg); opacity: 0; }
 }
 @keyframes season-rise {
   from { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0; }
   15% { opacity: 0.85; }
-  to { transform: translate3d(-10px, -96px, 0) scale(1.1); opacity: 0; }
+  to { transform: translate3d(0, -96px, 0) scale(1.1); opacity: 0; }
 }
 @keyframes season-float {
-  from { transform: translate3d(-8vw, 0, 0); }
-  25% { transform: translate3d(22vw, -6px, 0); }
-  50% { transform: translate3d(52vw, 4px, 0); }
-  75% { transform: translate3d(80vw, -5px, 0); }
-  to { transform: translate3d(108vw, 0, 0); }
+  from { transform: translate3d(0, 0, 0); opacity: 0; }
+  15% { opacity: 0.85; }
+  45% { transform: translate3d(0, 46px, 0); }
+  55% { transform: translate3d(0, 40px, 0); }
+  85% { opacity: 0.85; }
+  to { transform: translate3d(0, 108px, 0); opacity: 0; }
 }
 @keyframes season-sway {
   from { transform: rotate(-9deg); }

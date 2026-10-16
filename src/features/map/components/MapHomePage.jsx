@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Route, X } from 'lucide-react';
 import { SearchBar } from '../../../components/SearchBar';
+import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
 import { RouteSuggestionsModal, useActiveRouteStore } from '../../itinerary';
 import { TRIP_DRAFT_MAX_PLACES } from '../../explore';
@@ -18,15 +20,18 @@ import {
 import { fetchLegDirections } from '../api/goongDirections';
 import { useHomeMap } from '../hooks/useHomeMap';
 import { useMapTripPanel } from '../hooks/useMapTripPanel';
-import { useQuickFilters } from '../hooks/useQuickFilters';
+import { useSavedItineraries } from '../hooks/useSavedItineraries';
+import { useSavedRouteLayers } from '../hooks/useSavedRouteLayers';
+import { useMapStore } from '../stores/mapStore';
+import { useSavedRoutesStore } from '../stores/savedRoutesStore';
 import { ActiveRouteBanner } from './ActiveRouteBanner';
 import { ActiveRouteSidebar } from './ActiveRouteSidebar';
 import { CategoryChips } from './CategoryChips';
 import { MapPointCard } from './MapPointCard';
-import { MapQuickActions } from './MapQuickActions';
 import { MapTripPanel } from './MapTripPanel';
 import { MapProviderBadge, MapStatusOverlay } from './MapStatusOverlay';
 import { PlaceDetailCard } from './PlaceDetailCard';
+import { SavedRoutesPanel } from './SavedRoutesPanel';
 import { StartPointPicker } from './StartPointPicker';
 import { TrendingCarousel } from './TrendingCarousel';
 import { TrendingSidebar } from './TrendingSidebar';
@@ -36,13 +41,46 @@ export const MapHomePage = () => {
   const { mapContainerRef, ...home } = useHomeMap();
   const isNavigating = home.isNavigating && Boolean(home.activeItinerary);
   const reviewActions = usePlaceReviewActions();
-  const quickFilters = useQuickFilters();
   const tripPanel = useMapTripPanel(home.userCoordinates);
   // Khung nổi bên trái bản đồ (1 khung 1 lúc): trạm xe buýt | tuyến xe buýt
   const [overlay, setOverlay] = useState(null);
   // Phương tiện "Buýt & Metro" (nút lọc phương tiện / cột chỉ đường): bản đồ hiện metro, trạm buýt (bấm xem xe sắp tới);
   // chỉ đường tìm tuyến xe buýt / metro và vẽ từng chặng theo màu tuyến
   const isTransitMode = home.vehicleInfo.value === 'bus';
+
+  // Lộ trình đã lưu hiện trên bản đồ (tối đa 5, mỗi lộ trình 1 màu); đang dẫn đường thì tạm ẩn cho đỡ rối
+  const { showToast } = useToast();
+  const saved = useSavedItineraries();
+  const { visible: visibleSaved, focusedId, lastShownId, setFocused, prune } = useSavedRoutesStore();
+  const setSidebarTab = useMapStore((state) => state.setSidebarTab);
+  const [isRoutesSheetOpen, setIsRoutesSheetOpen] = useState(false); // điện thoại: bảng trượt "Lộ trình đã lưu"
+  const savedById = useMemo(() => new Map(saved.itineraries.map((itinerary) => [itinerary.id, itinerary])), [saved.itineraries]);
+  const savedRoutes = useMemo(
+    () => visibleSaved.filter((item) => savedById.has(item.id)).map((item) => ({ itinerary: savedById.get(item.id), color: item.color })),
+    [visibleSaved, savedById],
+  );
+  // Lộ trình đã bị xoá ở nơi khác => bỏ khỏi danh sách đang hiện
+  useEffect(() => {
+    if (saved.isAuthenticated && !saved.isLoading && !saved.error) prune(new Set(saved.itineraries.map((itinerary) => itinerary.id)));
+  }, [saved.isAuthenticated, saved.isLoading, saved.error, saved.itineraries, prune]);
+  const savedLayers = useSavedRouteLayers(home.map, savedRoutes, {
+    enabled: !isNavigating,
+    focusedId,
+    autoFitId: lastShownId,
+    coverBottom: isRoutesSheetOpen ? 0.5 : 0, // điện thoại: bảng trượt che nửa dưới bản đồ
+    // Bấm 1 lộ trình trên bản đồ => chọn lộ trình đó và mở danh sách tới đúng chỗ
+    onSelectRoute: (id) => {
+      setFocused(id);
+      setSidebarTab('routes');
+      if (!window.matchMedia('(min-width: 1024px)').matches) setIsRoutesSheetOpen(true);
+    },
+  });
+  const startSavedTrip = (itinerary) => {
+    useActiveRouteStore.getState().startTrip(itinerary);
+    setIsRoutesSheetOpen(false);
+    showToast(`Bắt đầu chuyến đi “${itinerary.name}”`);
+  };
+  const savedRoutesPanel = <SavedRoutesPanel saved={saved} layers={savedLayers} onStartTrip={startSavedTrip} />;
   const openStop = useCallback((id) => setOverlay({ type: 'stop', id }), []);
   const openRoute = useCallback((routeId, varId) => setOverlay({ type: 'route', routeId, varId }), []);
   const routeDetail = useRouteDetail(overlay?.type === 'route' ? overlay.routeId : null, overlay?.varId ?? null);
@@ -113,6 +151,8 @@ export const MapHomePage = () => {
           onCategoryChange={home.setCategory}
           onSelect={home.selectPlace}
           vehicleEmoji={vehicleEmoji}
+          savedRoutes={savedRoutesPanel}
+          savedRouteCount={saved.itineraries.length}
         />
       )}
 
@@ -120,7 +160,26 @@ export const MapHomePage = () => {
         {/* Điện thoại: ô tìm kiếm + danh mục nằm trên bản đồ (desktop nằm trong cột danh sách bên trái) */}
         {!isNavigating && (
           <div className="lg:hidden px-4 pt-2.5 pb-2 space-y-2 bg-surface border-b border-neutral-100">
-            <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <SearchBar value={query} onChange={setQuery} onClear={clearQuery} />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRoutesSheetOpen((open) => !open)}
+                aria-expanded={isRoutesSheetOpen}
+                aria-label="Lộ trình đã lưu"
+                title="Lộ trình đã lưu"
+                className={`relative shrink-0 w-11 h-11 rounded-pill flex items-center justify-center transition ${isRoutesSheetOpen ? 'bg-primary-600 text-white' : 'bg-neutral-100 text-neutral-700'}`}
+              >
+                <Route className="w-5 h-5" />
+                {savedRoutes.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-pill bg-primary-600 text-white text-[10px] font-bold flex items-center justify-center border-2 border-surface">
+                    {savedRoutes.length}
+                  </span>
+                )}
+              </button>
+            </div>
             <CategoryChips value={home.category} onChange={home.setCategory} />
           </div>
         )}
@@ -177,18 +236,6 @@ export const MapHomePage = () => {
             </div>
           )}
 
-          <MapQuickActions
-            filters={quickFilters.filters}
-            openKey={quickFilters.openKey}
-            onToggle={quickFilters.toggleMenu}
-            onClose={quickFilters.closeMenu}
-            onSelectOption={quickFilters.selectOption}
-            onLocate={home.locate}
-            isLocating={home.isLocating}
-            showLocateHint={home.showLocateHint && !isNavigating}
-            onDismissLocateHint={home.dismissLocateHint}
-          />
-
           {home.selectedPlace && !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
               <PlaceDetailCard
@@ -205,6 +252,14 @@ export const MapHomePage = () => {
           ) : home.mapPoint && !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:inset-x-auto lg:right-4 lg:bottom-4 lg:w-96">
               <MapPointCard point={home.mapPoint} vehicleEmoji={vehicleEmoji} onClose={home.closeMapPoint} onDirections={home.showPointDirections} onZoomIn={home.zoomToPoint} startPicker={startPicker} />
+            </div>
+          ) : !isNavigating && isRoutesSheetOpen ? (
+            <div className="absolute z-30 inset-x-0 bottom-0 lg:hidden max-h-[50%] flex flex-col bg-surface rounded-t-card shadow-modal animate-[sheet-up_200ms_ease-out]">
+              <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                <h2 className="text-sm font-bold text-neutral-900 inline-flex items-center gap-1.5"><Route className="w-4 h-4 text-primary-600" /> Lộ trình đã lưu</h2>
+                <button type="button" onClick={() => setIsRoutesSheetOpen(false)} aria-label="Đóng" className="p-1.5 rounded-pill text-neutral-500 hover:bg-neutral-100"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-3 pb-3">{savedRoutesPanel}</div>
             </div>
           ) : !isNavigating ? (
             <div className="absolute z-20 inset-x-0 bottom-0 lg:hidden">
