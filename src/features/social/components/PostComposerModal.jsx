@@ -22,7 +22,7 @@ export const PostComposerModal = () => {
   const { draft, sources } = composer;
 
   return (
-    <Modal isOpen={composer.isOpen} title="Đăng bài" onClose={composer.close} size="lg">
+    <Modal isOpen={composer.isOpen} title={composer.isEditing ? 'Chỉnh sửa bài viết' : 'Đăng bài'} onClose={composer.close} size="lg">
       <form
         noValidate
         className="space-y-4"
@@ -65,15 +65,18 @@ export const PostComposerModal = () => {
           <Label>Hashtag</Label>
           <TagInput tags={draft.tags} inputValue={draft.tagInput} onInputChange={(tagInput) => composer.update({ tagInput })} onAdd={composer.addTag} onRemove={composer.removeTag} />
         </div>
-        <div>
-          <Label>Gắn thẻ bạn bè</Label>
-          <FriendPicker friends={sources.friends} selectedIds={draft.taggedIds} onToggle={composer.toggleTagged} />
-        </div>
+        {/* Gắn thẻ chỉ lúc đăng (người được gắn đã nhận thông báo) */}
+        {!composer.isEditing && (
+          <div>
+            <Label>Gắn thẻ bạn bè</Label>
+            <FriendPicker friends={sources.friends} selectedIds={draft.taggedIds} onToggle={composer.toggleTagged} />
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-100">
           <ChipGroup size="sm" options={VISIBILITY_OPTIONS} value={draft.visibility} onChange={(visibility) => composer.update({ visibility })} ariaLabel="Ai xem được" />
           <button type="submit" disabled={composer.isSubmitting || composer.media.isUploading} className="px-6 py-2.5 rounded-button bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold disabled:opacity-70">
-            {composer.isSubmitting ? 'Đang đăng…' : composer.media.isUploading ? 'Đang tải ảnh…' : 'Đăng bài'}
+            {composer.isSubmitting ? (composer.isEditing ? 'Đang lưu…' : 'Đang đăng…') : composer.media.isUploading ? 'Đang tải ảnh / video…' : composer.isEditing ? 'Lưu thay đổi' : 'Đăng bài'}
           </button>
         </div>
       </form>

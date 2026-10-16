@@ -1,12 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '../../../hooks/useToast';
-import { createPostApi } from '../api/socialApi';
+import { createPostApi, updatePostApi } from '../api/socialApi';
 import { useSocialStore } from '../stores/socialStore';
 import { isValidHashtag, normalizeHashtag, POST_MAX_TAGS, POST_TYPES } from '../utils/socialConfig';
 import { useComposerSources } from './useComposerSources';
 import { useMediaAttachments } from './useMediaAttachments';
 
-const createDraft = (preset) => ({
+// Sửa bài: bản nháp lấy từ chính bài viết (loại bài / địa điểm / lộ trình giữ nguyên)
+const draftFromPost = (post) => ({
+  type: post.type,
+  place: post.place,
+  itinerary: post.itinerary,
+  content: post.content ?? '',
+  rating: post.rating ?? null,
+  visited: Boolean(post.visited),
+  tags: post.tags ?? [],
+  tagInput: '',
+  taggedIds: (post.tagged_users ?? []).map((user) => user.id),
+  visibility: post.visibility,
+});
+
+const createDraft = (preset) => (preset?.editPost ? draftFromPost(preset.editPost) : {
   type: preset?.type ?? POST_TYPES.TEXT,
   place: preset?.place ?? null,
   itinerary: preset?.itinerary ?? null,
@@ -38,9 +52,14 @@ export const usePostComposer = () => {
   }
 
   const sources = useComposerSources({ isOpen: composer.isOpen, type: draft.type });
+  const editingPost = composer.preset?.editPost ?? null;
   const media = useMediaAttachments(composer.isOpen);
-  const { reset: resetMedia } = media;
-  useEffect(() => resetMedia(), [composer, resetMedia]); // mở khung mới => bỏ ảnh / video của lần trước
+  const { reset: resetMedia, seed: seedMedia } = media;
+  // Mở khung mới => bỏ ảnh / video của lần trước; sửa bài => nạp sẵn ảnh / video đang có của bài
+  useEffect(() => {
+    resetMedia();
+    if (composer.preset?.editPost) seedMedia(composer.preset.editPost.media);
+  }, [composer, resetMedia, seedMedia]);
   const update = (changes) => {
     setDraft((prev) => ({ ...prev, ...changes }));
     setError('');
@@ -71,6 +90,18 @@ export const usePostComposer = () => {
 
     setIsSubmitting(true);
     try {
+      if (editingPost) {
+        await updatePostApi(editingPost.id, {
+          content: draft.content.trim(),
+          tags: tags.slice(0, POST_MAX_TAGS),
+          visibility: draft.visibility,
+          ...(draft.type === POST_TYPES.PLACE && { rating: draft.rating, visited: draft.visited }),
+          media: media.uploaded,
+        });
+        bumpFeed(); // danh sách tải lại => thấy ngay bài đã sửa (không bật thông báo nổi)
+        closeComposer();
+        return undefined;
+      }
       await createPostApi({
         type: draft.type,
         content: draft.content.trim(),
@@ -96,7 +127,8 @@ export const usePostComposer = () => {
 
   return {
     isOpen: composer.isOpen,
-    isTypeLocked: Boolean(composer.preset?.type),
+    isEditing: Boolean(editingPost),
+    isTypeLocked: Boolean(composer.preset?.type || editingPost),
     close: closeComposer,
     draft,
     update,

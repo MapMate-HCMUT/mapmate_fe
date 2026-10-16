@@ -47,9 +47,10 @@ export const useMediaAttachments = (isOpen) => {
     const current = itemsRef.current;
     const currentVideos = current.filter((item) => item.kind === 'video').length;
     let videos = currentVideos;
-    // Lượt còn lại hôm nay (server tính) trừ đi file đã chọn trong khung này
-    const filesLeft = (config.quota?.files_left ?? Infinity) - current.length;
-    const videosLeft = (config.quota?.videos_left ?? Infinity) - currentVideos;
+    // Lượt còn lại hôm nay (server tính) trừ đi file MỚI đã chọn trong khung này (file cũ của bài đang sửa không tốn lượt)
+    const fresh = current.filter((item) => !item.existing);
+    const filesLeft = (config.quota?.files_left ?? Infinity) - fresh.length;
+    const videosLeft = (config.quota?.videos_left ?? Infinity) - fresh.filter((item) => item.kind === 'video').length;
     const accepted = [];
     for (const file of Array.from(fileList)) {
       const kind = mediaKindOf(file);
@@ -92,7 +93,7 @@ export const useMediaAttachments = (isOpen) => {
 
   const remove = (id) => {
     const target = itemsRef.current.find((item) => item.id === id);
-    if (target) URL.revokeObjectURL(target.previewUrl);
+    if (target && !target.existing) URL.revokeObjectURL(target.previewUrl);
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -104,9 +105,25 @@ export const useMediaAttachments = (isOpen) => {
   };
 
   const reset = useCallback(() => {
-    itemsRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    itemsRef.current.forEach((item) => !item.existing && URL.revokeObjectURL(item.previewUrl));
     setItems([]);
     setNotice('');
+  }, []);
+
+  // Sửa bài: ảnh / video đang có của bài => coi như đã tải xong (bỏ được, thêm file mới bên cạnh)
+  const seed = useCallback((media = []) => {
+    setItems(
+      media.filter((item) => item.id).map((item) => ({
+        id: `e_${item.id}`,
+        kind: item.type,
+        previewUrl: item.type === 'video' ? item.poster_url : item.thumb_url ?? item.url,
+        existing: true,
+        progress: 100,
+        status: 'done',
+        error: null,
+        result: { public_id: item.id, resource_type: item.type },
+      })),
+    );
   }, []);
 
   return {
@@ -118,6 +135,7 @@ export const useMediaAttachments = (isOpen) => {
     remove,
     retry,
     reset,
+    seed,
     isUploading: items.some((item) => item.status === 'uploading'),
     hasFailed: items.some((item) => item.status === 'error'),
     uploaded: items.filter((item) => item.status === 'done').map((item) => item.result),
