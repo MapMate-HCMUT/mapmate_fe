@@ -1,10 +1,10 @@
-import { Heart, Repeat2, Share2, Users, Link2 } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share2, Users, Link2 } from 'lucide-react';
 import { useDisclosure } from '../../../hooks/useDisclosure';
 
 const actionClass = 'flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-button text-sm font-medium transition';
 
 // Hàng nút dưới bài viết. `target` = bài gốc (kể cả khi đang xem 1 bài đăng lại).
-export const PostActions = ({ target, onLike, onRepost, onSendToFriends, onCopyLink }) => {
+export const PostActions = ({ target, onLike, onRepost, onSendToFriends, onCopyLink, commentCount = 0, commentsOpen = false, onToggleComments }) => {
   const { containerRef, ...shareMenu } = useDisclosure();
   const canRepost = target.visibility === 'public';
 
@@ -13,6 +13,15 @@ export const PostActions = ({ target, onLike, onRepost, onSendToFriends, onCopyL
       <button type="button" onClick={() => onLike(target)} aria-pressed={target.liked_by_me} className={`${actionClass} ${target.liked_by_me ? 'text-danger-600 bg-danger-50' : 'text-neutral-600 hover:bg-neutral-100'}`}>
         <Heart className={`w-4.5 h-4.5 ${target.liked_by_me ? 'fill-current' : ''}`} />
         <span>Thích</span>{target.like_count > 0 && <span className="font-bold">{target.like_count}</span>}
+      </button>
+      <button
+        type="button"
+        onClick={onToggleComments}
+        aria-expanded={commentsOpen}
+        className={`${actionClass} ${commentsOpen ? 'text-primary-700 bg-primary-50' : 'text-neutral-600 hover:bg-neutral-100'}`}
+      >
+        <MessageCircle className="w-4.5 h-4.5" />
+        <span>Bình luận</span>{commentCount > 0 && <span className="font-bold">{commentCount}</span>}
       </button>
       <button
         type="button"

@@ -1,13 +1,34 @@
-import { ImagePlus, Play, RotateCw, X } from 'lucide-react';
+import { Clapperboard, ImagePlus, Play, RotateCw, X } from 'lucide-react';
 import { formatMegabytes } from '../utils/mediaUpload';
 
-// Chọn ảnh / video đính kèm: ô xem trước + % tải lên + xoá / thử lại. Server chưa bật Cloudinary => ẩn hẳn.
+// Chọn ảnh / video đính kèm: 2 nút riêng "Ảnh" / "Video", ô xem trước + % tải lên + xoá / thử lại. Server chưa bật Cloudinary => ẩn hẳn.
+const pickerClass = 'inline-flex items-center gap-2 px-3 py-2 rounded-button border border-dashed border-neutral-300 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer';
+
+const FileButton = ({ icon: Icon, iconClass, label, accept, multiple, onFiles }) => (
+  <label className={pickerClass}>
+    <Icon className={`w-4.5 h-4.5 ${iconClass}`} />
+    {label}
+    <input
+      type="file"
+      multiple={multiple}
+      accept={accept}
+      className="sr-only"
+      onChange={(event) => {
+        onFiles(event.target.files);
+        event.target.value = ''; // chọn lại đúng file đó vẫn nhận
+      }}
+    />
+  </label>
+);
 export const ComposerMediaPicker = ({ media }) => {
   const { config, items } = media;
   // Hạn mức tháng của MapMate sắp hết => tạm ngưng nhận ảnh / video: nói rõ lý do thay vì giấu nút
   if (!media.isEnabled) return config.paused_reason ? <p className="text-xs text-warning-700">📷 {config.paused_reason}</p> : null;
-  const filesLeft = config.quota ? Math.max(0, config.quota.files_left - items.length) : null;
+  const freshItems = items.filter((item) => !item.existing); // file cũ của bài đang sửa không tốn lượt tải hôm nay
+  const filesLeft = config.quota ? Math.max(0, config.quota.files_left - freshItems.length) : null;
   const canAdd = items.length < config.max_items && filesLeft !== 0;
+  const hasVideo = items.some((item) => item.kind === 'video');
+  const canAddVideo = canAdd && config.video_enabled && items.filter((item) => item.kind === 'video').length < config.max_videos;
 
   return (
     <div className="space-y-2">
@@ -17,7 +38,11 @@ export const ComposerMediaPicker = ({ media }) => {
             <li key={item.id} className="relative aspect-square rounded-input overflow-hidden bg-neutral-100">
               {item.kind === 'video' ? (
                 <>
-                  <video src={item.previewUrl} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+                  {item.existing ? (
+                    <img src={item.previewUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <video src={item.previewUrl} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+                  )}
                   <Play className="absolute inset-0 m-auto w-7 h-7 text-white drop-shadow" aria-hidden="true" />
                 </>
               ) : (
@@ -39,20 +64,11 @@ export const ComposerMediaPicker = ({ media }) => {
         </ul>
       )}
       {canAdd && (
-        <label className="inline-flex items-center gap-2 px-3 py-2 rounded-button border border-dashed border-neutral-300 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer">
-          <ImagePlus className="w-4.5 h-4.5 text-primary-600" />
-          Thêm ảnh / video
-          <input
-            type="file"
-            multiple
-            accept="image/*,video/*"
-            className="sr-only"
-            onChange={(event) => {
-              media.addFiles(event.target.files);
-              event.target.value = ''; // chọn lại đúng file đó vẫn nhận
-            }}
-          />
-        </label>
+        <div className="flex flex-wrap gap-2">
+          <FileButton icon={ImagePlus} iconClass="text-primary-600" label="Ảnh" accept="image/*" multiple onFiles={media.addFiles} />
+          {canAddVideo && <FileButton icon={Clapperboard} iconClass="text-secondary-600" label="Video" accept="video/*" onFiles={media.addFiles} />}
+          {!canAddVideo && hasVideo && config.video_enabled && <span className="self-center text-xs text-neutral-400">Đã có {config.max_videos} video</span>}
+        </div>
       )}
       <p className="text-[11px] text-neutral-400">
         Tối đa {config.max_items} file · ảnh ≤ {formatMegabytes(config.image_max_bytes)} · {config.max_videos} video ≤ {config.video_max_seconds} giây, {formatMegabytes(config.video_max_bytes)}

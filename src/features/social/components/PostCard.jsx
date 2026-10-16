@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
-import { Repeat2, Trash2 } from 'lucide-react';
+import { Pencil, Repeat2, Trash2 } from 'lucide-react';
+import { useSocialStore } from '../stores/socialStore';
 import { PostActions } from './PostActions';
+import { PostComments } from './PostComments';
 import { PostContent } from './PostContent';
 
 // 1 bài trên bảng tin. Bài đăng lại = dòng "X đã đăng lại" + lời bình + khung bài gốc.
 export const PostCard = ({ post, actions, onTagClick, onCloneItinerary, cloningId, onSendToFriends, onCopyLink, highlighted = false }) => {
   const target = post.is_repost ? post.original : post;
+  // Bình luận thuộc bài gốc (kể cả khi đang xem 1 bài đăng lại); mở thông báo dẫn tới bài => mở sẵn bình luận
+  const [commentsOpen, setCommentsOpen] = useState(highlighted);
+  const openComposer = useSocialStore((state) => state.openComposer);
+  const [commentDelta, setCommentDelta] = useState(0);
+  const commentCount = (target?.comment_count ?? 0) + commentDelta;
 
   return (
     <article className={`bg-surface rounded-card shadow-card p-4 space-y-3 ${highlighted ? 'ring-2 ring-primary-400' : ''}`}>
@@ -28,13 +36,28 @@ export const PostCard = ({ post, actions, onTagClick, onCloneItinerary, cloningI
       )}
 
       {target && (
-        <PostActions target={target} onLike={actions.toggleLike} onRepost={actions.toggleRepost} onSendToFriends={onSendToFriends} onCopyLink={onCopyLink} />
+        <PostActions
+          target={target}
+          onLike={actions.toggleLike}
+          onRepost={actions.toggleRepost}
+          onSendToFriends={onSendToFriends}
+          onCopyLink={onCopyLink}
+          commentCount={commentCount}
+          commentsOpen={commentsOpen}
+          onToggleComments={() => setCommentsOpen((open) => !open)}
+        />
       )}
+      {target && commentsOpen && <PostComments post={target} onCountChange={(delta) => setCommentDelta((value) => value + delta)} />}
 
       {post.is_mine && !post.is_repost && (
-        <button type="button" onClick={() => actions.deletePost(post)} className="inline-flex items-center gap-1 text-xs font-medium text-neutral-400 hover:text-danger-600">
-          <Trash2 className="w-3.5 h-3.5" /> Xoá bài viết
-        </button>
+        <div className="flex items-center gap-4">
+          <button type="button" onClick={() => openComposer({ editPost: post })} className="inline-flex items-center gap-1 text-xs font-medium text-neutral-400 hover:text-primary-700">
+            <Pencil className="w-3.5 h-3.5" /> Chỉnh sửa
+          </button>
+          <button type="button" onClick={() => actions.deletePost(post)} className="inline-flex items-center gap-1 text-xs font-medium text-neutral-400 hover:text-danger-600">
+            <Trash2 className="w-3.5 h-3.5" /> Xoá bài viết
+          </button>
+        </div>
       )}
     </article>
   );

@@ -26,6 +26,7 @@ export const PostContent = ({ post, onTagClick, onCloneItinerary, cloningId }) =
         </p>
         <p className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
           <span>{formatRelativeTime(post.created_at)}</span>
+          {post.edited_at && <span title={`Sửa lúc ${new Date(post.edited_at).toLocaleString('vi-VN')}`}>· đã chỉnh sửa</span>}
           <span>·</span>
           <span title={post.visibility === 'public' ? 'Công khai' : 'Bạn bè'} className="inline-flex items-center">
             {post.visibility === 'public' ? <Globe className="w-3.5 h-3.5 text-neutral-400" /> : <Users className="w-3.5 h-3.5 text-neutral-400" />}

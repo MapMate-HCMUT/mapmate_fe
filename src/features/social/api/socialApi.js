@@ -16,11 +16,17 @@ export const getPostApi = (postId) => apiClient.get(`/posts/${postId}`);
 export const getTrendingTagsApi = () => apiClient.get('/posts/trending-tags');
 export const createPostApi = (payload) => apiClient.post('/posts', payload);
 export const deletePostApi = (postId) => apiClient.delete(`/posts/${postId}`);
+// Chỉnh sửa: chỉ gửi phần muốn đổi; media = danh sách cuối cùng (file cũ giữ lại + file mới)
+export const updatePostApi = (postId, payload) => apiClient.patch(`/posts/${postId}`, payload);
 export const likePostApi = (postId) => apiClient.post(`/posts/${postId}/like`);
 export const unlikePostApi = (postId) => apiClient.delete(`/posts/${postId}/like`);
 export const repostApi = (postId, content = '') => apiClient.post(`/posts/${postId}/repost`, { content });
 export const undoRepostApi = (postId) => apiClient.delete(`/posts/${postId}/repost`);
 export const sharePostApi = (postId, friendIds, message) => apiClient.post(`/posts/${postId}/share`, { friend_ids: friendIds, message });
+// Bình luận (cũ trước; `after` = mốc để tải tiếp)
+export const getCommentsApi = (postId, params) => apiClient.get(`/posts/${postId}/comments`, { params });
+export const addCommentApi = (postId, content) => apiClient.post(`/posts/${postId}/comments`, { content });
+export const deleteCommentApi = (postId, commentId) => apiClient.delete(`/posts/${postId}/comments/${commentId}`);
 
 // ── Ghim địa điểm ──
 export const getMyPinsApi = (status) => apiClient.get('/pins', { params: { status } });
