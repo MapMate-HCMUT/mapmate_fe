@@ -4,7 +4,7 @@ import { Icon } from '../Icon';
 
 const tabClass = (isActive) => `flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-16 text-[11px] font-medium transition ${isActive ? 'text-primary-600' : 'text-neutral-500'}`;
 
-// Thanh dưới trên điện thoại: Bản đồ · AI Gợi ý (nút nổi giữa) · Khám phá
+// Thanh dưới trên điện thoại: Bản đồ · Khám phá (nút nổi giữa — trang chủ) · AI Gợi ý
 export const MobileBottomNav = () => {
   const { pathname } = useLocation();
   return (

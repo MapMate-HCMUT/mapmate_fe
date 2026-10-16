@@ -29,7 +29,7 @@ const ActiveTabIndicator = ({ index, count }) => (
   </span>
 );
 
-// Nút "Cửa hàng" của chủ doanh nghiệp — tách khỏi nhóm tab giữa để "AI Gợi ý" luôn nằm chính giữa
+// Nút "Cửa hàng" của chủ doanh nghiệp — tách khỏi nhóm tab giữa để "Khám phá" luôn nằm chính giữa
 const BusinessLink = ({ compact = false }) => (
   <Link
     to={BUSINESS_NAV_ITEM.path}
@@ -43,7 +43,7 @@ const BusinessLink = ({ compact = false }) => (
   </Link>
 );
 
-// Navbar: Logo · Bản đồ / AI Gợi ý / Khám phá (giữa) · Tài khoản. Ô tìm kiếm nằm trong từng trang.
+// Navbar: Logo · Bản đồ / Khám phá (giữa) / AI Gợi ý · Tài khoản. Ô tìm kiếm nằm trong từng trang.
 // Dịp lễ (Tết, Trung thu, Giáng sinh...) => hạt trang trí rơi / bay phía sau nội dung + lời chúc cạnh logo.
 export const TopNavbar = () => {
   const { pathname } = useLocation();

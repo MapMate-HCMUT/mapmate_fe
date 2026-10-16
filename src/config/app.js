@@ -3,7 +3,7 @@
 export const BRAND = {
   name: 'MapMate',
   tagline: 'Bạn đồng hành trên mọi hành trình',
-  logoSrc: '/logo.svg',
+  logoSrc: '/logo_mapmate.png',
   logoAlt: 'Logo MapMate',
 };
 
