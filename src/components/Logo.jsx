@@ -13,7 +13,7 @@ export const Logo = ({ size = 'md', showName = true }) => {
   const sizeClass = SIZES[size];
 
   return (
-    <Link to="/" className="flex items-center gap-2 shrink-0" aria-label={`${BRAND.name} — Trang chủ`}>
+    <Link to="/welcome" className="flex items-center gap-2 shrink-0" aria-label={`${BRAND.name} — Giới thiệu`}>
       <img src={BRAND.logoSrc} alt={BRAND.logoAlt} className={`${sizeClass.img} object-contain`} />
       {showName && (
         <span className={`${sizeClass.text} font-extrabold tracking-tight text-primary-600`}>{BRAND.name}</span>
