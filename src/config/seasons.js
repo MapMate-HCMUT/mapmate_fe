@@ -171,12 +171,7 @@ export const SEASONS = [
     bar: 'from-orange-400 via-violet-500 to-orange-400',
     logoAccent: 'witch-hat',
     corner: 'spider-web',
-    badgeTone: 'border-warning-200 bg-warning-50 text-warning-800 hover:bg-warning-100',
-    // Bấm badge => khám phá theo dịp lễ (search: từ khoá trang Khám phá; ask: câu hỏi gửi sẵn cho AI Gợi ý)
-    actions: [
-      { emoji: '👻', label: 'Chơi Halloween: escape room, nhà ma', hint: 'Phòng thoát hiểm kinh dị quanh bạn', search: 'escape' },
-      { emoji: '🪄', label: 'Lên lộ trình Halloween cùng AI', hint: 'Escape room, ăn tối rồi dạo phố đêm', ask: 'Tối nay đi chơi Halloween: chơi escape room kinh dị, ăn tối rồi dạo phố đi bộ Bùi Viện, 2 người' },
-    ],
+    badgeTone: 'border-warning-200 bg-warning-50 text-warning-800 select-none cursor-default',
   },
   {
     id: 'teacher-day',

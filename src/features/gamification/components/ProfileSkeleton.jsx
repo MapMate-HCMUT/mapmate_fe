@@ -1,12 +1,13 @@
+import { EXPLORE_GRID, EXPLORE_MAIN } from '../../../config/layout';
 import { ErrorState } from '../../../components/ErrorState';
 
 export const ProfileSkeleton = () => (
-  <div className="grid lg:grid-cols-[1fr_380px] gap-5 animate-pulse" aria-label="Đang tải hồ sơ">
-    <div className="space-y-5">
+  <div className={`${EXPLORE_GRID} animate-pulse`} aria-label="Đang tải hồ sơ">
+    <div className={`${EXPLORE_MAIN} space-y-5`}>
       <div className="h-80 bg-surface rounded-card shadow-card" />
       <div className="h-28 bg-surface rounded-card shadow-card" />
     </div>
-    <div className="h-96 bg-surface rounded-card shadow-card" />
+    <div className="h-96 bg-surface rounded-card shadow-card hidden xl:block" />
   </div>
 );
 

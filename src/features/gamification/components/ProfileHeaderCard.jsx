@@ -22,7 +22,7 @@ export const ProfileHeaderCard = ({ profile, stats, actions, onAvatarClick, onCo
 
   return (
     <section className="bg-surface rounded-card shadow-card overflow-hidden">
-      <div className="relative h-32 sm:h-auto sm:aspect-[4/1]">
+      <div className="relative h-32 sm:h-36 md:h-40 overflow-hidden">
         <ProfileCover src={profile.cover_url ? resolveAssetUrl(profile.cover_url) : null} />
         {onCoverClick && (
           <button
@@ -35,7 +35,7 @@ export const ProfileHeaderCard = ({ profile, stats, actions, onAvatarClick, onCo
           </button>
         )}
       </div>
-      <div className={`px-5 pb-5 ${PROFILE_AVATAR_OVERLAP[PROFILE_AVATAR_SIZE]} text-center`}>
+      <div className={`relative z-10 px-5 pb-5 ${PROFILE_AVATAR_OVERLAP[PROFILE_AVATAR_SIZE]} text-center`}>
         {onAvatarClick ? (
           <button type="button" onClick={onAvatarClick} aria-label="Đổi ảnh đại diện" title="Đổi ảnh đại diện" className="group relative mx-auto block w-fit rounded-pill">
             <Avatar name={profile.username} src={profile.avatar_url} size={PROFILE_AVATAR_SIZE} className="border-4 border-surface shadow-card" />
@@ -48,7 +48,9 @@ export const ProfileHeaderCard = ({ profile, stats, actions, onAvatarClick, onCo
             </span>
           </button>
         ) : (
-          <Avatar name={profile.username} src={profile.avatar_url} size={PROFILE_AVATAR_SIZE} className="mx-auto border-4 border-surface shadow-card" />
+          <div className="relative mx-auto w-fit rounded-pill">
+            <Avatar name={profile.username} src={profile.avatar_url} size={PROFILE_AVATAR_SIZE} className="border-4 border-surface shadow-card" />
+          </div>
         )}
         <h1 className="mt-3 text-xl font-bold tracking-tight text-neutral-900 break-all">{profile.username}</h1>
         <p className="text-sm font-semibold text-accent-600">
