@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuthStore } from '../../../stores/authStore';
 import { useDisclosure } from '../../../hooks/useDisclosure';
 import { useToast } from '../../../hooks/useToast';
 import { compactErrors, mapServerFieldErrors, validatePassword } from '../../../utils/validators';
@@ -36,7 +37,9 @@ export const useChangePassword = () => {
 
     setIsSubmitting(true);
     try {
-      await changePasswordApi(values);
+      const result = await changePasswordApi(values);
+      // Server thu hồi mọi phiên cũ khi đổi mật khẩu => thiết bị này dùng token mới, không bị đăng xuất
+      if (result?.token) useAuthStore.getState().replaceToken(result.token);
       showToast('Đổi mật khẩu thành công');
       modal.close();
     } catch (error) {

@@ -1,7 +1,7 @@
 import { Popup } from 'maplibre-gl';
 import { useEffect } from 'react';
 import { useMapStore } from '../stores/mapStore';
-import { basemapPoiAt, placePinAt } from '../utils/mapPoint';
+import { basemapPoiAt, placePinAt, savedRouteStopAt } from '../utils/mapPoint';
 
 const POPUP_OFFSET_PX = 12; // hiện ngay dưới chấm (phía trên hay bị các thẻ nổi đầu bản đồ che)
 
@@ -25,7 +25,7 @@ export const usePoiHover = (map, enabled) => {
         frame = null;
         if (useMapStore.getState().isPickingStart) return hide(); // đang chọn điểm xuất phát: không gợi ý "bấm để xem"
         const pin = placePinAt(map, event.point);
-        const poi = pin ? { name: pin.name, coordinates: pin.coordinates, kindLabel: 'MapMate' } : basemapPoiAt(map, event.point);
+        const poi = savedRouteStopAt(map, event.point) ?? (pin ? { name: pin.name, coordinates: pin.coordinates, kindLabel: 'MapMate' } : basemapPoiAt(map, event.point));
         if (!poi) return hide();
         map.getCanvas().style.cursor = 'pointer';
         if (poi.name === currentName) return undefined;
@@ -36,7 +36,7 @@ export const usePoiHover = (map, enabled) => {
         title.textContent = poi.name;
         const hint = document.createElement('p');
         hint.className = 'text-[11px] text-neutral-500';
-        hint.textContent = [poi.kindLabel, 'bấm để xem thông tin'].filter(Boolean).join(' · ');
+        hint.textContent = [poi.kindLabel, poi.hint ?? 'bấm để xem thông tin'].filter(Boolean).join(' · ');
         content.append(title, hint);
         popup.setLngLat(poi.coordinates).setDOMContent(content).addTo(map);
         return undefined;

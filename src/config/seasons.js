@@ -53,8 +53,11 @@ import {
 
 // Hiệu ứng thanh điều hướng theo dịp lễ (giờ máy người dùng). Mỗi dịp:
 // - from / to: "MM-DD" hằng năm (qua năm mới được, VD 12-30 → 01-02), hoặc `byYear` cho lễ âm lịch (Tết, Trung thu)
-// - icon: icon lucide cạnh lời chúc; particles: [Icon lucide, màu] rơi / bay trên thanh (lặp lại nếu cần nhiều hạt hơn); motion: fall (rơi) | float (bay ngang) | sway (treo đung đưa) | rise (bay lên) | twinkle (lấp lánh)
+// - icon: icon lucide cạnh lời chúc; particles: [Icon lucide, màu] rơi / bay trên thanh (lặp lại nếu cần nhiều hạt hơn); motion: fall (rơi) | float (trôi dọc chậm, khựng nhẹ giữa chừng) | sway (treo đung đưa) | rise (bay lên) | twinkle (lấp lánh)
 // - bar: dải màu mảnh ở mép dưới thanh điều hướng
+// - tuỳ chọn: particleCount { desktop, mobile } / particleOpacity / speed (>1 = chậm hơn) — mặc định theo kiểu chuyển động;
+//   logoAccent ('witch-hat') đội lên logo; corner ('spider-web') trang trí góc phải; badgeEmoji + badgeTone cho lời chúc;
+//   actions: [{ emoji, label, hint, search | ask }] — bấm lời chúc => menu khám phá theo dịp (Khám phá / AI Gợi ý)
 // Xem thử 1 dịp bất kỳ: thêm ?season=<id> vào URL (VD ?season=christmas). Người dùng không tắt được hiệu ứng;
 // khi chạy dev (npm run dev) thêm ?season=off để tắt hẳn trong phiên làm việc (xem src/hooks/useSeason.js).
 export const SEASONS = [
@@ -153,14 +156,27 @@ export const SEASONS = [
     id: 'halloween',
     greeting: 'Happy Halloween!',
     icon: Ghost,
+    badgeEmoji: '🎃',
     from: '10-13',
     to: '11-01',
+    // Màu nhạt + ít hạt + rơi chậm: tạo không khí, chữ trên thanh vẫn nổi
     particles: [
-      [Ghost, '#a855f7'], [Skull, '#94a3b8'], [MoonStar, '#f59e0b'], [CloudMoon, '#8b5cf6'],
-      [Flame, '#f97316'], [Candy, '#f97316'], [WandSparkles, '#a855f7'], [Cat, '#64748b'],
+      [Ghost, '#c4b5fd'], [Candy, '#fdba74'], [MoonStar, '#fcd34d'], [Skull, '#cbd5e1'],
+      [Flame, '#fdba74'], [WandSparkles, '#d8b4fe'], [CloudMoon, '#c4b5fd'], [Cat, '#cbd5e1'],
     ],
+    particleCount: { desktop: 5, mobile: 3 },
+    particleOpacity: 0.7,
+    speed: 1.7,
     motion: 'float',
-    bar: 'from-orange-500 via-violet-600 to-orange-500',
+    bar: 'from-orange-400 via-violet-500 to-orange-400',
+    logoAccent: 'witch-hat',
+    corner: 'spider-web',
+    badgeTone: 'border-warning-200 bg-warning-50 text-warning-800 hover:bg-warning-100',
+    // Bấm badge => khám phá theo dịp lễ (search: từ khoá trang Khám phá; ask: câu hỏi gửi sẵn cho AI Gợi ý)
+    actions: [
+      { emoji: '👻', label: 'Chơi Halloween: escape room, nhà ma', hint: 'Phòng thoát hiểm kinh dị quanh bạn', search: 'escape' },
+      { emoji: '🪄', label: 'Lên lộ trình Halloween cùng AI', hint: 'Escape room, ăn tối rồi dạo phố đêm', ask: 'Tối nay đi chơi Halloween: chơi escape room kinh dị, ăn tối rồi dạo phố đi bộ Bùi Viện, 2 người' },
+    ],
   },
   {
     id: 'teacher-day',

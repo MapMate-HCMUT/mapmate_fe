@@ -5,6 +5,7 @@ import { calculateDistanceKm } from '../../../utils/calculateDistance';
 // - Trúng nhãn địa điểm của bản đồ nền (Goong / OpenFreeMap đều đặt id lớp "poi...") => lấy tên nhãn
 // - Sát 1 địa điểm của MapMate => mở thẻ địa điểm đó (đủ giá, giờ, đánh giá) thay vì thẻ toạ độ
 export const PLACE_PIN_LAYER = 'mapmate-places-pins'; // ghim địa điểm MapMate (usePlacePins)
+export const SAVED_ROUTE_STOP_LAYER = 'mapmate-saved-route-stops'; // điểm dừng của lộ trình đã lưu đang hiện (useSavedRouteLayers)
 const APP_LAYER_PREFIXES = ['transit-', 'goong-itinerary-', 'map-point-', 'mapmate-'];
 const POI_LAYER_PREFIX = 'poi';
 const QUERY_PADDING_PX = 10; // ngón tay / chuột lệch vài pixel vẫn trúng chấm / nhãn
@@ -32,6 +33,15 @@ export const placePinAt = (map, point) => {
   if (!map.getLayer(PLACE_PIN_LAYER)) return null;
   const feature = map.queryRenderedFeatures(boxAround(point), { layers: [PLACE_PIN_LAYER] })[0];
   return feature ? { id: feature.properties.id, name: feature.properties.name, coordinates: feature.geometry.coordinates } : null;
+};
+
+// Điểm dừng của 1 lộ trình đã lưu đang hiện trên bản đồ (rê chuột => tên điểm + tên lộ trình)
+export const savedRouteStopAt = (map, point) => {
+  if (!map.getLayer(SAVED_ROUTE_STOP_LAYER)) return null;
+  const feature = map.queryRenderedFeatures(boxAround(point), { layers: [SAVED_ROUTE_STOP_LAYER] })[0];
+  if (!feature) return null;
+  const { label, name, routeName } = feature.properties;
+  return { name: `${label}. ${name}`, coordinates: feature.geometry.coordinates, kindLabel: routeName, hint: 'bấm để xem lộ trình' };
 };
 
 export const basemapPoiAt = (map, point) => {

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { PanelLeft, SquarePen } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { ErrorPage } from '../../../components/ErrorPage';
@@ -40,6 +41,21 @@ export const AiPlannerPage = () => {
   // Desktop: thanh bên mở sẵn. Điện thoại: là drawer che cả màn hình => đóng sẵn, bấm nút mới mở
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.matchMedia(DESKTOP_QUERY).matches);
   const chat = useAiChat({ defaultTier: options.default_model, onSent: () => setVersion((value) => value + 1) });
+
+  // /ai-planner?ask=... (VD bấm lời chúc dịp lễ trên thanh điều hướng) => mở cuộc trò chuyện mới với câu hỏi đó, rồi bỏ tham số khỏi URL
+  const [searchParams, setSearchParams] = useSearchParams();
+  const askedRef = useRef(null);
+  const ask = searchParams.get('ask');
+  useEffect(() => {
+    if (!ask || askedRef.current === ask) return;
+    askedRef.current = ask; // StrictMode chạy effect 2 lần => chỉ gửi 1 lần
+    setSearchParams((params) => {
+      const next = new URLSearchParams(params);
+      next.delete('ask');
+      return next;
+    }, { replace: true });
+    chat.send(ask.slice(0, options.prompt_max_length ?? ask.length), { fresh: true });
+  }, [ask, chat, options.prompt_max_length, setSearchParams]);
   const sessions = useAiSessions(version);
   const memory = useAiMemory(version);
 
