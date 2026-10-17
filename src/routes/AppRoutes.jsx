@@ -23,7 +23,7 @@ import { ExploreLayout, LegacyExploreRedirect, MineTab, PlacesTab } from '../fea
 import { ProfilePage, PublicProfilePage } from '../features/gamification';
 import { MapHomePage } from '../features/map';
 import { LandingPage } from '../features/landing';
-import { FeedTab } from '../features/social';
+import { FeedTab, TrashPage } from '../features/social';
 import { VouchersPage } from '../features/vouchers';
 import { ERROR_KINDS } from '../utils/errorMessages';
 import { GuestOnlyRoute, ProtectedRoute, RequireAuthOutlet } from './ProtectedRoute';
@@ -76,6 +76,7 @@ export const AppRoutes = () => (
           <Route path="vouchers" element={<WalletRoute />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="users/:userId" element={<PublicProfilePage />} />
+          <Route path="trash" element={<TrashPage />} />
         </Route>
         <Route path="map" element={<MapHomePage />} />
         <Route path="explore" element={<LegacyExploreRedirect />} />

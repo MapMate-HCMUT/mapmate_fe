@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { Trash2 } from 'lucide-react';
 import { useAccountMenu } from '../../hooks/useAccountMenu';
 import { Avatar } from '../Avatar';
 import { Icon } from '../Icon';
@@ -52,6 +53,10 @@ export const AccountButton = ({ compact = false }) => {
           <Link to="/profile" role="menuitem" onClick={menu.close} className={`${itemClass} text-neutral-700 hover:bg-neutral-100`}>
             <Icon name="user" className="w-4.5 h-4.5 text-neutral-400" />
             Hồ sơ của tôi
+          </Link>
+          <Link to="/trash" role="menuitem" onClick={menu.close} className={`${itemClass} text-neutral-700 hover:bg-neutral-100`}>
+            <Trash2 className="w-4.5 h-4.5 text-neutral-400" aria-hidden="true" />
+            Thùng rác
           </Link>
           <Link to={isBusiness ? '/business' : '/for-business'} role="menuitem" onClick={menu.close} className={`${itemClass} text-neutral-700 hover:bg-neutral-100`}>
             <Icon name="store" className="w-4.5 h-4.5 text-neutral-400" />

@@ -5,10 +5,32 @@ import { useExploreOrigin } from '../../explore';
 import { getAiSessionApi, sendAiMessageApi } from '../api/aiApi';
 
 const TIER_KEY = 'mapmate.aiTier';
+const PROMPT_HISTORY_KEY = 'mapmate.aiPromptHistory';
+const PROMPT_HISTORY_MAX = 50;
+const RECENT_PROMPTS_MAX = 6; // khớp AI_HISTORY_TURNS của server — để AI biết người dùng đang hỏi lại y hệt
+// "quán cà phê nào gần tôi", "quanh đây có gì ăn" => cần vị trí thật, không phải trung tâm Quận 1
+const NEAR_ME = /((gần|quanh|xung quanh)\s*(tôi|mình|em|tui|tớ|đây|nhà|chỗ (tôi|mình))|near me|nearby)/i;
 let nextId = 0;
 const newId = () => {
   nextId += 1;
   return `m${nextId}`;
+};
+
+// Câu đã gửi (mới nhất cuối) — ô nhập bấm ↑ / ↓ để gọi lại, sửa chút rồi gửi; giữ cả khi mở cuộc trò chuyện mới
+const loadPromptHistory = () => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PROMPT_HISTORY_KEY) ?? '[]');
+    return Array.isArray(stored) ? stored.filter((item) => typeof item === 'string').slice(-PROMPT_HISTORY_MAX) : [];
+  } catch {
+    return [];
+  }
+};
+const savePromptHistory = (items) => {
+  try {
+    window.localStorage.setItem(PROMPT_HISTORY_KEY, JSON.stringify(items));
+  } catch {
+    // trình duyệt chặn storage => chỉ nhớ trong lần mở trang này
+  }
 };
 
 const loadTier = (fallback) => {
@@ -62,6 +84,14 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
   // Mất mạng / máy chủ không phản hồi => cả trang AI hiện màn hình lỗi (như khi mất Wi‑Fi), giữ nguyên cuộc trò chuyện
   const [pageError, setPageError] = useState(null); // { kind, retryText }
   const [tier, setTierState] = useState(() => loadTier(defaultTier));
+  const [promptHistory, setPromptHistory] = useState(loadPromptHistory);
+
+  const rememberPrompt = (text) =>
+    setPromptHistory((prev) => {
+      const next = [...prev.filter((item) => item !== text), text].slice(-PROMPT_HISTORY_MAX);
+      savePromptHistory(next);
+      return next;
+    });
 
   const setTier = (value) => {
     setTierState(value);
@@ -81,17 +111,23 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
       setSessionId(null);
       setContext(null);
     }
+    const recentPrompts = fresh ? [] : messages.filter((message) => message.role === 'user').map((message) => message.text).slice(-RECENT_PROMPTS_MAX);
     setMessages((prev) => [...(fresh ? [] : prev), { id: newId(), role: 'user', text }]);
+    rememberPrompt(text);
     setIsSending(true);
     try {
+      // Hỏi "gần tôi" mà chưa có vị trí => xin quyền định vị ngay (trình duyệt hỏi 1 lần), từ chối thì AI dùng trung tâm Quận 1 và nói rõ
+      const from = origin.isDefault && NEAR_ME.test(text) ? await locateMe({ quiet: true }) : origin;
       const data = await sendAiMessageApi({
         message: text,
         session_id: isAuthenticated && !fresh ? sessionId : null,
-        context: isAuthenticated || fresh ? null : context,
-        origin: origin.isDefault ? null : { lat: origin.lat, lng: origin.lng, label: origin.label },
+        context: isAuthenticated || fresh ? null : { ...context, recent_prompts: recentPrompts },
+        origin: !from || from.isDefault ? null : { lat: from.lat, lng: from.lng, label: from.label },
         model: tier,
       });
-      setMessages((prev) => [...prev, { id: newId(), role: 'assistant', data }]);
+      // Hỏi "gần tôi" mà không lấy được vị trí (bị chặn quyền / hết giờ chờ) => nói rõ đang gợi ý quanh trung tâm Quận 1
+      const locationFallback = NEAR_ME.test(text) && (!from || from.isDefault) ? { retryText: text } : null;
+      setMessages((prev) => [...prev, { id: newId(), role: 'assistant', data, locationFallback }]);
       setSessionId(data.session_id ?? null);
       setContext((prev) => toContext(data, prev));
       onSent?.();
@@ -136,5 +172,5 @@ export const useAiChat = ({ defaultTier = 'smart', onSent } = {}) => {
     setContext(null);
   };
 
-  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe, pageError, retryAfterError, dismissPageError };
+  return { messages, isSending, send, newChat, openSession, sessionId, tier, setTier, origin, isLocating, locateMe, pageError, retryAfterError, dismissPageError, promptHistory };
 };

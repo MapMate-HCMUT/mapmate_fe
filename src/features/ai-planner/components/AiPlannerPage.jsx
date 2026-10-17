@@ -105,7 +105,7 @@ export const AiPlannerPage = () => {
         ) : (
           <>
             <ChatThread messages={chat.messages} isSending={chat.isSending} onSend={chat.send} examples={options.examples} personalized={memory.memory?.suggestions ?? []} llmEnabled={options.llm_enabled} />
-            <PromptComposer onSend={chat.send} isSending={chat.isSending} maxLength={options.prompt_max_length} origin={chat.origin} isLocating={chat.isLocating} onLocate={chat.locateMe} />
+            <PromptComposer onSend={chat.send} isSending={chat.isSending} maxLength={options.prompt_max_length} origin={chat.origin} isLocating={chat.isLocating} onLocate={() => chat.locateMe()} history={chat.promptHistory} />
           </>
         )}
       </div>

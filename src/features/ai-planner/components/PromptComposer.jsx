@@ -1,22 +1,51 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { LocateFixed, SendHorizontal } from 'lucide-react';
 import { VoiceButton } from '../../../components/VoiceButton';
 
+const isPlainKey = (event) => !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey && !event.nativeEvent.isComposing;
+
 // Ô nhập: gõ tự do (Enter gửi, Shift+Enter xuống dòng), kèm điểm xuất phát dùng chung với trang Khám phá.
-export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocating, onLocate }) => {
+// ↑ / ↓ (khi con trỏ ở dòng đầu / dòng cuối) = gọi lại câu đã gửi như terminal — sửa chút rồi gửi, khỏi gõ lại cả câu.
+export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocating, onLocate, history = [] }) => {
   const [text, setText] = useState('');
+  // index = đang xem câu thứ mấy trong lịch sử (null = đang gõ câu mới); draft = câu đang gõ dở trước khi bấm ↑
+  const [browse, setBrowse] = useState({ index: null, draft: '' });
+  const inputRef = useRef(null);
 
   const submit = () => {
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
     setText('');
+    setBrowse({ index: null, draft: '' });
     onSend(trimmed);
   };
+  const recall = (step) => {
+    const next = (browse.index ?? history.length) + step;
+    if (!history.length || next < 0 || next > history.length) return false;
+    if (next === history.length) {
+      setText(browse.draft);
+      setBrowse({ index: null, draft: '' });
+    } else {
+      setText(history[next]);
+      setBrowse({ index: next, draft: browse.index == null ? text : browse.draft });
+    }
+    requestAnimationFrame(() => {
+      const input = inputRef.current;
+      input?.setSelectionRange(input.value.length, input.value.length); // con trỏ về cuối câu vừa gọi lại
+    });
+    return true;
+  };
   const onKeyDown = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+    if (!isPlainKey(event)) return;
+    if (event.key === 'Enter') {
       event.preventDefault();
       submit();
+      return;
     }
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+    const { selectionStart, selectionEnd, value } = event.currentTarget;
+    const atEdge = event.key === 'ArrowUp' ? !value.slice(0, selectionStart).includes('\n') : !value.slice(selectionEnd).includes('\n');
+    if (atEdge && recall(event.key === 'ArrowUp' ? -1 : 1)) event.preventDefault();
   };
 
   return (
@@ -24,6 +53,7 @@ export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocatin
       <div className="mx-auto max-w-3xl">
         <div className="flex items-end gap-2 rounded-card border border-neutral-200 bg-neutral-50 p-2 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20">
           <textarea
+            ref={inputRef}
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={onKeyDown}
@@ -49,7 +79,10 @@ export const PromptComposer = ({ onSend, isSending, maxLength, origin, isLocatin
             <LocateFixed className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{isLocating ? 'Đang lấy vị trí…' : origin.isDefault ? 'Dùng vị trí của tôi' : origin.label}</span>
           </button>
-          <span className="tabular-nums">{text.length}/{maxLength}</span>
+          <span className="flex items-center gap-3">
+            {history.length > 0 && <span className="hidden sm:inline">↑ ↓ gọi lại câu đã gửi</span>}
+            <span className="tabular-nums">{text.length}/{maxLength}</span>
+          </span>
         </div>
       </div>
     </div>

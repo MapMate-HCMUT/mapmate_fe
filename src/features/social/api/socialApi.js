@@ -41,3 +41,9 @@ export const searchPlacesByNameApi = (q) => apiClient.get('/places/nearby', { pa
 export const getUploadConfigApi = () => apiClient.get('/uploads/config');
 export const getUploadSignatureApi = (resourceType) => apiClient.post('/uploads/signature', { resource_type: resourceType });
 export const getPlaceApi = (placeId) => apiClient.get(`/places/${placeId}`);
+
+// ── Thùng rác (bài viết + ảnh / video đã xoá, giữ 30 ngày) ──
+export const getTrashApi = () => apiClient.get('/trash');
+export const restoreTrashItemApi = (itemId) => apiClient.post(`/trash/${itemId}/restore`);
+export const deleteTrashItemApi = (itemId) => apiClient.delete(`/trash/${itemId}`);
+export const emptyTrashApi = () => apiClient.delete('/trash');

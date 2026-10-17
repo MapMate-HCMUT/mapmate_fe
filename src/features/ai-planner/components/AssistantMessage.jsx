@@ -1,4 +1,4 @@
-import { AlertTriangle, Lightbulb } from 'lucide-react';
+import { AlertTriangle, Lightbulb, MapPinOff } from 'lucide-react';
 import { ErrorState } from '../../../components/ErrorState';
 import { AiPlaceList } from './AiPlaceList';
 import { AiRouteOptions } from './AiRouteOptions';
@@ -48,6 +48,21 @@ const TipsBox = ({ items }) => {
   );
 };
 
+// Không lấy được vị trí thật => báo đang gợi ý quanh trung tâm Quận 1 + nút thử lại (trình duyệt hỏi quyền lần nữa)
+const LocationFallbackNotice = ({ retryText, onRetry, isSending }) => (
+  <div role="status" className="flex items-start gap-2.5 rounded-card border border-amber-200 bg-amber-50/90 p-3 text-xs sm:text-[13px] text-amber-950">
+    <MapPinOff className="w-4 h-4 mt-0.5 shrink-0 text-amber-600" aria-hidden="true" />
+    <div className="min-w-0 space-y-1.5">
+      <p className="font-medium leading-relaxed">
+        Không lấy được vị trí hiện tại của bạn — mình tạm lấy <b>trung tâm Quận 1</b> làm điểm xuất phát để gợi ý. Bật quyền vị trí cho trang này trong trình duyệt để có kết quả gần bạn hơn.
+      </p>
+      <button type="button" disabled={isSending} onClick={() => onRetry(retryText)} className="font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-950 disabled:opacity-50">
+        Lấy vị trí & hỏi lại
+      </button>
+    </div>
+  </div>
+);
+
 // 1 câu trả lời của AI: lời tư vấn, tiêu chí đã hiểu, lộ trình / địa điểm thật, cảnh báo, gợi ý hỏi tiếp.
 export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
   if (message.error) {
@@ -66,6 +81,7 @@ export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
   const asksBack = data.clarifying_questions?.length > 0;
   return (
     <div className="space-y-3">
+      {message.locationFallback && <LocationFallbackNotice retryText={message.locationFallback.retryText} onRetry={onFollowUp} isSending={isSending} />}
       {data.refusal ? <RefusalCard refusal={data.refusal} /> : !asksBack && <p className="text-sm leading-relaxed text-neutral-800 whitespace-pre-line">{data.reply}</p>}
       {asksBack && <ClarifyQuestions questions={data.clarifying_questions} onAnswer={onFollowUp} isSending={isSending} />}
       {message.restored && data.options?.length === 0 && data.intent !== 'ask_place' && !data.refusal && !asksBack && (
