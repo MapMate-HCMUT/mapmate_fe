@@ -90,7 +90,12 @@ export const useUserLocation = (onLocated) => {
       isLocatingRef.current = true;
       setIsLocating(true);
 
+      // Flag để retry lần 2 không gọi handleError sau khi handleSuccess đã chạy thành công
+      let settled = false;
+
       const handleError = () => {
+        if (settled) return;
+        settled = true;
         isLocatingRef.current = false;
         setIsLocating(false);
         if (!silentError) {
@@ -99,6 +104,8 @@ export const useUserLocation = (onLocated) => {
       };
 
       const handleSuccess = ({ coords }) => {
+        if (settled) return;
+        settled = true;
         isLocatingRef.current = false;
         setIsLocating(false);
         const next = [coords.longitude, coords.latitude];
@@ -152,7 +159,9 @@ export const useUserLocation = (onLocated) => {
     }
 
     const timer = setTimeout(() => {
-      locate({ silent: false, fly: true });
+      // silent: true → không hiện toast "Đã xác định vị trí" khi tự động định vị lần đầu
+      // Chỉ hiện toast lỗi khi thật sự không lấy được (silentError vẫn là false)
+      locate({ silent: true, fly: true });
     }, 0);
     return () => clearTimeout(timer);
   }, [locate, showToast]);
