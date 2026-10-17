@@ -21,6 +21,18 @@ export const Toast = ({ toast, onClose }) => {
       >
         <span aria-hidden="true">{TONE_EMOJI[toast.tone]}</span>
         <p className="flex-1">{toast.message}</p>
+        {toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              toast.action.onClick();
+            }}
+            className="shrink-0 rounded-input px-2 py-1 font-semibold underline-offset-2 hover:underline hover:bg-white/10"
+          >
+            {toast.action.label}
+          </button>
+        )}
         <button type="button" onClick={onClose} aria-label="Đóng thông báo" className="opacity-70 hover:opacity-100">
           <Icon name="close" className="w-4 h-4" />
         </button>

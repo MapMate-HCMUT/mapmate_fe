@@ -6,6 +6,7 @@ export { PinButton } from './components/PinButton';
 export { PinsPanel } from './components/PinsPanel';
 export { PlaceReviewsModal } from './components/PlaceReviewsModal';
 export { PostComposerModal } from './components/PostComposerModal';
+export { TrashPage } from './components/TrashPage';
 export { UserPinsSection } from './components/UserPinsSection';
 export { UserPostsSection } from './components/UserPostsSection';
 export { usePlaceReviewActions } from './hooks/usePlaceReviews';

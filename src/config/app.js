@@ -8,3 +8,4 @@ export const BRAND = {
 };
 
 export const TOAST_DURATION_MS = 2500;
+export const TOAST_ACTION_DURATION_MS = 6000; // toast có nút ("Hoàn tác") — đủ lâu để kịp bấm

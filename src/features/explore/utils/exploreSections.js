@@ -1,4 +1,4 @@
-import { Compass, Newspaper, PartyPopper, Route, Ticket, UserRound } from 'lucide-react';
+import { Compass, Newspaper, PartyPopper, Route, Ticket, Trash2, UserRound } from 'lucide-react';
 
 // Các mục của trang Khám phá (cột trái kiểu Facebook). group: 'explore' = khám phá chung, 'mine' = của riêng bạn.
 // Hồ sơ nằm ở thẻ đầu cột (ảnh đại diện + tên) như Facebook; trên điện thoại hiện cùng hàng nút cuộn ngang.
@@ -9,6 +9,7 @@ export const EXPLORE_SECTIONS = [
   { path: '/routes', label: 'Lộ trình của tôi', hint: 'Lộ trình đã lưu & địa điểm đã ghim', icon: Route, group: 'mine' },
   { path: '/vouchers', label: 'Voucher của tôi', hint: 'Ví voucher đã săn', icon: Ticket, group: 'mine' },
   { path: '/profile', label: 'Hồ sơ', hint: 'Cấp độ, bạn bè, thông báo', icon: UserRound, group: 'mine', isProfile: true },
+  { path: '/trash', label: 'Thùng rác', hint: 'Bài viết, ảnh / video đã xoá', icon: Trash2, group: 'mine' },
 ];
 
 export const EXPLORE_GROUPS = [
