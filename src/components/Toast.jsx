@@ -17,7 +17,7 @@ export const Toast = ({ toast, onClose }) => {
       <div
         key={toast.id}
         role="status"
-        className={`${TONE_CLASSES[toast.tone]} pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-button shadow-modal text-sm font-medium animate-[toast-in_200ms_ease-out]`}
+        className={`${TONE_CLASSES[toast.tone]} pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-button shadow-modal ring-1 ring-white/15 text-sm font-medium animate-[toast-in_200ms_ease-out]`}
       >
         <span aria-hidden="true">{TONE_EMOJI[toast.tone]}</span>
         <p className="flex-1">{toast.message}</p>
