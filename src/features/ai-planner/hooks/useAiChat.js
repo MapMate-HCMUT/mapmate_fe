@@ -54,7 +54,8 @@ const toContext = (data, previous) => {
   return { ...remembered, pending: data.pending ?? null, recent_place_ids: recent };
 };
 
-// Tin nhắn AI lưu trong phiên cũ => cùng dạng với câu trả lời mới để hiển thị lại (lộ trình không lưu kèm)
+// Tin nhắn AI lưu trong phiên cũ => cùng dạng với câu trả lời mới để hiển thị lại đúng quán / lộ trình đã gợi ý
+// (phiên lưu trước khi có bản đầy đủ: server nạp lại quán theo id; lộ trình khi đó không lưu nên không hiện lại được)
 const toRestoredData = (message) => ({
   reply: message.reply,
   intent: message.intent,
@@ -62,12 +63,16 @@ const toRestoredData = (message) => ({
   refusal: message.refusal ?? null,
   place_answer: message.place_answer ?? null,
   weather: message.weather ?? null,
-  options: [],
-  places: [],
-  follow_up_suggestions: [],
-  tips: [],
-  warnings: [],
-  trace: [],
+  understood: message.understood ?? null,
+  options: message.understood ? message.options ?? [] : [], // thẻ lộ trình cần tiêu chí lúc đó
+  places: message.places ?? [],
+  follow_up_suggestions: message.follow_up_suggestions ?? [],
+  tips: message.tips ?? [],
+  warnings: message.warnings ?? [],
+  trace: message.trace ?? [],
+  sources: message.sources ?? null,
+  base_plan: message.base_plan ?? null,
+  lost_options: (message.option_keys?.length ?? 0) > 0 && !message.options?.length,
 });
 
 /**

@@ -1,4 +1,5 @@
-import { AlertTriangle, Lightbulb, MapPinOff } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, ChevronDown, Lightbulb, MapPinOff } from 'lucide-react';
 import { ErrorState } from '../../../components/ErrorState';
 import { AiPlaceList } from './AiPlaceList';
 import { AiRouteOptions } from './AiRouteOptions';
@@ -63,8 +64,13 @@ const LocationFallbackNotice = ({ retryText, onRetry, isSending }) => (
   </div>
 );
 
+// Nhãn nút "Xem lại" của lượt cũ: nói rõ bên trong có gì
+const savedLabel = (data) => [data.options?.length && `${data.options.length} lộ trình`, data.places?.length && `${data.places.length} quán`].filter(Boolean).join(' · ');
+
 // 1 câu trả lời của AI: lời tư vấn, tiêu chí đã hiểu, lộ trình / địa điểm thật, cảnh báo, gợi ý hỏi tiếp.
 export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
+  // Mở lại cuộc trò chuyện cũ: chỉ hiện lời trả lời, quán / lộ trình đã gợi ý gấp gọn — bấm "Xem lại" mới mở ra
+  const [isExpanded, setIsExpanded] = useState(!message.restored);
   if (message.error) {
     // Lỗi của 1 lượt chat: báo ngay trong khung chat (không rời trang => không mất cuộc trò chuyện) + nút gửi lại
     return (
@@ -84,16 +90,31 @@ export const AssistantMessage = ({ message, onFollowUp, isSending }) => {
       {message.locationFallback && <LocationFallbackNotice retryText={message.locationFallback.retryText} onRetry={onFollowUp} isSending={isSending} />}
       {data.refusal ? <RefusalCard refusal={data.refusal} /> : !asksBack && <p className="text-sm leading-relaxed text-neutral-800 whitespace-pre-line">{data.reply}</p>}
       {asksBack && <ClarifyQuestions questions={data.clarifying_questions} onAnswer={onFollowUp} isSending={isSending} />}
-      {message.restored && data.options?.length === 0 && data.intent !== 'ask_place' && !data.refusal && !asksBack && (
+      {message.restored && data.lost_options && (
         <p className="text-[11px] text-neutral-400">Lộ trình của lượt này không được lưu kèm — gửi tiếp để AI lên lại theo tiêu chí đã nhớ.</p>
       )}
       {data.place_answer && <PlaceAnswerCard answer={data.place_answer} />}
-      {data.weather && <WeatherChip weather={data.weather} />}
-      {data.options?.length > 0 && <AiRouteOptions options={data.options} criteria={data.understood.criteria} />}
-      {data.places?.length > 0 && <AiPlaceList places={data.places} />}
-      <WarningsBox items={data.warnings} />
-      <TipsBox items={data.tips} />
-      {data.follow_up_suggestions?.length > 0 && (
+      {message.restored && savedLabel(data) && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((open) => !open)}
+          aria-expanded={isExpanded}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-button border border-neutral-200 bg-surface text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition"
+        >
+          <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+          {isExpanded ? 'Thu gọn' : 'Xem lại'} {savedLabel(data)} đã gợi ý
+        </button>
+      )}
+      {isExpanded && (
+        <>
+          {data.weather && <WeatherChip weather={data.weather} />}
+          {data.options?.length > 0 && <AiRouteOptions options={data.options} criteria={data.understood.criteria} />}
+          {data.places?.length > 0 && <AiPlaceList places={data.places} />}
+          <WarningsBox items={data.warnings} />
+          <TipsBox items={data.tips} />
+        </>
+      )}
+      {isExpanded && data.follow_up_suggestions?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {data.follow_up_suggestions.map((suggestion) => (
             <button

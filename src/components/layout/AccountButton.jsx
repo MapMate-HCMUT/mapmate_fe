@@ -8,7 +8,7 @@ const itemClass = 'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-input te
 
 // Góc phải Navbar: chưa đăng nhập => nút "Đăng nhập"; đã đăng nhập => avatar + menu (Hồ sơ, Đăng xuất).
 export const AccountButton = ({ compact = false }) => {
-  const { user, isAuthenticated, menu, menuRef, handleLogout } = useAccountMenu();
+  const { user, isAuthenticated, isGuest, menu, menuRef, handleLogout } = useAccountMenu();
   const isBusiness = user?.role === 'business';
 
   if (!isAuthenticated) {
@@ -35,7 +35,7 @@ export const AccountButton = ({ compact = false }) => {
         {!compact && (
           <span className="text-left leading-tight">
             <span className="block text-sm font-semibold text-neutral-800 max-w-28 truncate">{user?.username}</span>
-            <span className="block text-[11px] text-accent-600 font-medium">{isBusiness ? <span className="text-secondary-700">🏪 Doanh nghiệp</span> : `Lv.${user?.level}`}</span>
+            <span className="block text-[11px] text-accent-600 font-medium">{isBusiness ? <span className="text-secondary-700">🏪 Doanh nghiệp</span> : isGuest ? <span className="text-neutral-500">Khách</span> : `Lv.${user?.level}`}</span>
           </span>
         )}
         {!compact && <Icon name="chevronDown" className="w-4 h-4 mr-1 text-neutral-400" />}
@@ -48,7 +48,7 @@ export const AccountButton = ({ compact = false }) => {
               <span className="truncate">{user?.username}</span>
               {isBusiness && <span className="shrink-0 px-1.5 py-0.5 rounded-pill bg-secondary-50 text-secondary-700 text-[10px] font-bold">Doanh nghiệp</span>}
             </p>
-            <p className="text-xs text-neutral-500 truncate">{user?.email}</p>
+            <p className="text-xs text-neutral-500 truncate">{isGuest ? 'Tài khoản khách · chưa dùng được AI' : user?.email}</p>
           </div>
           <Link to="/profile" role="menuitem" onClick={menu.close} className={`${itemClass} text-neutral-700 hover:bg-neutral-100`}>
             <Icon name="user" className="w-4.5 h-4.5 text-neutral-400" />

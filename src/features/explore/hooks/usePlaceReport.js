@@ -1,33 +1,43 @@
 import { useState } from 'react';
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useToast } from '../../../hooks/useToast';
-import { reportPlaceStatusApi } from '../api/placesApi';
+import { reportPlaceStatusApi, undoPlaceReportApi } from '../api/placesApi';
 
-const THANKS = {
-  closed: 'Cảm ơn bạn! Khi đủ người xác nhận, nơi này sẽ được ẩn khỏi kết quả',
-  open: 'Cảm ơn bạn đã xác nhận nơi này vẫn mở',
-};
+// Báo cáo chỉ là phiếu của người dùng — MapMate (admin) kiểm tra rồi mới ẩn quán, không tự ẩn
+const THANKS = { open: 'Cảm ơn bạn đã xác nhận nơi này vẫn mở' };
+const THANKS_ISSUE = 'Cảm ơn bạn! MapMate sẽ kiểm tra lại nơi này';
 
-// Báo quán "đã đóng cửa" / "vẫn mở". Server tính lại trạng thái theo số phiếu và trả về status mới.
+// Báo lỗi (đóng cửa / sai giờ / giá / vị trí / khác + mô tả tự gõ), xác nhận "vẫn mở", sửa hoặc hoàn tác báo cáo của mình.
+// Server đếm lại phiếu đóng / mở và trả về status mới.
 export const usePlaceReport = (place) => {
-  const [state, setState] = useState({ status: place.status ?? 'active', myReport: place.my_report ?? null });
+  const [state, setState] = useState({ status: place.status ?? 'active', myReport: place.my_report ?? null, myNote: place.my_report_note ?? '' });
   const [isSending, setIsSending] = useState(false);
   const { showToast } = useToast();
   const requireAuth = useRequireAuth();
 
-  const report = requireAuth(async (type) => {
-    if (isSending || state.myReport === type) return;
+  const send = async (request) => {
     setIsSending(true);
     try {
-      const data = await reportPlaceStatusApi(place.id, type);
-      setState({ status: data.status, myReport: data.my_report });
-      showToast(data.status === 'closed' ? 'Đã xác nhận nơi này đóng cửa — cảm ơn bạn!' : THANKS[type]);
+      const data = await request();
+      setState({ status: data.status, myReport: data.my_report, myNote: data.my_report_note ?? '' });
+      return data;
     } catch (error) {
       showToast(error.message, 'danger');
+      return null;
     } finally {
       setIsSending(false);
     }
+  };
+
+  const undo = () => send(() => undoPlaceReportApi(place.id)); // gỡ xong nhãn tự đổi lại => không cần toast
+
+  // Trả true khi gửi xong (khung báo lỗi tự đóng)
+  const report = requireAuth(async (type, note = '') => {
+    if (isSending || (state.myReport === type && state.myNote === note)) return true;
+    const data = await send(() => reportPlaceStatusApi(place.id, type, note));
+    if (data) showToast(THANKS[type] ?? THANKS_ISSUE, 'success', { action: { label: 'Hoàn tác', onClick: undo } });
+    return Boolean(data);
   });
 
-  return { ...state, isSending, report };
+  return { ...state, isSending, report, undo };
 };

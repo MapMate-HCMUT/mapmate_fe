@@ -47,7 +47,7 @@ const BusinessLink = ({ compact = false }) => (
 // Dịp lễ (Tết, Trung thu, Giáng sinh...) => hạt trang trí rơi / bay phía sau nội dung + lời chúc cạnh logo.
 export const TopNavbar = () => {
   const { pathname } = useLocation();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const isBusiness = user?.role === 'business';
   const season = useSeason();
   const activeIndex = NAV_ITEMS.findIndex((item) => isNavItemActive(item, pathname));
@@ -78,6 +78,7 @@ export const TopNavbar = () => {
                 <span className={desktopTabClass(isActive)}>
                   <Icon name={item.icon} className="w-5 h-5" />
                   {item.label}
+                  {isGuest && item.memberOnly && <Icon name="lock" className="w-3.5 h-3.5 text-neutral-400" />}
                 </span>
               </Link>
             );

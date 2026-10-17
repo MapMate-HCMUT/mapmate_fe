@@ -1,4 +1,5 @@
 import { Loader2, Mic, Square } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 const LABELS = { idle: 'Nói để nhập (tiếng Việt / tiếng Anh)', recording: 'Đang nghe… bấm để dừng', transcribing: 'Đang nhận dạng giọng nói…' };
@@ -8,10 +9,11 @@ const STYLES = {
   transcribing: 'text-primary-500',
 };
 
-// Nút micro: bấm để nói, bấm lần nữa để dừng (tự dừng sau 20 giây). Trình duyệt không hỗ trợ ghi âm => ẩn.
+// Nút micro: bấm để nói, bấm lần nữa để dừng (tự dừng sau 20 giây). Trình duyệt không hỗ trợ ghi âm / tài khoản khách (nhận giọng nói là AI) => ẩn.
 export const VoiceButton = ({ onText, className = '' }) => {
+  const { isGuest } = useAuth();
   const voice = useVoiceInput({ onText });
-  if (!voice.isSupported) return null;
+  if (!voice.isSupported || isGuest) return null;
   const VoiceIcon = voice.status === 'recording' ? Square : voice.status === 'transcribing' ? Loader2 : Mic;
   return (
     <button
