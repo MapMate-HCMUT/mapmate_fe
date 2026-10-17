@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Sparkles } from 'lucide-react';
+import { AiAvatar } from './AiAvatar';
 import { AiWelcome } from './AiWelcome';
 import { AssistantMessage } from './AssistantMessage';
 
@@ -24,9 +24,7 @@ export const ChatThread = ({ messages, isSending, onSend, examples, personalized
                 <p className="max-w-[85%] rounded-card rounded-br-sm bg-primary-600 px-3.5 py-2 text-sm text-white whitespace-pre-line">{message.text}</p>
               ) : (
                 <>
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-xs ring-1 ring-white/30">
-                    <Sparkles className="w-3.5 h-3.5 drop-shadow-xs" />
-                  </span>
+                  <AiAvatar className="mt-0.5" />
                   <div className="flex-1 min-w-0"><AssistantMessage message={message} onFollowUp={onSend} isSending={isSending} /></div>
                 </>
               )}
@@ -34,9 +32,7 @@ export const ChatThread = ({ messages, isSending, onSend, examples, personalized
           ))}
           {isSending && (
             <li className="flex gap-2.5 text-sm text-neutral-500">
-              <span className="flex h-7 w-7 shrink-0 animate-pulse items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-xs ring-1 ring-white/30">
-                <Sparkles className="w-3.5 h-3.5 drop-shadow-xs" />
-              </span>
+              <AiAvatar className="animate-pulse" />
               <span className="pt-1">{THINKING_STEPS}</span>
             </li>
           )}

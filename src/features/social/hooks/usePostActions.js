@@ -1,12 +1,24 @@
 import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useToast } from '../../../hooks/useToast';
-import { deletePostApi, likePostApi, repostApi, undoRepostApi, unlikePostApi } from '../api/socialApi';
+import { deletePostApi, likePostApi, repostApi, restoreTrashItemApi, undoRepostApi, unlikePostApi } from '../api/socialApi';
+import { useSocialStore } from '../stores/socialStore';
 
 // Thích / đăng lại / xoá. Giao diện đổi ngay (optimistic), lỗi thì hoàn tác.
 // Với bài đăng lại, mọi thao tác áp lên BÀI GỐC (giống các mạng xã hội khác).
 export const usePostActions = ({ updatePost, removePosts, prependPost }) => {
   const { showToast } = useToast();
   const requireAuth = useRequireAuth();
+  const bumpFeed = useSocialStore((state) => state.bumpFeed);
+
+  // Xoá nhầm => bấm "Hoàn tác" ngay trong toast (bài về đúng chỗ cũ); muộn hơn thì vào Thùng rác (30 ngày)
+  const undoDelete = async (trashId) => {
+    try {
+      await restoreTrashItemApi(trashId);
+      bumpFeed();
+    } catch (error) {
+      showToast(error.message, 'danger');
+    }
+  };
 
   const toggleLike = requireAuth(async (target) => {
     const liked = !target.liked_by_me;
@@ -41,13 +53,14 @@ export const usePostActions = ({ updatePost, removePosts, prependPost }) => {
 
   const deletePost = requireAuth(async (post) => {
     try {
-      await deletePostApi(post.id);
+      const { trash_id: trashId } = await deletePostApi(post.id);
       if (post.is_repost && post.original) {
         updatePost(post.original.id, (original) => ({ ...original, reposted_by_me: false, repost_count: Math.max(0, original.repost_count - 1) }));
       }
-      // Xoá bài gốc thì các bài đăng lại của nó cũng biến mất
-      removePosts((item) => item.id === post.id || item.original?.id === post.id);
-      showToast('Đã xoá bài viết', 'info');
+      // Bài gốc vào thùng rác => các bài đăng lại của nó hiện "bài gốc đã bị xoá" (khôi phục là hiện lại như cũ)
+      removePosts((item) => item.id === post.id);
+      updatePost(post.id, () => null);
+      showToast('Đã chuyển bài viết vào thùng rác', 'info', { action: { label: 'Hoàn tác', onClick: () => undoDelete(trashId) } });
     } catch (error) {
       showToast(error.message, 'danger');
     }

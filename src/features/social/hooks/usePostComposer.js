@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useToast } from '../../../hooks/useToast';
 import { createPostApi, updatePostApi } from '../api/socialApi';
 import { useSocialStore } from '../stores/socialStore';
@@ -39,6 +40,7 @@ export const usePostComposer = () => {
   const closeComposer = useSocialStore((state) => state.closeComposer);
   const bumpFeed = useSocialStore((state) => state.bumpFeed);
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [draft, setDraft] = useState(() => createDraft(null));
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,6 +102,9 @@ export const usePostComposer = () => {
         });
         bumpFeed(); // danh sách tải lại => thấy ngay bài đã sửa (không bật thông báo nổi)
         closeComposer();
+        // Ảnh / video bỏ ra không mất ngay — báo cho người dùng biết còn lấy lại được trong Thùng rác
+        const removed = (editingPost.media ?? []).filter((item) => !media.uploaded.some((kept) => kept.public_id === item.id)).length;
+        if (removed) showToast(`Đã chuyển ${removed} ảnh / video vào thùng rác`, 'info', { action: { label: 'Xem', onClick: () => navigate('/trash') } });
         return undefined;
       }
       await createPostApi({

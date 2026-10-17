@@ -78,7 +78,7 @@ export const FALLBACK_OPTIONS = {
     { label: 'Overture Maps Foundation', license: 'CDLA-Permissive-2.0', url: 'https://overturemaps.org' },
     { label: '© OpenStreetMap contributors', license: 'ODbL', url: 'https://www.openstreetmap.org/copyright' },
   ],
-  trip_budget: { min: 50000, max: 2000000, step: 50000, default: 500000 },
+  trip_budget: { min: 20000, max: 2000000, step: 10000, default: 500000 },
   radius: { min: 1, max: 20, default: 5 },
   people: { min: 1, max: 20, default: 2 },
   duration: { min: 1, max: 12, default: 4 },
