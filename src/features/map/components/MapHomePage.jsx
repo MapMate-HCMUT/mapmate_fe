@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Route, X } from 'lucide-react';
+import { LoaderCircle, LocateFixed, Route, X } from 'lucide-react';
 import { SearchBar } from '../../../components/SearchBar';
 import { useToast } from '../../../hooks/useToast';
 import { useSearchStore } from '../../../stores/searchStore';
@@ -190,6 +190,22 @@ export const MapHomePage = () => {
             <div ref={mapContainerRef} className="w-full h-full" aria-label="Bản đồ TP.HCM" />
           </div>
           <MapStatusOverlay isReady={home.isMapReady} error={home.mapError} />
+
+          {/* Nút định vị "Vị trí của tôi" trên bản đồ */}
+          <button
+            type="button"
+            onClick={() => home.locate({ fly: true, manual: true })}
+            disabled={home.isLocating}
+            aria-label="Vị trí của tôi"
+            title="Vị trí của tôi — Đưa bản đồ về chỗ bạn đang đứng"
+            className="absolute z-20 right-2.5 top-20 w-[29px] h-[29px] bg-surface rounded-[4px] shadow-[0_0_0_2px_rgba(0,0,0,0.1)] flex items-center justify-center text-neutral-700 hover:bg-neutral-100 transition disabled:opacity-60"
+          >
+            {home.isLocating ? (
+              <LoaderCircle className="w-4 h-4 text-primary-600 animate-spin" />
+            ) : (
+              <LocateFixed className="w-4 h-4 text-neutral-700 hover:text-primary-600" />
+            )}
+          </button>
 
           {/* Đang chọn điểm xuất phát: nhắc chạm bản đồ (Esc / Huỷ để thôi) */}
           {home.isPickingStart && (

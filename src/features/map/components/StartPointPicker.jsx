@@ -27,7 +27,7 @@ export const StartPointPicker = ({ hasCurrentLocation, onUseCurrentLocation, com
 
   const useCurrent = () => {
     setStartPoint(null);
-    if (!hasCurrentLocation) onUseCurrentLocation?.();
+    onUseCurrentLocation?.();
     close();
   };
   const pickOnMap = () => {
