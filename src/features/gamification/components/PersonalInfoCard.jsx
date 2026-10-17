@@ -1,4 +1,5 @@
 import { Icon } from '../../../components/Icon';
+import { GUEST_ROLE } from '../../../config/auth';
 import { formatBirthDate, formatHomeArea } from '../utils/profileConfig';
 
 const Row = ({ icon, label, value }) => (
@@ -21,7 +22,7 @@ export const PersonalInfoCard = ({ profile, onEdit }) => (
       </button>
     </div>
     <dl className="divide-y divide-neutral-100">
-      <Row icon="✉️" label="Email" value={profile.email} />
+      <Row icon="✉️" label="Email" value={profile.role === GUEST_ROLE ? 'Tài khoản khách — không có email' : profile.email} />
       <Row icon="🎂" label="Ngày sinh" value={formatBirthDate(profile.birth_date)} />
       <Row icon="📍" label="Khu vực sinh sống" value={formatHomeArea(profile.home_area)} />
     </dl>

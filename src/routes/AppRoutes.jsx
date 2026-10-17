@@ -26,7 +26,7 @@ import { LandingPage } from '../features/landing';
 import { FeedTab, TrashPage } from '../features/social';
 import { VouchersPage } from '../features/vouchers';
 import { ERROR_KINDS } from '../utils/errorMessages';
-import { GuestOnlyRoute, ProtectedRoute, RequireAuthOutlet } from './ProtectedRoute';
+import { GuestOnlyRoute, MemberOnlyRoute, ProtectedRoute, RequireAuthOutlet } from './ProtectedRoute';
 
 // /vouchers?event=... (link cũ từ thẻ quán) => mục Sự kiện; còn lại là ví voucher
 const WalletRoute = () => {
@@ -48,7 +48,16 @@ export const AppRoutes = () => (
     <Route path="register" element={<Navigate to="/login" replace />} />
 
     {/* Chủ doanh nghiệp: giao diện quản lý riêng (menu tối, không có thanh điều hướng người dùng thường) */}
-    <Route path="business/register" element={<ProtectedRoute><OnboardingLayout /></ProtectedRoute>}>
+    <Route
+      path="business/register"
+      element={
+        <ProtectedRoute>
+          <MemberOnlyRoute title="Đăng ký cửa hàng cần tài khoản Google" description="Tài khoản khách không đăng ký được doanh nghiệp. Đăng nhập bằng Google để đưa cửa hàng của bạn lên MapMate.">
+            <OnboardingLayout />
+          </MemberOnlyRoute>
+        </ProtectedRoute>
+      }
+    >
       <Route index element={<BusinessRegisterPage />} />
     </Route>
     <Route path="business" element={<BusinessConsoleLayout />}>
@@ -80,7 +89,7 @@ export const AppRoutes = () => (
         </Route>
         <Route path="map" element={<MapHomePage />} />
         <Route path="explore" element={<LegacyExploreRedirect />} />
-        <Route path="ai-planner" element={<AiPlannerPage />} />
+        <Route path="ai-planner" element={<MemberOnlyRoute><AiPlannerPage /></MemberOnlyRoute>} />
       </Route>
       <Route path="for-business" element={<BusinessLandingPage />} />
       <Route path="error" element={<ErrorRoutePage />} />

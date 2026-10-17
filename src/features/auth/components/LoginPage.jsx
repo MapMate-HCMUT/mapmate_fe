@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, UserRound } from 'lucide-react';
 import { FormAlert } from '../../../components/form/FormAlert';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../stores/authStore';
-import { googleLoginApi } from '../api/authApi';
+import { googleLoginApi, guestLoginApi } from '../api/authApi';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { ACCOUNT_TYPES } from '../utils/accountTypes';
 import { AccountTypePicker } from './AccountTypePicker';
@@ -150,6 +150,22 @@ export const LoginPage = () => {
     }
   }, [handleGoogleLogin]);
 
+  // Khách: không cần email / thông tin cá nhân, dùng được web nhưng bị khoá AI
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    setFormError('');
+    try {
+      const session = await guestLoginApi();
+      setSession(session, remember);
+      showToast('Bạn đang dùng MapMate với tư cách khách — đăng nhập Google để dùng AI nhé');
+      goToRedirect();
+    } catch (err) {
+      setFormError(err.message || 'Không vào được chế độ khách. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCustomButtonClick = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
@@ -196,6 +212,28 @@ export const LoginPage = () => {
             <GoogleIcon />
             <span>{isLoading ? 'Đang kết nối Google…' : 'Tiếp tục với Google'}</span>
           </button>
+
+          {accountType === ACCOUNT_TYPES.PERSONAL && (
+            <>
+              <div className="flex items-center gap-3 text-xs text-neutral-400" aria-hidden="true">
+                <span className="h-px flex-1 bg-neutral-200" />
+                hoặc
+                <span className="h-px flex-1 bg-neutral-200" />
+              </div>
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                disabled={isLoading}
+                className="w-full flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl border border-dashed border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-700 transition cursor-pointer disabled:opacity-60"
+              >
+                <span className="flex items-center gap-2 font-semibold text-sm">
+                  <UserRound className="w-4.5 h-4.5" aria-hidden="true" />
+                  Dùng thử với tư cách khách
+                </span>
+                <span className="text-[11px] text-neutral-500">Không cần email hay thông tin cá nhân · không dùng được AI</span>
+              </button>
+            </>
+          )}
 
           <label className="flex items-center gap-2.5 text-xs font-medium text-neutral-700 cursor-pointer select-none pt-1">
             <input

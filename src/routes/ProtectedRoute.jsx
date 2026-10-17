@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
+import { GuestUpgradePrompt } from '../components/GuestUpgradePrompt';
 import { useAuth } from '../hooks/useAuth';
 import { getSafeRedirect } from '../utils/safeRedirect';
 
@@ -25,6 +26,12 @@ export const RequireAuthOutlet = () => {
   if (location.pathname === '/' && !location.search) return <Navigate to="/welcome" replace />;
   const redirect = encodeURIComponent(location.pathname + location.search);
   return <Navigate to={`/login?redirect=${redirect}`} replace />;
+};
+
+// Tính năng chỉ dành cho thành viên (AI Gợi ý, đăng ký cửa hàng...): tài khoản khách => khối mời đăng nhập Google.
+export const MemberOnlyRoute = ({ children, title, description }) => {
+  const { isGuest } = useAuth();
+  return isGuest ? <GuestUpgradePrompt title={title} description={description} /> : children;
 };
 
 // Đã đăng nhập mà vào /login hoặc /register => đi tới ?redirect= (mặc định trang hồ sơ).

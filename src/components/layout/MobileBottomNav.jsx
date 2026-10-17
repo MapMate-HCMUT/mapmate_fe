@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { isNavItemActive, NAV_ITEMS } from '../../config/navigation';
+import { useAuth } from '../../hooks/useAuth';
 import { Icon } from '../Icon';
 
 const tabClass = (isActive) => `flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-16 text-[11px] font-medium transition ${isActive ? 'text-primary-600' : 'text-neutral-500'}`;
@@ -7,6 +8,7 @@ const tabClass = (isActive) => `flex flex-col items-center gap-0.5 py-1.5 px-2 m
 // Thanh dưới trên điện thoại: Bản đồ · Khám phá (nút nổi giữa — trang chủ) · AI Gợi ý
 export const MobileBottomNav = () => {
   const { pathname } = useLocation();
+  const { isGuest } = useAuth();
   return (
     <nav
       aria-label="Điều hướng chính"
@@ -21,7 +23,10 @@ export const MobileBottomNav = () => {
                 <Icon name={item.icon} className="w-5 h-5" />
               </span>
             ) : (
-              <Icon name={item.icon} className="w-6 h-6" />
+              <span className="relative">
+                <Icon name={item.icon} className="w-6 h-6" />
+                {isGuest && item.memberOnly && <Icon name="lock" className="absolute -right-1.5 -bottom-0.5 w-3.5 h-3.5 rounded-pill bg-surface text-neutral-500" />}
+              </span>
             )}
             {item.label}
           </Link>

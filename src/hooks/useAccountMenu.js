@@ -5,7 +5,7 @@ import { useToast } from './useToast';
 
 // Menu tài khoản trên Navbar: mở/đóng + đăng xuất.
 export const useAccountMenu = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isGuest, logout } = useAuth();
   const { containerRef: menuRef, ...menu } = useDisclosure();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -17,5 +17,5 @@ export const useAccountMenu = () => {
     navigate('/', { replace: true });
   };
 
-  return { user, isAuthenticated, menu, menuRef, handleLogout };
+  return { user, isAuthenticated, isGuest, menu, menuRef, handleLogout };
 };
